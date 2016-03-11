@@ -8,7 +8,7 @@ namespace verbly {
       int id;
       
     public:
-      std::string value;
+      std::string form;
       
       adjective(int id) : id(id)
       {

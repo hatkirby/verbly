@@ -24,7 +24,8 @@ namespace verbly {
   enum class fillin_type {
     noun_phrase,
     participle_phrase,
-    adjective
+    adjective,
+    adverb
   };
   
   class token {
@@ -128,14 +129,14 @@ namespace verbly {
             return it != other.it;
           }
           
-          token* operator*()
+          token& operator*()
           {
-            return *it->get();
+            return **it;
           }
           
-          token* operator->()
+          token& operator->()
           {
-            return *it->get();
+            return **it;
           }
       };*/
       
@@ -185,16 +186,6 @@ namespace verbly {
       }
       
       iterator end()
-      {
-        return std::end(utterance);
-      }
-      
-      const iterator begin() const
-      {
-        return std::begin(utterance);
-      }
-      
-      const iterator end() const
       {
         return std::end(utterance);
       }
