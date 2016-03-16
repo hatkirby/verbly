@@ -1,8 +1,6 @@
 #ifndef VERB_H_BCC929AD
 #define VERB_H_BCC929AD
 
-#include <vector>
-
 namespace verbly {
   
   /*class frame_part {
@@ -26,42 +24,50 @@ namespace verbly {
       }
   };*/
   
-  enum class conjugation {
-    present_participle,
-    past_participle,
-    infinitive
-  };
-  
-  class verb {
+  class verb : public word {
     private:
-      int id;
+      std::string _infinitive;
+      std::string _past_tense;
+      std::string _past_participle;
+      std::string _ing_form;
+      std::string _s_form;
+      
+      friend class verb_query;
       
     public:
-      verb(int id) : id(id)
-      {
-        
-      }
+      verb(const data& _data, int _id);
       
-      std::string infinitive;
-      std::string past_tense;
-      std::string past_participle;
-      std::string ing_form;
-      std::string s_form;
-      //std::vector<frame> frames;
+      std::string base_form() const;
+      std::string infinitive_form() const;
+      std::string past_tense_form() const;
+      std::string past_participle_form() const;
+      std::string ing_form() const;
+      std::string s_form() const;
+  };
+  
+  class verb_query {
+    public:
+      verb_query(const data& _data);
       
-      std::string conjugate(conjugation infl) const
-      {
-        switch (infl)
-        {
-          case conjugation::infinitive: return infinitive;
-          case conjugation::past_participle: return past_participle;
-          case conjugation::present_participle: return ing_form;
-        }
-      }
+      verb_query& limit(int _limit);
+      verb_query& random(bool _random);
+      verb_query& except(const verb& _word);
+      verb_query& rhymes_with(const word& _word);
+      verb_query& has_pronunciation(bool _has_prn);
+      
+      std::list<verb> run() const;
+      
+      const static int unlimited = -1;
+      
+    private:
+      const data& _data;
+      int _limit = unlimited;
+      bool _random = false;
+      std::list<std::string> _rhymes;
+      std::list<verb> _except;
+      bool _has_prn = false;
   };
   
 };
-
-#include "token.h"
 
 #endif /* end of include guard: VERB_H_BCC929AD */

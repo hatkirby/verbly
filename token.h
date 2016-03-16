@@ -4,16 +4,10 @@
 #include <string>
 #include <list>
 #include <sstream>
-#include "verb.h"
 
 namespace verbly {
   
-  enum class type {
-    verb,
-    fillin,
-    string,
-    utterance
-  };
+  class verb;
   
   class selrestr {
   };
@@ -29,20 +23,22 @@ namespace verbly {
   };
   
   class token {
+    public:
+      enum class type {
+        verb,
+        fillin,
+        string,
+        utterance
+      };
+      
     protected:
       // General
-      type type;
+      type _type;
       
-      token(enum type type) : type(type)
-      {
-        
-      }
+      token(type _type);
       
     public:
-      enum type token_type() const
-      {
-        return type;
-      }
+      enum type token_type() const;
       
       virtual bool complete() const = 0;
       virtual std::string compile() const = 0;
@@ -50,42 +46,32 @@ namespace verbly {
   };
   
   class verb_token : public token {
+    public:
+      enum class inflection {
+        infinitive,
+        past_tense,
+        past_participle,
+        ing_form,
+        s_form
+      };
+      
     private:
       // Verb
-      const verb* m_verb;
-      conjugation verb_infl = conjugation::infinitive;
+      const verb* _verb;
+      inflection _inflection = inflection::infinitive;
     
     public:
-      verb_token(const class verb& verb) : token(type::verb), m_verb(&verb)
-      {
-
-      }
+      verb_token(const class verb& _verb);
       
-      const class verb& verb() const
-      {
-        return *m_verb;
-      }
+      const class verb& verb() const;
       
-      verb_token& conjugate(conjugation infl)
-      {
-        verb_infl = infl;
-        return *this;
-      }
+      verb_token& inflect(inflection infl);
       
-      bool complete() const
-      {
-        return true;
-      }
+      bool complete() const;
       
-      std::string compile() const
-      {
-        return m_verb->conjugate(verb_infl);
-      }
+      std::string compile() const;
       
-      token* copy() const
-      {
-        return new verb_token(*this);
-      }
+      token* copy() const;
   };
   
   class utterance_token : public token {
@@ -140,7 +126,7 @@ namespace verbly {
           }
       };*/
       
-      utterance_token(std::initializer_list<token*> tkns) : token(type::utterance)
+      utterance_token(std::initializer_list<token*> tkns) : token(token::type::utterance)
       {
         for (auto tkn : tkns)
         {
@@ -148,7 +134,7 @@ namespace verbly {
         }
       }
       
-      utterance_token(const utterance_token& other) : token(type::utterance)
+      utterance_token(const utterance_token& other) : token(token::type::utterance)
       {
         for (auto& tkn : other.utterance)
         {
@@ -156,7 +142,7 @@ namespace verbly {
         }
       }
       
-      utterance_token(utterance_token&& other) : token(type::utterance), utterance(std::move(other.utterance))
+      utterance_token(utterance_token&& other) : token(token::type::utterance), utterance(std::move(other.utterance))
       {
         
       }
@@ -237,7 +223,7 @@ namespace verbly {
       fillin_type m_fillin_type;
       
     public:
-      fillin_token(fillin_type ft) : token(type::fillin), m_fillin_type(ft)
+      fillin_token(fillin_type ft) : token(token::type::fillin), m_fillin_type(ft)
       {
 
       }
@@ -301,7 +287,7 @@ namespace verbly {
       std::string str;
       
     public:
-      string_token(std::string str) : token(type::string), str(str)
+      string_token(std::string str) : token(token::type::string), str(str)
       {
         
       }
