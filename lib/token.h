@@ -4,6 +4,7 @@
 #include <string>
 #include <list>
 #include <sstream>
+#include <algorithm>
 
 namespace verbly {
   
@@ -61,9 +62,9 @@ namespace verbly {
       inflection _inflection = inflection::infinitive;
     
     public:
-      verb_token(const class verb& _verb);
+      verb_token(const verb& _verb);
       
-      const class verb& verb() const;
+      const verb& get_verb() const;
       
       verb_token& inflect(inflection infl);
       
@@ -260,7 +261,7 @@ namespace verbly {
         return m_theme;
       }
       
-      fillin_type fillin_type() const
+      fillin_type get_fillin_type() const
       {
         return m_fillin_type;
       }

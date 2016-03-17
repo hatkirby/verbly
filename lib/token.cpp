@@ -12,12 +12,12 @@ namespace verbly {
     return _type;
   }
   
-  verb_token::verb_token(const class verb& _verb) : token(token::type::verb), _verb(&_verb)
+  verb_token::verb_token(const verb& _verb) : token(token::type::verb), _verb(&_verb)
   {
     
   }
   
-  const class verb& verb_token::verb() const
+  const verb& verb_token::get_verb() const
   {
     return *_verb;
   }
