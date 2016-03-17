@@ -78,6 +78,7 @@ namespace verbly {
       noun_query& not_member_holonym_of(const noun& _noun);
       
       noun_query& is_proper(bool _arg);
+      noun_query& is_not_proper(bool _arg);
       noun_query& instance_of(const noun& _noun);
       noun_query& not_instance_of(const noun& _noun);
       
@@ -98,6 +99,9 @@ namespace verbly {
       
       noun_query& is_attribute(bool _arg);
       noun_query& attribute_of(const adjective& _adj);
+      
+      noun_query& derived_from(const word& _w);
+      noun_query& not_derived_from(const word& _w);
       
       std::list<noun> run() const;
       
@@ -144,6 +148,7 @@ namespace verbly {
       std::list<noun> _not_member_holonym_of;
       
       bool _is_proper = false;
+      bool _is_not_proper = false;
       std::list<noun> _instance_of;
       std::list<noun> _not_instance_of;
       
@@ -164,6 +169,13 @@ namespace verbly {
       
       bool _is_attribute = false;
       std::list<adjective> _attribute_of;
+      
+      std::list<adjective> _derived_from_adjective;
+      std::list<adjective> _not_derived_from_adjective;
+      std::list<adverb> _derived_from_adverb;
+      std::list<adverb> _not_derived_from_adverb;
+      std::list<noun> _derived_from_noun;
+      std::list<noun> _not_derived_from_noun;
   };
   
 };

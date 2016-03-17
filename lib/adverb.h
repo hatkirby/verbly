@@ -24,6 +24,9 @@ namespace verbly {
       adverb_query antonyms() const;
       adverb_query synonyms() const;
       adjective_query anti_mannernyms() const;
+      
+      adverb_query& derived_from(const word& _w);
+      adverb_query& not_derived_from(const word& _w);
   };
   
   class adverb_query {
@@ -50,6 +53,9 @@ namespace verbly {
       adverb_query& is_mannernymic(bool _arg);
       adverb_query& mannernym_of(const adjective& _adj);
       
+      adverb_query& derived_from(const word& _w);
+      adverb_query& not_derived_from(const word& _w);
+      
       std::list<adverb> run() const;
       
       const static int unlimited = -1;
@@ -75,6 +81,13 @@ namespace verbly {
       
       bool _is_mannernymic = false;
       std::list<adjective> _mannernym_of;
+      
+      std::list<adjective> _derived_from_adjective;
+      std::list<adjective> _not_derived_from_adjective;
+      std::list<adverb> _derived_from_adverb;
+      std::list<adverb> _not_derived_from_adverb;
+      std::list<noun> _derived_from_noun;
+      std::list<noun> _not_derived_from_noun;
   };
   
 };

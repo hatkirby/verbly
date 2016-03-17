@@ -85,6 +85,9 @@ namespace verbly {
       adjective_query& is_mannernymic(bool _is_mannernymic);
       adjective_query& anti_mannernym_of(const adverb& _adv);
       
+      adjective_query& derived_from(const word& _w);
+      adjective_query& not_derived_from(const word& _w);
+      
       std::list<adjective> run() const;
       
       const static int unlimited = -1;
@@ -126,6 +129,13 @@ namespace verbly {
       
       bool _is_mannernymic = false;
       std::list<adverb> _anti_mannernym_of;
+      
+      std::list<adjective> _derived_from_adjective;
+      std::list<adjective> _not_derived_from_adjective;
+      std::list<adverb> _derived_from_adverb;
+      std::list<adverb> _not_derived_from_adverb;
+      std::list<noun> _derived_from_noun;
+      std::list<noun> _not_derived_from_noun;
   };
   
 };

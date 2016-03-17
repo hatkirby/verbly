@@ -261,6 +261,38 @@ namespace verbly {
     return *this;
   }
   
+  adjective_query& adjective_query::derived_from(const word& _w)
+  {
+    if (dynamic_cast<const adjective*>(&_w) != nullptr)
+    {
+      _derived_from_adjective.push_back(dynamic_cast<const adjective&>(_w));
+    } else if (dynamic_cast<const adverb*>(&_w) != nullptr)
+    {
+      _derived_from_adverb.push_back(dynamic_cast<const adverb&>(_w));
+    } else if (dynamic_cast<const noun*>(&_w) != nullptr)
+    {
+      _derived_from_noun.push_back(dynamic_cast<const noun&>(_w));
+    }
+    
+    return *this;
+  }
+  
+  adjective_query& adjective_query::not_derived_from(const word& _w)
+  {
+    if (dynamic_cast<const adjective*>(&_w) != nullptr)
+    {
+      _not_derived_from_adjective.push_back(dynamic_cast<const adjective&>(_w));
+    } else if (dynamic_cast<const adverb*>(&_w) != nullptr)
+    {
+      _not_derived_from_adverb.push_back(dynamic_cast<const adverb&>(_w));
+    } else if (dynamic_cast<const noun*>(&_w) != nullptr)
+    {
+      _not_derived_from_noun.push_back(dynamic_cast<const noun&>(_w));
+    }
+    
+    return *this;
+  }
+  
   std::list<adjective> adjective_query::run() const
   {
     std::stringstream construct;
@@ -423,6 +455,48 @@ namespace verbly {
       conditions.push_back(cond);
     }
     
+    if (!_derived_from_adjective.empty())
+    {
+      std::list<std::string> clauses(_derived_from_adjective.size(), "adjective_2_id = @DERADJ");
+      std::string cond = "adjective_id IN (SELECT adjective_1_id FROM adjective_adjective_derivation WHERE " + verbly::implode(std::begin(clauses), std::end(clauses), " OR ") + ")";
+      conditions.push_back(cond);
+    }
+    
+    if (!_not_derived_from_adjective.empty())
+    {
+      std::list<std::string> clauses(_not_derived_from_adjective.size(), "adjective_2_id = @NDERADJ");
+      std::string cond = "adjective_id NOT IN (SELECT adjective_1_id FROM adjective_adjective_derivation WHERE " + verbly::implode(std::begin(clauses), std::end(clauses), " OR ") + ")";
+      conditions.push_back(cond);
+    }
+    
+    if (!_derived_from_adverb.empty())
+    {
+      std::list<std::string> clauses(_derived_from_adverb.size(), "adverb_id = @DERADV");
+      std::string cond = "adjective_id IN (SELECT adjective_id FROM adjective_adverb_derivation WHERE " + verbly::implode(std::begin(clauses), std::end(clauses), " OR ") + ")";
+      conditions.push_back(cond);
+    }
+    
+    if (!_not_derived_from_adverb.empty())
+    {
+      std::list<std::string> clauses(_not_derived_from_adverb.size(), "adverb_id = @NDERADV");
+      std::string cond = "adjective_id NOT IN (SELECT adjective_id FROM adjective_adverb_derivation WHERE " + verbly::implode(std::begin(clauses), std::end(clauses), " OR ") + ")";
+      conditions.push_back(cond);
+    }
+    
+    if (!_derived_from_noun.empty())
+    {
+      std::list<std::string> clauses(_derived_from_noun.size(), "noun_id = @DERN");
+      std::string cond = "adjective_id IN (SELECT adjective_id FROM noun_adjective_derivation WHERE " + verbly::implode(std::begin(clauses), std::end(clauses), " OR ") + ")";
+      conditions.push_back(cond);
+    }
+    
+    if (!_not_derived_from_noun.empty())
+    {
+      std::list<std::string> clauses(_not_derived_from_noun.size(), "noun_id = @NDERN");
+      std::string cond = "adjective_id NOT IN (SELECT adjective_id FROM noun_adjective_derivation WHERE " + verbly::implode(std::begin(clauses), std::end(clauses), " OR ") + ")";
+      conditions.push_back(cond);
+    }
+    
     if (!conditions.empty())
     {
       construct << " WHERE ";
@@ -521,6 +595,36 @@ namespace verbly {
     for (auto mannernym : _anti_mannernym_of)
     {
       sqlite3_bind_int(ppstmt, sqlite3_bind_parameter_index(ppstmt, "@MANID"), mannernym._id);
+    }
+    
+    for (auto adj : _derived_from_adjective)
+    {
+      sqlite3_bind_int(ppstmt, sqlite3_bind_parameter_index(ppstmt, "@DERADJ"), adj._id);
+    }
+    
+    for (auto adj : _not_derived_from_adjective)
+    {
+      sqlite3_bind_int(ppstmt, sqlite3_bind_parameter_index(ppstmt, "@NDERADJ"), adj._id);
+    }
+    
+    for (auto adv : _derived_from_adverb)
+    {
+      sqlite3_bind_int(ppstmt, sqlite3_bind_parameter_index(ppstmt, "@DERADV"), adv._id);
+    }
+    
+    for (auto adv : _not_derived_from_adverb)
+    {
+      sqlite3_bind_int(ppstmt, sqlite3_bind_parameter_index(ppstmt, "@NDERADV"), adv._id);
+    }
+    
+    for (auto n : _derived_from_noun)
+    {
+      sqlite3_bind_int(ppstmt, sqlite3_bind_parameter_index(ppstmt, "@DERN"), n._id);
+    }
+    
+    for (auto n : _not_derived_from_noun)
+    {
+      sqlite3_bind_int(ppstmt, sqlite3_bind_parameter_index(ppstmt, "@NDERN"), n._id);
     }
 
     std::list<adjective> output;
