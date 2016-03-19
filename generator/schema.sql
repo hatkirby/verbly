@@ -52,7 +52,8 @@ DROP TABLE IF EXISTS `nouns`;
 CREATE TABLE `nouns` (
   `noun_id` INTEGER PRIMARY KEY,
   `singular` VARCHAR(32) NOT NULL,
-  `plural` VARCHAR(32)
+  `plural` VARCHAR(32),
+  `proper` INTEGER(1) NOT NULL
 );
 
 DROP TABLE IF EXISTS `hypernymy`;

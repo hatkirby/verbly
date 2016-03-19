@@ -10,6 +10,7 @@
 #include <sstream>
 #include <regex>
 #include <list>
+#include <algorithm>
 #include "progress.h"
 
 struct verb {
@@ -525,9 +526,9 @@ int main(int argc, char** argv)
         {
           if (nouns.count(word) == 1)
           {
-            query = "INSERT INTO nouns (singular, plural) VALUES (?, ?)";
+            query = "INSERT INTO nouns (singular, proper, plural) VALUES (?, ?, ?)";
           } else {
-            query = "INSERT INTO nouns (singular) VALUES (?)";
+            query = "INSERT INTO nouns (singular, proper) VALUES (?, ?)";
           }
         
           break;
@@ -576,9 +577,14 @@ int main(int argc, char** argv)
       {
         case 1: // Noun
         {
+          auto sing = nouns[word].singular;
+          sqlite3_bind_int(ppstmt, 2, (std::any_of(std::begin(sing), std::end(sing), [] (char ch) {
+            return isupper(ch);
+          }) ? 1 : 0));
+          
           if (nouns.count(word) == 1)
           {
-            sqlite3_bind_text(ppstmt, 2, nouns[word].plural.c_str(), nouns[word].plural.length(), SQLITE_STATIC);
+            sqlite3_bind_text(ppstmt, 3, nouns[word].plural.c_str(), nouns[word].plural.length(), SQLITE_STATIC);
           }
           
           break;

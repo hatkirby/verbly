@@ -79,6 +79,8 @@ namespace verbly {
       
       noun_query& is_proper(bool _arg);
       noun_query& is_not_proper(bool _arg);
+      
+      noun_query& is_instance(bool _arg);
       noun_query& instance_of(const noun& _noun);
       noun_query& not_instance_of(const noun& _noun);
       
@@ -149,6 +151,8 @@ namespace verbly {
       
       bool _is_proper = false;
       bool _is_not_proper = false;
+      
+      bool _is_instance = false;
       std::list<noun> _instance_of;
       std::list<noun> _not_instance_of;
       

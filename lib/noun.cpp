@@ -330,6 +330,13 @@ namespace verbly {
     return *this;
   }
   
+  noun_query& noun_query::is_instance(bool _arg)
+  {
+    _is_instance = _arg;
+    
+    return *this;
+  }
+  
   noun_query& noun_query::instance_of(const noun& _noun)
   {
     _instance_of.push_back(_noun);
@@ -644,12 +651,17 @@ namespace verbly {
     
     if (_is_proper)
     {
-      conditions.push_back("noun_id IN (SELECT instance_id FROM instantiation)");
+      conditions.push_back("proper = 1");
     }
     
     if (_is_not_proper)
     {
-      conditions.push_back("noun_id NOT IN (SELECT instance_id FROM instantiation)");
+      conditions.push_back("proper = 0");
+    }
+    
+    if (_is_instance)
+    {
+      conditions.push_back("noun_id IN (SELECT instance_id FROM instantiation)");
     }
     
     if (!_instance_of.empty())
