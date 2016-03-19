@@ -1,3 +1,74 @@
 WordNet Release 3.0
+===================
 
 This software and database is being provided to you, the LICENSEE, by Princeton University under the following license. By obtaining, using and/or copying this software and database, you agree that you have read, understood, and will comply with these terms and conditions.: Permission to use, copy, modify and distribute this software and database and its documentation for any purpose and without fee or royalty is hereby granted, provided that you agree to comply with the following copyright notice and statements, including the disclaimer, and that the same appear on ALL copies of the software, database and documentation, including modifications that you make for internal use or for distribution. WordNet 3.0 Copyright 2006 by Princeton University. All rights reserved. THIS SOFTWARE AND DATABASE IS PROVIDED "AS IS" AND PRINCETON UNIVERSITY MAKES NO REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED. BY WAY OF EXAMPLE, BUT NOT LIMITATION, PRINCETON UNIVERSITY MAKES NO REPRESENTATIONS OR WARRANTIES OF MERCHANT- ABILITY OR FITNESS FOR ANY PARTICULAR PURPOSE OR THAT THE USE OF THE LICENSED SOFTWARE, DATABASE OR DOCUMENTATION WILL NOT INFRINGE ANY THIRD PARTY PATENTS, COPYRIGHTS, TRADEMARKS OR OTHER RIGHTS. The name of Princeton University or Princeton may not be used in advertising or publicity pertaining to distribution of the software and/or database. Title to copyright in this software, database and any associated documentation shall at all times remain with Princeton University and LICENSEE agrees to preserve same.
+
+
+Automatically Generated Inflection Database (AGID) 2014.08.11
+=============================================================
+
+Copyright 2000-2014 by Kevin Atkinson
+
+Permission to use, copy, modify, distribute and sell this database,
+the associated scripts, the output created form the scripts and its
+documentation for any purpose is hereby granted without fee,
+provided that the above copyright notice appears in all copies and
+that both that copyright notice and this permission notice appear in
+supporting documentation. Kevin Atkinson makes no representations
+about the suitability of this array for any purpose. It is provided
+"as is" without express or implied warranty.
+
+
+The Moby Lexicon Project (indirectly through AGID)
+==================================================
+
+The Moby lexicon project is complete and has
+been place into the public domain. Use, sell,
+rework, excerpt and use in any way on any platform.
+
+Placing this material on internal or public servers is
+also encouraged. The compiler is not aware of any
+export restrictions so freely distribute world-wide.
+
+You can verify the public domain status by contacting
+
+Grady Ward
+3449 Martha Ct.
+Arcata, CA  95521-4884
+
+grady@netcom.com
+grady@northcoast.com
+
+
+ENABLE2K Word List (indirectly through AGID)
+============================================
+
+The ENABLE master word list, WORD.LST, is herewith formally
+released into the Public Domain. Anyone is free to use it or
+distribute it in any manner they see fit. No fee or registration
+is required for its use nor are "contributions" solicited (if you
+feel you absolutely must contribute something for your own peace
+of mind, the authors of the ENABLE list ask that you make a
+donation on their behalf to your favorite charity). This word
+list is our gift to the Scrabble community, as an alternate to
+"official" word lists. Game designers may feel free to
+incorporate the WORD.LST into their games. Please mention the
+source and credit us as originators of the list. Note that if
+you, as a game designer, use the WORD.LST in your product, you
+may still copyright and protect your product, but you may *not*
+legally copyright or in any way restrict redistribution of the
+WORD.LST portion of your product. This *may* under law restrict
+your rights to restrict your users' rights, but that is only
+fair.
+
+
+Carnegie Mellon Pronouncing Dictionary (CMUDICT)
+================================================
+
+The Carnegie Mellon Pronouncing Dictionary, in its current and
+previous versions is Copyright (C) 1993-2014 by Carnegie Mellon
+University.  Use of this dictionary for any research or commercial
+purpose is completely unrestricted. If you make use of or
+redistribute this material we request that you acknowledge its
+origin in your descriptions, as per the license information included
+in the dictionary file (a Simplified BSD lincense).
