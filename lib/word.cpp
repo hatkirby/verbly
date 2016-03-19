@@ -1,4 +1,5 @@
 #include "verbly.h"
+#include <algorithm>
 
 namespace verbly {
   
@@ -27,6 +28,13 @@ namespace verbly {
     }
     
     return result;
+  }
+  
+  bool word::starts_with_vowel_sound() const
+  {
+    return std::any_of(std::begin(pronunciations), std::end(pronunciations), [] (std::list<std::string> phonemes) {
+      return (phonemes.front().find_first_of("012") != std::string::npos);
+    });
   }
   
 };

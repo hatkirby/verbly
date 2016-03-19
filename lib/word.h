@@ -28,6 +28,7 @@ namespace verbly {
       virtual std::string base_form() const = 0;
       
       std::list<std::string> rhyme_phonemes() const;
+      bool starts_with_vowel_sound() const;
   };
   
 };
