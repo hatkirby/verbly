@@ -577,8 +577,7 @@ int main(int argc, char** argv)
       {
         case 1: // Noun
         {
-          auto sing = nouns[word].singular;
-          sqlite3_bind_int(ppstmt, 2, (std::any_of(std::begin(sing), std::end(sing), [] (char ch) {
+          sqlite3_bind_int(ppstmt, 2, (std::any_of(std::begin(word), std::end(word), [] (char ch) {
             return isupper(ch);
           }) ? 1 : 0));
           
