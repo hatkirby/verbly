@@ -1,0 +1,49 @@
+from: src, path, spatial, loc
+out: src, path, spatial
+out of: src, path, spatial, loc
+off: src, path, spatial, loc
+off of: src, path, spatial
+into: dest_conf, dest, path, spatial
+onto: dest_conf, dest, path, spatial
+for: dest_dir, dest, path, spatial
+at: dest_dir, dest, path, spatial, loc
+to: dest_dir, dest, path, spatial
+towards: dest_dir, dest, path, spatial
+along: dir, path, spatial, loc
+across: dir, path, spatial
+around: dir, path, spatial, loc
+down: dir, path, spatial
+over: dir, path, spatial, loc
+past: dir, path, spatial
+round: dir, path, spatial, loc
+through: dir, path, spatial
+towards: dir, path, spatial
+up: dir, path, spatial
+about: loc, spatial
+above: loc, spatial
+against: loc, spatial
+alongside: loc, spatial
+amid: loc, spatial
+among: loc, spatial
+amongst: loc, spatial
+astride: loc, spatial
+athwart: loc, spatial
+before: loc, spatial
+behind: loc, spatial
+beside: loc, spatial
+between: loc, spatial
+beyond: loc, spatial
+by: loc, spatial
+in: loc, spatial
+in front of: loc, spatial
+inside: loc, spatial
+near: loc, spatial
+next to: loc, spatial
+on: loc, spatial
+opposite: loc, spatial
+outside: loc, spatial
+throughout: loc, spatial
+under: loc, spatial
+underneath: loc, spatial
+upon: loc, spatial
+within: loc, spatial

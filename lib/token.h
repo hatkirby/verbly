@@ -1,314 +1,169 @@
 #ifndef TOKEN_H_AD62C505
 #define TOKEN_H_AD62C505
 
-#include <string>
-#include <list>
-#include <sstream>
-#include <algorithm>
-
 namespace verbly {
-  
-  class verb;
-  
-  class selrestr {
-  };
-  
-  class synrestr {
-  };
-  
-  enum class fillin_type {
-    noun_phrase,
-    participle_phrase,
-    adjective,
-    adverb
-  };
   
   class token {
     public:
       enum class type {
         verb,
+        noun,
+        adjective,
+        adverb,
+        preposition,
         fillin,
-        string,
-        utterance
+        utterance,
+        string
       };
       
-    protected:
-      // General
-      type _type;
-      
-      token(type _type);
-      
-    public:
-      enum type token_type() const;
-      
-      virtual bool complete() const = 0;
-      virtual std::string compile() const = 0;
-      virtual token* copy() const = 0;
-  };
-  
-  class verb_token : public token {
-    public:
-      enum class inflection {
+      enum class verb_inflection {
         infinitive,
         past_tense,
         past_participle,
-        ing_form,
-        s_form
+        s_form,
+        ing_form
       };
       
-    private:
-      // Verb
-      const verb* _verb;
-      inflection _inflection = inflection::infinitive;
-    
-    public:
-      verb_token(const verb& _verb);
+      enum class noun_inflection {
+        singular,
+        plural
+      };
       
-      const verb& get_verb() const;
+      enum class adjective_inflection {
+        base,
+        comparative,
+        superlative
+      };
       
-      verb_token& inflect(inflection infl);
+      enum class adverb_inflection {
+        base,
+        comparative,
+        superlative
+      };
       
-      bool complete() const;
+      enum class fillin_type {
+        generic,
+        noun_phrase,
+        adjective_phrase,
+        adverb_phrase,
+        participle_phrase,
+        infinitive_phrase
+      };
       
+      type get_type() const;
+      
+      int get_extra() const;
+      void set_extra(int _arg);
+      
+      token(const token& other);
+      token& operator=(const token& other);
+      ~token();
+      
+      bool is_complete() const;
       std::string compile() const;
       
-      token* copy() const;
-  };
-  
-  class utterance_token : public token {
-    private:
-      // Utterance
-      std::list<std::unique_ptr<token>> utterance;
-
-    public:
-      typedef std::list<std::unique_ptr<token>>::iterator iterator;
-      /*class iterator {
-        private:
-          friend class utterance_token;
-          
-          std::list<std::unique_ptr<token>>::iterator it;
-          
-        public:
-          iterator(std::list<std::unique_ptr<token>>::iterator it) : it(it)
-          {
-            
-          }
-          
-          iterator& operator++()
-          {
-            ++it;
-            return *this;
-          }
-          
-          iterator& operator--()
-          {
-            --it;
-            return *this;
-          }
-          
-          bool operator==(const iterator& other) const
-          {
-            return it == other.it;
-          }
-          
-          bool operator!=(const iterator& other) const
-          {
-            return it != other.it;
-          }
-          
-          token& operator*()
-          {
-            return **it;
-          }
-          
-          token& operator->()
-          {
-            return **it;
-          }
-      };*/
+      // Verb
+      token(verb _verb);
+      token(verb _verb, verb_inflection _infl);
+      token& operator=(verb _verb);
+      verb get_verb() const;
+      void set_verb(verb _verb);
+      verb_inflection get_verb_inflection() const;
+      void set_verb_inflection(verb_inflection _infl);
       
-      utterance_token(std::initializer_list<token*> tkns) : token(token::type::utterance)
-      {
-        for (auto tkn : tkns)
-        {
-          utterance.push_back(std::unique_ptr<token>(tkn));
-        }
-      }
+      // Noun
+      token(noun _noun);
+      token(noun _noun, noun_inflection _infl);
+      token& operator=(noun _noun);
+      noun get_noun() const;
+      void set_noun(noun _noun);
+      noun_inflection get_noun_inflection() const;
+      void set_noun_inflection(noun_inflection _infl);
       
-      utterance_token(const utterance_token& other) : token(token::type::utterance)
-      {
-        for (auto& tkn : other.utterance)
-        {
-          utterance.push_back(std::unique_ptr<token>(tkn->copy()));
-        }
-      }
+      // Adjective
+      token(adjective _adjective);
+      token(adjective _adjective, adjective_inflection _infl);
+      token& operator=(adjective _adjective);
+      adjective get_adjective() const;
+      void set_adjective(adjective _adjective);
+      adjective_inflection get_adjective_inflection() const;
+      void set_adjective_inflection(adjective_inflection _infl);
       
-      utterance_token(utterance_token&& other) : token(token::type::utterance), utterance(std::move(other.utterance))
-      {
-        
-      }
+      // Adverb
+      token(adverb _adverb);
+      token(adverb _adverb, adverb_inflection _infl);
+      token& operator=(adverb _adverb);
+      adverb get_adverb() const;
+      void set_adverb(adverb _adverb);
+      adverb_inflection get_adverb_inflection() const;
+      void set_adverb_inflection(adverb_inflection _infl);
       
-      utterance_token& operator=(const utterance_token& other)
-      {
-        utterance.clear();
-        
-        for (auto& tkn : other.utterance)
-        {
-          utterance.push_back(std::unique_ptr<token>(tkn->copy()));
-        }
-        
-        return *this;
-      }
+      // Preposition
+      token(preposition _preposition);
+      token& operator=(preposition _preposition);
+      preposition get_preposition() const;
+      void set_preposition(preposition _preposition);
       
-      utterance_token& operator=(utterance_token&& other)
-      {
-        utterance = std::move(other.utterance);
-        
-        return *this;
-      }
-      
-      iterator begin()
-      {
-        return std::begin(utterance);
-      }
-      
-      iterator end()
-      {
-        return std::end(utterance);
-      }
-      
-      void erase(iterator it)
-      {
-        utterance.erase(it);
-      }
-      
-      bool complete() const
-      {
-        return std::all_of(std::begin(utterance), std::end(utterance), [] (const std::unique_ptr<token>& tkn) {
-          return tkn->complete();
-        });
-      }
-      
-      std::string compile() const
-      {
-        std::stringstream result;
-        for (auto& t : utterance)
-        {
-          if (t->complete())
-          {
-            result << t->compile() << " ";
-          } else {
-            return "Could not compile!";
-          }
-        }
-    
-        std::string output = result.str();
-        if (output != "")
-        {
-          output.pop_back();
-        }
-    
-        return output;
-      }
-      
-      token* copy() const
-      {
-        return new utterance_token(*this);
-      }
-  };
-  
-  class fillin_token : public token {
-    private:    
       // Fillin
-      std::string m_theme;
-      fillin_type m_fillin_type;
+      token(fillin_type _ft);
+      token& operator=(fillin_type _ft);
+      fillin_type get_fillin_type() const;
+      void set_fillin_type(fillin_type _ft);
       
-    public:
-      fillin_token(fillin_type ft) : token(token::type::fillin), m_fillin_type(ft)
-      {
-
-      }
+      // Utterance
+      typedef std::list<token>::iterator iterator;
       
-/*      void synrestrs(std::initializer_list<synrestr> ins)
-      {
-        m_synrestrs = std::set<synrestr>(ins);
-      }
+      token();
+      token(std::initializer_list<token> _init);
+      iterator begin();
+      iterator end();
+      token& operator<<(token _tkn);
+      void push_back(token _tkn);
+      void insert(iterator before, token _tkn);
+      void replace(iterator torepl, token _tkn);
+      void erase(iterator toer);
       
-      std::set<synrestr>& synrestrs()
-      {
-        return m_synrestrs;
-      }
-      
-      void selrestrs(std::initializer_list<selrestr> ins)
-      {
-        m_selrestrs = std::set<selrestr>(ins);
-      }
-      
-      std::set<selrestr>& selrestrs()
-      {
-        return m_selrestrs;
-      }*/
-      
-      fillin_token theme(std::string theme)
-      {
-        m_theme = theme;
-        
-        return *this;
-      }
-      
-      std::string& theme()
-      {
-        return m_theme;
-      }
-      
-      fillin_type get_fillin_type() const
-      {
-        return m_fillin_type;
-      }
-      
-      bool complete() const
-      {
-        return false;
-      }
-      
-      std::string compile() const
-      {
-        return "";
-      }
-      
-      token* copy() const
-      {
-        return new fillin_token(*this);
-      }
-  };
-  
-  class string_token : public token {
-    private:
       // String
-      std::string str;
+      token(std::string _str);
+      token& operator=(std::string _str);
+      std::string get_string() const;
+      void set_string(std::string _str);
       
-    public:
-      string_token(std::string str) : token(token::type::string), str(str)
-      {
-        
-      }
-      
-      bool complete() const
-      {
-        return true;
-      }
-      
-      std::string compile() const
-      {
-        return str;
-      }
-      
-      token* copy() const
-      {
-        return new string_token(*this);
-      }
+    private:
+      type _type;
+      int _extra = 0;
+      union {
+        struct {
+          verb _verb;
+          verb_inflection _infl;
+        } _verb;
+        struct {
+          noun _noun;
+          noun_inflection _infl;
+        } _noun;
+        struct {
+          adjective _adjective;
+          adjective_inflection _infl;
+        } _adjective;
+        struct {
+          adverb _adverb;
+          adverb_inflection _infl;
+        } _adverb;
+        struct {
+          preposition _preposition;
+        } _preposition;
+        struct {
+          fillin_type _type;
+        } _fillin;
+        struct {
+          std::string _str;
+        } _string;
+        struct {
+          std::list<token> _utterance;
+        } _utterance;
+      };
   };
-  
+
 };
 
 #endif /* end of include guard: TOKEN_H_AD62C505 */

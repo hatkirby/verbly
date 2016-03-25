@@ -1,0 +1,482 @@
+diff /Users/hatkirby/Downloads/new_vn 2/admit-65.xml datadir/vn/admit-65.xml
+104c104
+<                     <SELRESTRS logic="or">
+---
+>                     <SELRESTRS>
+diff /Users/hatkirby/Downloads/new_vn 2/amuse-31.1.xml datadir/vn/amuse-31.1.xml
+270a271,273
+>         <THEMROLE type="Cause">
+>           <SELRESTRS/>
+>         </THEMROLE>
+368c371,373
+<                 <LEX value="'s"/>
+---
+>                 <NP value="Cause">
+>                   <SYNRESTRS/>
+>                 </NP>
+404c409,411
+<                     <SYNRESTRS/>
+---
+>                     <SYNRESTRS>
+>                       <SYNRESTR Value="+" type="adjp"/>
+>                     </SYNRESTRS>
+diff /Users/hatkirby/Downloads/new_vn 2/animal_sounds-38.xml datadir/vn/animal_sounds-38.xml
+186a187,191
+>                 <PREP>
+>                   <SELRESTRS>
+>                     <SELRESTR Value="+" type="loc" />
+>                   </SELRESTRS>
+>                 </PREP>
+diff /Users/hatkirby/Downloads/new_vn 2/assessment-34.1.xml datadir/vn/assessment-34.1.xml
+103d102
+<                 <LEX value="'s"/>
+diff /Users/hatkirby/Downloads/new_vn 2/battle-36.4.xml datadir/vn/battle-36.4.xml
+96c96
+<                         <SYNRESTR Value="+" type="what_extract"/>
+---
+>                         <SYNRESTR Value="+" type="wh_comp"/>
+diff /Users/hatkirby/Downloads/new_vn 2/become-109.1.xml datadir/vn/become-109.1.xml
+34c34,36
+<                     <SYNRESTRS/>
+---
+>                   <SYNRESTRS>
+>                     <SYNRESTR Value="+" type="adjp"/>
+>                   </SYNRESTRS>
+diff /Users/hatkirby/Downloads/new_vn 2/beg-58.2.xml datadir/vn/beg-58.2.xml
+41c41
+< 			<SYNRESTR Value="-" type="for_comp"/>
+---
+> 			<SYNRESTR Value="+" type="for_comp"/>
+diff /Users/hatkirby/Downloads/new_vn 2/bend-45.2.xml datadir/vn/bend-45.2.xml
+47c47,49
+<                 <SELRESTRS/>
+---
+>                 <SELRESTRS>
+>                   <SELRESTR Value="+" type="state"/>
+>                 </SELRESTRS>
+230c232,234
+<                     <SYNRESTRS/>
+---
+>                    <SYNRESTRS>
+>                      <SYNRESTR Value="+" type="adjp"/>
+>                    </SYNRESTRS>
+280,282c284
+<                     <SELRESTRS>
+<                         <SELRESTR Value="+" type="state"/>
+<                     </SELRESTRS>
+---
+>                     <SELRESTRS/>
+332,334c334
+<                     <SELRESTRS>
+<                         <SELRESTR Value="+" type="state"/>
+<                     </SELRESTRS>
+---
+>                     <SELRESTRS/>
+diff /Users/hatkirby/Downloads/new_vn 2/break-45.1.xml datadir/vn/break-45.1.xml
+255c255,257
+<                     <SYNRESTRS/>
+---
+>                   <SYNRESTRS>
+>                     <SYNRESTR Value="+" type="adjp"/>
+>                   </SYNRESTRS>
+307c309,311
+<                     <SYNRESTRS/>
+---
+>                   <SYNRESTRS>
+>                     <SYNRESTR Value="+" type="adjp"/>
+>                   </SYNRESTRS>
+diff /Users/hatkirby/Downloads/new_vn 2/characterize-29.2.xml datadir/vn/characterize-29.2.xml
+107c107
+<                 <LEX value="as"/>
+---
+>                 <LEX value="to be"/>
+109,111c109,111
+<                     <SYNRESTRS>
+<                         <SYNRESTR Value="+" type="small_clause"/>
+<                     </SYNRESTRS>
+---
+>                   <SYNRESTRS>
+>                     <SYNRESTR Value="+" type="adjp"/>
+>                   </SYNRESTRS>
+386a387,391
+>                                 <NP value="Attribute">
+>                                   <SYNRESTRS>
+>                                     <SYNRESTR Value="+" type="adjp"/>
+>                                   </SYNRESTRS>
+>                                 </NP>
+diff /Users/hatkirby/Downloads/new_vn 2/coloring-24.xml datadir/vn/coloring-24.xml
+89c89,91
+<                     <SYNRESTRS/>
+---
+>                   <SYNRESTRS>
+>                     <SYNRESTR Value="+" type="adjp"/>
+>                   </SYNRESTRS>
+diff /Users/hatkirby/Downloads/new_vn 2/confess-37.10.xml datadir/vn/confess-37.10.xml
+110a111,115
+>                 <NP value="Attribute">
+>                   <SYNRESTRS>
+>                     <SYNRESTR Value="+" type="adjp"/>
+>                   </SYNRESTRS>
+>                 </NP>
+diff /Users/hatkirby/Downloads/new_vn 2/consider-29.9.xml datadir/vn/consider-29.9.xml
+191,193c191,193
+<                                             <SYNRESTRS>
+<                                                 <SYNRESTR Value="-" type="sentential"/>
+<                                             </SYNRESTRS>
+---
+>                                   <SYNRESTRS>
+>                                     <SYNRESTR Value="+" type="adjp"/>
+>                                   </SYNRESTRS>
+334,336c334,336
+<                                             <SYNRESTRS>
+<                                                 <SYNRESTR Value="-" type="sentential"/>
+<                                             </SYNRESTRS>
+---
+>                                           <SYNRESTRS>
+>                                             <SYNRESTR Value="+" type="adjp"/>
+>                                           </SYNRESTRS>
+468,470c468,470
+<                                             <SYNRESTRS>
+<                                                 <SYNRESTR Value="-" type="sentential"/>
+<                                             </SYNRESTRS>
+---
+>                           <SYNRESTRS>
+>                             <SYNRESTR Value="+" type="adjp"/>
+>                           </SYNRESTRS>
+554,556c554,556
+<                                             <SYNRESTRS>
+<                                                 <SYNRESTR Value="-" type="sentential"/>
+<                                             </SYNRESTRS>
+---
+>                           <SYNRESTRS>
+>                             <SYNRESTR Value="+" type="adjp"/>
+>                           </SYNRESTRS>
+diff /Users/hatkirby/Downloads/new_vn 2/cut-21.1.xml datadir/vn/cut-21.1.xml
+316c316,318
+<                     <SYNRESTRS/>
+---
+>                   <SYNRESTRS>
+>                     <SYNRESTR Value="+" type="adjp"/>
+>                   </SYNRESTRS>
+368c370,372
+<                     <SYNRESTRS/>
+---
+>                   <SYNRESTRS>
+>                     <SYNRESTR Value="+" type="adjp"/>
+>                   </SYNRESTRS>
+560c564,566
+<                     <SYNRESTRS/>
+---
+>                   <SYNRESTRS>
+>                     <SYNRESTR Value="+" type="adjp"/>
+>                   </SYNRESTRS>
+diff /Users/hatkirby/Downloads/new_vn 2/declare-29.4.xml datadir/vn/declare-29.4.xml
+33,35c33,35
+<                     <SYNRESTRS>
+<                         <SYNRESTR Value="-" type="sentential"/>
+<                     </SYNRESTRS>
+---
+>                   <SYNRESTRS>
+>                     <SYNRESTR Value="+" type="adjp"/>
+>                   </SYNRESTRS>
+122,124c122,124
+<                     <SYNRESTRS>
+<                         <SYNRESTR Value="-" type="sentential"/>
+<                     </SYNRESTRS>
+---
+>                   <SYNRESTRS>
+>                     <SYNRESTR Value="+" type="adjp"/>
+>                   </SYNRESTRS>
+244,246c244,246
+<                     <SYNRESTRS>
+<                         <SYNRESTR Value="-" type="sentential"/>
+<                     </SYNRESTRS>
+---
+>                           <SYNRESTRS>
+>                             <SYNRESTR Value="+" type="adjp"/>
+>                           </SYNRESTRS>
+diff /Users/hatkirby/Downloads/new_vn 2/estimate-34.2.xml datadir/vn/estimate-34.2.xml
+123a124
+>                 <LEX value="to be"/>
+125,127c126,128
+<                     <SYNRESTRS>
+<                         <SYNRESTR Value="+" type="to_be"/>
+<                     </SYNRESTRS>
+---
+>                   <SYNRESTRS>
+>                     <SYNRESTR Value="+" type="adjp"/>
+>                   </SYNRESTRS>
+diff /Users/hatkirby/Downloads/new_vn 2/get-13.5.1.xml datadir/vn/get-13.5.1.xml
+55,56c55
+<                 <SELRESTR Value="-" type="location"/>
+<                 <SELRESTR Value="-" type="region"/>
+---
+>                 <SELRESTR Value="+" type="currency"/>
+diff /Users/hatkirby/Downloads/new_vn 2/hit-18.1.xml datadir/vn/hit-18.1.xml
+234c234,236
+<                     <SYNRESTRS/>
+---
+>                   <SYNRESTRS>
+>                     <SYNRESTR Value="+" type="adjp"/>
+>                   </SYNRESTRS>
+294c296,298
+<                     <SYNRESTRS/>
+---
+>                    <SYNRESTRS>
+>                      <SYNRESTR Value="+" type="adjp"/>
+>                    </SYNRESTRS>
+619c623,625
+<                     <SYNRESTRS/>
+---
+>                   <SYNRESTRS>
+>                     <SYNRESTR Value="+" type="adjp"/>
+>                   </SYNRESTRS>
+diff /Users/hatkirby/Downloads/new_vn 2/instr_communication-37.4.xml datadir/vn/instr_communication-37.4.xml
+195c195,197
+<                     <SYNRESTRS/>
+---
+>                     <SYNRESTRS>
+>                       <SYNRESTR Value="+" type="quotation"/>
+>                     </SYNRESTRS>
+233c235,237
+<                     <SYNRESTRS/>
+---
+>                   <SYNRESTRS>
+>                       <SYNRESTR Value="+" type="quotation"/>
+>                   </SYNRESTRS>
+diff /Users/hatkirby/Downloads/new_vn 2/judgment-33.xml datadir/vn/judgment-33.xml
+187a188,190
+>                 <NP value="Attribute">
+>                   <SYNRESTRS/>
+>                 </NP>
+243a247
+>                 <LEX value="to be"/>
+245,247c249
+<                     <SYNRESTRS>
+<                         <SYNRESTR Value="+" type="small_clause"/>
+<                     </SYNRESTRS>
+---
+>                     <SYNRESTRS/>
+diff /Users/hatkirby/Downloads/new_vn 2/manner_speaking-37.3.xml datadir/vn/manner_speaking-37.3.xml
+264c264,266
+<                     <SYNRESTRS/>
+---
+>                   <SYNRESTRS>
+>                       <SYNRESTR Value="+" type="quotation"/>
+>                   </SYNRESTRS>
+603c605,607
+<                     <SYNRESTRS/>
+---
+>                   <SYNRESTRS>
+>                       <SYNRESTR Value="+" type="quotation"/>
+>                   </SYNRESTRS>
+diff /Users/hatkirby/Downloads/new_vn 2/other_cos-45.4.xml datadir/vn/other_cos-45.4.xml
+534c534,536
+< 			<SYNRESTRS/>
+---
+>           <SYNRESTRS>
+>             <SYNRESTR Value="+" type="adjp"/>
+>           </SYNRESTRS>
+diff /Users/hatkirby/Downloads/new_vn 2/pocket-9.10.xml datadir/vn/pocket-9.10.xml
+256c256,258
+<                             <SYNRESTRS/>
+---
+>                             <SYNRESTRS>
+>                               <SYNRESTR Value="+" type="adv-loc"/>
+>                             </SYNRESTRS>
+diff /Users/hatkirby/Downloads/new_vn 2/poison-42.2.xml datadir/vn/poison-42.2.xml
+93c93,95
+<                     <SYNRESTRS/>
+---
+>                   <SYNRESTRS>
+>                     <SYNRESTR Value="+" type="adjp"/>
+>                   </SYNRESTRS>
+diff /Users/hatkirby/Downloads/new_vn 2/pour-9.5.xml datadir/vn/pour-9.5.xml
+59,61c59,62
+<                     <SELRESTRS>
+<                         <SELRESTR Value="+" type="path"/>
+<                         <SELRESTR Value="-" type="dest_dir"/>
+---
+>                     <SELRESTRS logic="or">
+>                         <SELRESTR Value="+" type="dir"/>
+>                         <SELRESTR Value="+" type="src"/>
+>                         <SELRESTR Value="+" type="dest_conf"/>
+157,160c158,162
+<                     <SELRESTRS>
+<                         <SELRESTR Value="+" type="path"/>
+<                         <SELRESTR Value="-" type="dest_dir"/>
+<                     </SELRESTRS>
+---
+>                   <SELRESTRS logic="or">
+>                       <SELRESTR Value="+" type="dir"/>
+>                       <SELRESTR Value="+" type="src"/>
+>                       <SELRESTR Value="+" type="dest_conf"/>
+>                   </SELRESTRS>
+diff /Users/hatkirby/Downloads/new_vn 2/push-12.xml datadir/vn/push-12.xml
+90c90,92
+<                             <SYNRESTRS/>
+---
+>                           <SYNRESTRS>
+>                             <SYNRESTR Value="+" type="adjp"/>
+>                           </SYNRESTRS>
+diff /Users/hatkirby/Downloads/new_vn 2/roll-51.3.1.xml datadir/vn/roll-51.3.1.xml
+190c190,192
+<                     <SYNRESTRS/>
+---
+>                   <SYNRESTRS>
+>                     <SYNRESTR Value="+" type="adjp"/>
+>                   </SYNRESTRS>
+256c258,260
+<                     <SYNRESTRS/>
+---
+>                   <SYNRESTRS>
+>                     <SYNRESTR Value="+" type="adjp"/>
+>                   </SYNRESTRS>
+diff /Users/hatkirby/Downloads/new_vn 2/see-30.1.xml datadir/vn/see-30.1.xml
+16a17,19
+>         <THEMROLE type="Patient">
+>           <SELRESTRS/>
+>         </THEMROLE>
+93a97,102
+>                 <PREP value="in">
+>                   <SELRESTRS/>
+>                 </PREP>
+>                 <NP value="Patient">
+>                   <SYNRESTRS/>
+>                 </NP>
+231a241,243
+>                         <NP value="Patient">
+>                           <SYNRESTRS/>
+>                         </NP>
+diff /Users/hatkirby/Downloads/new_vn 2/seem-109.xml datadir/vn/seem-109.xml
+30,32c30,32
+<                     <SYNRESTRS>
+<                         <SYNRESTR Value="-" type="sentential"/>
+<                     </SYNRESTRS>
+---
+>                    <SYNRESTRS>
+>                      <SYNRESTR Value="+" type="adjp"/>
+>                    </SYNRESTRS>
+diff /Users/hatkirby/Downloads/new_vn 2/slide-11.2.xml datadir/vn/slide-11.2.xml
+69,72c69,73
+<                     <SELRESTRS>
+<                         <SELRESTR Value="+" type="path"/>
+<                         <SELRESTR Value="-" type="dest_dir"/>
+<                     </SELRESTRS>
+---
+>                   <SELRESTRS logic="or">
+>                       <SELRESTR Value="+" type="dir"/>
+>                       <SELRESTR Value="+" type="src"/>
+>                       <SELRESTR Value="+" type="dest_conf"/>
+>                   </SELRESTRS>
+218,221c219,223
+<                     <SELRESTRS>
+<                         <SELRESTR Value="+" type="path"/>
+<                         <SELRESTR Value="-" type="dest_dir"/>
+<                     </SELRESTRS>
+---
+>                   <SELRESTRS logic="or">
+>                       <SELRESTR Value="+" type="dir"/>
+>                       <SELRESTR Value="+" type="src"/>
+>                       <SELRESTR Value="+" type="dest_conf"/>
+>                   </SELRESTRS>
+diff /Users/hatkirby/Downloads/new_vn 2/spank-18.3.xml datadir/vn/spank-18.3.xml
+69a70,72
+>         <THEMROLE type="Recipient">
+>           <SELRESTRS/>
+>         </THEMROLE>
+201c204,206
+<                     <SYNRESTRS/>
+---
+>                    <SYNRESTRS>
+>                      <SYNRESTR Value="+" type="adjp"/>
+>                    </SYNRESTRS>
+529,532c534,541
+<                     <SYNRESTRS>
+<                         <SYNRESTR Value="+" type="genitive"/>
+<                         <SYNRESTR Value="+" type="body_part"/>
+<                     </SYNRESTRS>
+---
+>                   <SYNRESTRS>
+>                     <SYNRESTR Value="+" type="genitive"/>
+>                   </SYNRESTRS>
+>                 </NP>
+>                 <NP value="Recipient">
+>                   <SYNRESTRS>
+>                     <SYNRESTR Value="+" type="body_part"/>
+>                   </SYNRESTRS>
+diff /Users/hatkirby/Downloads/new_vn 2/swat-18.2.xml datadir/vn/swat-18.2.xml
+264c264,266
+<                     <SYNRESTRS/>
+---
+>                   <SYNRESTRS>
+>                     <SYNRESTR Value="+" type="adjp"/>
+>                   </SYNRESTRS>
+324c326,328
+<                     <SYNRESTRS/>
+---
+>                   <SYNRESTRS>
+>                     <SYNRESTR Value="+" type="adjp"/>
+>                   </SYNRESTRS>
+diff /Users/hatkirby/Downloads/new_vn 2/tape-22.4.xml datadir/vn/tape-22.4.xml
+364c364,366
+<                     <SYNRESTRS/>
+---
+>                   <SYNRESTRS>
+>                     <SYNRESTR Value="+" type="adjp"/>
+>                   </SYNRESTRS>
+diff /Users/hatkirby/Downloads/new_vn 2/vehicle-51.4.1.xml datadir/vn/vehicle-51.4.1.xml
+227c227,229
+<                     <SYNRESTRS/>
+---
+>                   <SYNRESTRS>
+>                     <SYNRESTR Value="+" type="adjp"/>
+>                   </SYNRESTRS>
+diff /Users/hatkirby/Downloads/new_vn 2/waltz-51.5.xml datadir/vn/waltz-51.5.xml
+181c181,183
+<                     <SYNRESTRS/>
+---
+>                   <SYNRESTRS>
+>                     <SYNRESTR Value="+" type="adjp"/>
+>                   </SYNRESTRS>
+diff /Users/hatkirby/Downloads/new_vn 2/want-32.1.xml datadir/vn/want-32.1.xml
+142a143
+>                         <ADV/>
+194a196
+>                         <ADJ/>
+305a308
+>                                 <LEX value="to be"/>
+307,309c310,312
+<                                     <SYNRESTRS>
+<                                         <SYNRESTR Value="+" type="to_be"/>
+<                                     </SYNRESTRS>
+---
+>                                   <SYNRESTRS>
+>                                     <SYNRESTR Value="+" type="adjp"/>
+>                                   </SYNRESTRS>
+diff /Users/hatkirby/Downloads/new_vn 2/wipe_instr-10.4.2.xml datadir/vn/wipe_instr-10.4.2.xml
+178c178,180
+<                     <SYNRESTRS/>
+---
+>                   <SYNRESTRS>
+>                     <SYNRESTR Value="+" type="adjp"/>
+>                   </SYNRESTRS>
+diff /Users/hatkirby/Downloads/new_vn 2/wipe_manner-10.4.1.xml datadir/vn/wipe_manner-10.4.1.xml
+198c198,199
+<                         <SELRESTR Value="-" type="region"/>
+---
+>                       <SELRESTR Value="+" type="location"/>
+>                       <SELRESTR Value="-" type="region"/>
+diff /Users/hatkirby/Downloads/new_vn 2/wish-62.xml datadir/vn/wish-62.xml
+91a92
+>                 <LEX value="to be"/>
+93,95c94,96
+<                     <SYNRESTRS>
+<                         <SYNRESTR Value="+" type="to_be"/>
+<                     </SYNRESTRS>
+---
+>                   <SYNRESTRS>
+>                     <SYNRESTR Value="+" type="adjp"/>
+>                   </SYNRESTRS>
+122a124
+>                 <ADJ/>

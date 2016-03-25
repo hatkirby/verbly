@@ -11,36 +11,75 @@
 #include <regex>
 #include <list>
 #include <algorithm>
+#include <json.hpp>
 #include "progress.h"
+#include "../lib/util.h"
 
-struct verb {
+using json = nlohmann::json;
+
+struct verb_t {
   std::string infinitive;
   std::string past_tense;
   std::string past_participle;
   std::string ing_form;
   std::string s_form;
+  int id;
 };
 
-struct adjective {
+struct adjective_t {
   std::string base;
   std::string comparative;
   std::string superlative;
 };
 
-struct noun {
+struct noun_t {
   std::string singular;
   std::string plural;
 };
 
-struct group {
-  std::string id;
-  std::set<std::string> members;
+struct selrestr_t {
+  enum class type_t {
+    singleton,
+    andlogic,
+    orlogic,
+    empty
+  };
+  type_t type;
+  std::string restriction;
+  bool pos;
+  std::list<selrestr_t> subordinates;
 };
 
-std::map<std::string, group> groups;
-std::map<std::string, verb> verbs;
-std::map<std::string, adjective> adjectives;
-std::map<std::string, noun> nouns;
+struct framepart_t {
+  enum class type_t {
+    np,
+    v,
+    pp,
+    adj,
+    adv,
+    lex
+  };
+  type_t type;
+  std::string role;
+  selrestr_t selrestrs;
+  std::set<std::string> preprestrs;
+  std::set<std::string> synrestrs;
+  std::list<std::string> choices;
+  std::string lexval;
+};
+
+struct group_t {
+  std::string id;
+  std::string parent;
+  std::set<std::string> members;
+  std::map<std::string, selrestr_t> roles;
+  std::list<std::list<framepart_t>> frames;
+};
+
+std::map<std::string, group_t> groups;
+std::map<std::string, verb_t> verbs;
+std::map<std::string, adjective_t> adjectives;
+std::map<std::string, noun_t> nouns;
 std::map<int, std::map<int, int>> wn;
 std::map<std::string, std::set<std::string>> pronunciations;
 
@@ -59,15 +98,97 @@ void print_usage()
   exit(1);
 }
 
-void db_error(sqlite3* ppdb, std::string)
+void db_error(sqlite3* ppdb, std::string query)
 {
   std::cout << "Error writing to output database: " << sqlite3_errmsg(ppdb) << std::endl;
+  std::cout << query << std::endl;
   sqlite3_close_v2(ppdb);
   print_usage();
 }
 
-/*
-void parse_group(xmlNodePtr top, std::string filename)
+json export_selrestrs(selrestr_t r)
+{
+  if (r.type == selrestr_t::type_t::empty)
+  {
+    return {};
+  } else if (r.type == selrestr_t::type_t::singleton)
+  {
+    json result;
+    result["type"] = r.restriction;
+    result["pos"] = r.pos;
+    return result;
+  } else {
+    json result;
+    if (r.type == selrestr_t::type_t::andlogic)
+    {
+      result["logic"] = "and";
+    } else {
+      result["logic"] = "or";
+    }
+    
+    std::list<json> outlist;
+    std::transform(std::begin(r.subordinates), std::end(r.subordinates), std::back_inserter(outlist), &export_selrestrs);
+    result["children"] = outlist;
+    
+    return result;
+  }
+}
+
+selrestr_t parse_selrestrs(xmlNodePtr top, std::string filename)
+{
+  selrestr_t r;
+  xmlChar* key;
+  
+  if (!xmlStrcmp(top->name, (const xmlChar*) "SELRESTRS"))
+  {
+    if (xmlChildElementCount(top) == 0)
+    {
+      r.type = selrestr_t::type_t::empty;
+    } else if (xmlChildElementCount(top) == 1)
+    {
+      r = parse_selrestrs(xmlFirstElementChild(top), filename);
+    } else {
+      r.type = selrestr_t::type_t::andlogic;
+      
+      if (xmlHasProp(top, (const xmlChar*) "logic"))
+      {
+        key = xmlGetProp(top, (const xmlChar*) "logic");
+        if (!xmlStrcmp(key, (const xmlChar*) "or"))
+        {
+          r.type = selrestr_t::type_t::orlogic;
+        }
+        xmlFree(key);
+      }
+  
+      for (xmlNodePtr selrestr = top->xmlChildrenNode; selrestr != nullptr; selrestr = selrestr->next)
+      {
+        if (!xmlStrcmp(selrestr->name, (const xmlChar*) "SELRESTRS") || !xmlStrcmp(selrestr->name, (const xmlChar*) "SELRESTR"))
+        {
+          r.subordinates.push_back(parse_selrestrs(selrestr, filename));
+        }
+      }
+    }
+  } else if (!xmlStrcmp(top->name, (const xmlChar*) "SELRESTR"))
+  {
+    r.type = selrestr_t::type_t::singleton;
+    
+    key = xmlGetProp(top, (xmlChar*) "Value");
+    r.pos = (std::string((const char*)key) == "+");
+    xmlFree(key);
+
+    key = xmlGetProp(top, (xmlChar*) "type");
+    r.restriction = (const char*) key;
+    xmlFree(key);
+  } else {
+    // Invalid
+    std::cout << "Bad VerbNet file format: " << filename << std::endl;
+    print_usage();
+  }
+  
+  return r;
+}
+
+group_t& parse_group(xmlNodePtr top, std::string filename)
 {
   xmlChar* key = xmlGetProp(top, (xmlChar*) "ID");
   if (key == 0)
@@ -75,24 +196,72 @@ void parse_group(xmlNodePtr top, std::string filename)
     std::cout << "Bad VerbNet file format: " << filename << std::endl;
     print_usage();
   }
-  std::string vnid = key;
+  std::string vnid = (const char*)key;
   vnid = vnid.substr(vnid.find_first_of("-")+1);
   xmlFree(key);
   
-  group g;
+  group_t g;
   g.id = vnid;
   
   for (xmlNodePtr node = top->xmlChildrenNode; node != nullptr; node = node->next)
   {
-    if (!xmlStrcmp(node->name, (const xmlChar*) "MEMBERS"))
+    if (!xmlStrcmp(node->name, (const xmlChar*) "SUBCLASSES"))
+    {
+      for (xmlNodePtr subclass = node->xmlChildrenNode; subclass != nullptr; subclass = subclass->next)
+      {
+        if (!xmlStrcmp(subclass->name, (const xmlChar*) "VNSUBCLASS"))
+        {
+          auto& sg = parse_group(subclass, filename);
+          sg.parent = vnid;
+          
+          for (auto member : sg.members)
+          {
+            g.members.insert(member);
+          }
+          
+          // The schema requires that subclasses appear after role definitions, so we can do this now
+          for (auto role : g.roles)
+          {
+            if (sg.roles.count(role.first) == 0)
+            {
+              sg.roles[role.first] = role.second;
+            }
+          }
+        }
+      }
+    } else if (!xmlStrcmp(node->name, (const xmlChar*) "MEMBERS"))
     {
       for (xmlNodePtr member = node->xmlChildrenNode; member != nullptr; member = member->next)
       {
         if (!xmlStrcmp(member->name, (const xmlChar*) "MEMBER"))
         {
           key = xmlGetProp(member, (xmlChar*) "name");
-          g.members.insert(key);
+          g.members.insert((const char*)key);
           xmlFree(key);
+        }
+      }
+    } else if (!xmlStrcmp(node->name, (const xmlChar*) "THEMROLES"))
+    {
+      for (xmlNodePtr role = node->xmlChildrenNode; role != nullptr; role = role->next)
+      {
+        if (!xmlStrcmp(role->name, (const xmlChar*) "THEMROLE"))
+        {
+          selrestr_t r;
+          r.type = selrestr_t::type_t::empty;
+          
+          key = xmlGetProp(role, (const xmlChar*) "type");
+          std::string type = (const char*)key;
+          xmlFree(key);
+          
+          for (xmlNodePtr rolenode = role->xmlChildrenNode; rolenode != nullptr; rolenode = rolenode->next)
+          {
+            if (!xmlStrcmp(rolenode->name, (const xmlChar*) "SELRESTRS"))
+            {
+              r = parse_selrestrs(rolenode, filename);
+            }
+          }
+          
+          g.roles[type] = r;
         }
       }
     } else if (!xmlStrcmp(node->name, (const xmlChar*) "FRAMES"))
@@ -101,15 +270,109 @@ void parse_group(xmlNodePtr top, std::string filename)
       {
         if (!xmlStrcmp(frame->name, (const xmlChar*) "FRAME"))
         {
+          std::list<framepart_t> f;
+          
           for (xmlNodePtr framenode = frame->xmlChildrenNode; framenode != nullptr; framenode = framenode->next)
           {
-            
+            if (!xmlStrcmp(framenode->name, (const xmlChar*) "SYNTAX"))
+            {
+              for (xmlNodePtr syntaxnode = framenode->xmlChildrenNode; syntaxnode != nullptr; syntaxnode = syntaxnode->next)
+              {
+                framepart_t fp;
+                
+                if (!xmlStrcmp(syntaxnode->name, (const xmlChar*) "NP"))
+                {
+                  fp.type = framepart_t::type_t::np;
+                  
+                  key = xmlGetProp(syntaxnode, (xmlChar*) "value");
+                  fp.role = (const char*)key;
+                  xmlFree(key);
+                  
+                  fp.selrestrs.type = selrestr_t::type_t::empty;
+                  
+                  for (xmlNodePtr npnode = syntaxnode->xmlChildrenNode; npnode != nullptr; npnode = npnode->next)
+                  {
+                    if (!xmlStrcmp(npnode->name, (const xmlChar*) "SYNRESTRS"))
+                    {
+                      for (xmlNodePtr synrestr = npnode->xmlChildrenNode; synrestr != nullptr; synrestr = synrestr->next)
+                      {
+                        if (!xmlStrcmp(synrestr->name, (const xmlChar*) "SYNRESTR"))
+                        {
+                          key = xmlGetProp(synrestr, (xmlChar*) "type");
+                          fp.synrestrs.insert(std::string((const char*)key));
+                          xmlFree(key);
+                        }
+                      }
+                    }
+                  
+                    if (!xmlStrcmp(npnode->name, (const xmlChar*) "SELRESTRS"))
+                    {
+                      fp.selrestrs = parse_selrestrs(npnode, filename);
+                    }
+                  }
+                } else if (!xmlStrcmp(syntaxnode->name, (xmlChar*) "VERB"))
+                {
+                  fp.type = framepart_t::type_t::v;
+                } else if (!xmlStrcmp(syntaxnode->name, (xmlChar*) "PREP"))
+                {
+                  fp.type = framepart_t::type_t::pp;
+                  
+                  if (xmlHasProp(syntaxnode, (xmlChar*) "value"))
+                  {
+                    key = xmlGetProp(syntaxnode, (xmlChar*) "value");
+                    std::string choices = (const char*)key;
+                    xmlFree(key);
+                  
+                    fp.choices = verbly::split<std::list<std::string>>(choices, " ");
+                  }
+                  
+                  for (xmlNodePtr npnode = syntaxnode->xmlChildrenNode; npnode != nullptr; npnode = npnode->next)
+                  {
+                    if (!xmlStrcmp(npnode->name, (const xmlChar*) "SELRESTRS"))
+                    {
+                      for (xmlNodePtr synrestr = npnode->xmlChildrenNode; synrestr != nullptr; synrestr = synrestr->next)
+                      {
+                        if (!xmlStrcmp(synrestr->name, (const xmlChar*) "SELRESTR"))
+                        {
+                          key = xmlGetProp(synrestr, (xmlChar*) "type");
+                          fp.preprestrs.insert(std::string((const char*)key));
+                          xmlFree(key);
+                        }
+                      }
+                    }
+                  }
+                } else if (!xmlStrcmp(syntaxnode->name, (xmlChar*) "ADJ"))
+                {
+                  fp.type = framepart_t::type_t::adj;
+                } else if (!xmlStrcmp(syntaxnode->name, (xmlChar*) "ADV"))
+                {
+                  fp.type = framepart_t::type_t::adv;
+                } else if (!xmlStrcmp(syntaxnode->name, (xmlChar*) "LEX"))
+                {
+                  fp.type = framepart_t::type_t::lex;
+                  
+                  key = xmlGetProp(syntaxnode, (xmlChar*) "value");
+                  fp.lexval = (const char*)key;
+                  xmlFree(key);
+                } else {
+                  continue;
+                }
+                
+                f.push_back(fp);
+              }
+              
+              g.frames.push_back(f);
+            }
           }
         }
       }
     }
   }
-}*/
+  
+  groups[vnid] = g;
+  
+  return groups[vnid];
+}
 
 int main(int argc, char** argv)
 {
@@ -118,7 +381,10 @@ int main(int argc, char** argv)
     print_usage();
   }
   
-  /*DIR* dir;
+  // VerbNet data
+  std::cout << "Reading verb frames..." << std::endl;
+  
+  DIR* dir;
   if ((dir = opendir(argv[1])) == nullptr)
   {
     std::cout << "Invalid VerbNet data directory." << std::endl;
@@ -160,7 +426,7 @@ int main(int argc, char** argv)
     parse_group(top, filename);
   }
   
-  closedir(dir);*/
+  closedir(dir);
   
   // Get verbs from AGID
   std::cout << "Reading inflections..." << std::endl;
@@ -222,7 +488,7 @@ int main(int argc, char** argv)
     {
       case 'V':
       {
-        verb v;
+        verb_t v;
         v.infinitive = word;
         if (forms.size() == 4)
         {
@@ -258,7 +524,7 @@ int main(int argc, char** argv)
       
       case 'A':
       {
-        adjective adj;
+        adjective_t adj;
         adj.base = word;
         if (forms.size() == 2)
         {
@@ -276,7 +542,7 @@ int main(int argc, char** argv)
       
       case 'N':
       {
-        noun n;
+        noun_t n;
         n.singular = word;
         if (forms.size() == 1)
         {
@@ -388,6 +654,85 @@ int main(int argc, char** argv)
     sqlite3_finalize(schmstmt);
   }
   
+  std::cout << "Writing prepositions..." << std::endl;
+  std::ifstream prepfile("prepositions.txt");
+  if (!prepfile.is_open())
+  {
+    std::cout << "Could not find prepositions file" << std::endl;
+    print_usage();
+  }
+  
+  for (;;)
+  {
+    std::string line;
+    if (!getline(prepfile, line))
+    {
+      break;
+    }
+    
+    if (line.back() == '\r')
+    {
+      line.pop_back();
+    }
+    
+    std::regex relation("^([^:]+): (.+)");
+    std::smatch relation_data;
+    std::regex_search(line, relation_data, relation);
+    std::string prep = relation_data[1];
+    std::list<std::string> groups = verbly::split<std::list<std::string>>(relation_data[2], ", ");
+    
+    std::string query("INSERT INTO prepositions (form) VALUES (?)");
+    sqlite3_stmt* ppstmt;
+    
+    if (sqlite3_prepare_v2(ppdb, query.c_str(), query.length(), &ppstmt, NULL) != SQLITE_OK)
+    {
+      db_error(ppdb, query);
+    }
+    
+    sqlite3_bind_text(ppstmt, 1, prep.c_str(), prep.length(), SQLITE_STATIC);
+    
+    if (sqlite3_step(ppstmt) != SQLITE_DONE)
+    {
+      db_error(ppdb, query);
+    }
+    
+    sqlite3_finalize(ppstmt);
+    
+    query = "SELECT last_insert_rowid()";
+    if (sqlite3_prepare_v2(ppdb, query.c_str(), query.length(), &ppstmt, NULL) != SQLITE_OK)
+    {
+      db_error(ppdb, query);
+    }
+    
+    if (sqlite3_step(ppstmt) != SQLITE_ROW)
+    {
+      db_error(ppdb, query);
+    }
+    
+    int rowid = sqlite3_column_int(ppstmt, 0);
+    sqlite3_finalize(ppstmt);
+    
+    for (auto group : groups)
+    {
+      query = "INSERT INTO preposition_groups (preposition_id, groupname) VALUES (?, ?)";
+      if (sqlite3_prepare_v2(ppdb, query.c_str(), query.length(), &ppstmt, NULL) != SQLITE_OK)
+      {
+        db_error(ppdb, query);
+      }
+      
+      sqlite3_bind_int(ppstmt, 1, rowid);
+      sqlite3_bind_text(ppstmt, 2, group.c_str(), group.length(), SQLITE_STATIC);
+      
+      if (sqlite3_step(ppstmt) != SQLITE_DONE)
+      {
+        db_error(ppdb, query);
+      }
+      
+      sqlite3_finalize(ppstmt);
+    }
+  }
+  
+  
   {
     progress ppgs("Writing verbs...", verbs.size());
     for (auto& mapping : verbs)
@@ -431,6 +776,8 @@ int main(int argc, char** argv)
     
         sqlite3_finalize(ppstmt);
         
+        mapping.second.id = rowid;
+        
         for (auto pronunciation : pronunciations[canonical])
         {
           query = "INSERT INTO verb_pronunciations (verb_id, pronunciation) VALUES (?, ?)";
@@ -441,6 +788,160 @@ int main(int argc, char** argv)
           
           sqlite3_bind_int(ppstmt, 1, rowid);
           sqlite3_bind_text(ppstmt, 2, pronunciation.c_str(), pronunciation.length(), SQLITE_STATIC);
+          
+          if (sqlite3_step(ppstmt) != SQLITE_DONE)
+          {
+            db_error(ppdb, query);
+          }
+          
+          sqlite3_finalize(ppstmt);
+        }
+      }
+      
+      ppgs.update();
+    }
+  }
+  
+  {
+    progress ppgs("Writing verb frames...", groups.size());
+    for (auto& mapping : groups)
+    {
+      std::list<json> roledatal;
+      std::transform(std::begin(mapping.second.roles), std::end(mapping.second.roles), std::back_inserter(roledatal), [] (std::pair<std::string, selrestr_t> r) {
+        json role;
+        role["type"] = r.first;
+        role["selrestrs"] = export_selrestrs(r.second);
+        
+        return role;
+      });
+      
+      json roledata(roledatal);
+      std::string rdm = roledata.dump();
+      
+      sqlite3_stmt* ppstmt;
+      std::string query("INSERT INTO groups (data) VALUES (?)");
+      if (sqlite3_prepare_v2(ppdb, query.c_str(), query.length(), &ppstmt, NULL) != SQLITE_OK)
+      {
+        db_error(ppdb, query);
+      }
+      
+      sqlite3_bind_blob(ppstmt, 1, rdm.c_str(), rdm.size(), SQLITE_STATIC);
+      
+      if (sqlite3_step(ppstmt) != SQLITE_DONE)
+      {
+        db_error(ppdb, query);
+      }
+      
+      sqlite3_finalize(ppstmt);
+      
+      query = "SELECT last_insert_rowid()";
+      if (sqlite3_prepare_v2(ppdb, query.c_str(), query.length(), &ppstmt, NULL) != SQLITE_OK)
+      {
+        db_error(ppdb, query);
+      }
+      
+      if (sqlite3_step(ppstmt) != SQLITE_ROW)
+      {
+        db_error(ppdb, query);
+      }
+      
+      int gid = sqlite3_column_int(ppstmt, 0);
+      sqlite3_finalize(ppstmt);
+      
+      for (auto frame : mapping.second.frames)
+      {
+        std::list<json> fdatap;
+        std::transform(std::begin(frame), std::end(frame), std::back_inserter(fdatap), [] (framepart_t& fp) {
+          json part;
+          
+          switch (fp.type)
+          {
+            case framepart_t::type_t::np:
+            {
+              part["type"] = "np";
+              part["role"] = fp.role;
+              part["selrestrs"] = export_selrestrs(fp.selrestrs);
+              part["synrestrs"] = fp.synrestrs;
+              
+              break;
+            }
+            
+            case framepart_t::type_t::pp:
+            {
+              part["type"] = "pp";
+              part["values"] = fp.choices;
+              part["preprestrs"] = fp.preprestrs;
+              
+              break;
+            }
+            
+            case framepart_t::type_t::v:
+            {
+              part["type"] = "v";
+              
+              break;
+            }
+            
+            case framepart_t::type_t::adj:
+            {
+              part["type"] = "adj";
+              
+              break;
+            }
+            
+            case framepart_t::type_t::adv:
+            {
+              part["type"] = "adv";
+              
+              break;
+            }
+            
+            case framepart_t::type_t::lex:
+            {
+              part["type"] = "lex";
+              part["value"] = fp.lexval;
+              
+              break;
+            }
+          }
+          
+          return part;
+        });
+        
+        json fdata(fdatap);
+        std::string marshall = fdata.dump();
+        
+        query = "INSERT INTO frames (group_id, data) VALUES (?, ?)";
+        if (sqlite3_prepare_v2(ppdb, query.c_str(), query.length(), &ppstmt, NULL) != SQLITE_OK)
+        {
+          db_error(ppdb, query);
+        }
+        
+        sqlite3_bind_int(ppstmt, 1, gid);
+        sqlite3_bind_blob(ppstmt, 2, marshall.c_str(), marshall.length(), SQLITE_STATIC);
+        
+        if (sqlite3_step(ppstmt) != SQLITE_DONE)
+        {
+          db_error(ppdb, query);
+        }
+        
+        sqlite3_finalize(ppstmt);
+      }
+      
+      for (auto member : mapping.second.members)
+      {
+        if (verbs.count(member) == 1)
+        {
+          auto& v = verbs[member];
+          
+          query = "INSERT INTO verb_groups (verb_id, group_id) VALUES (?, ?)";
+          if (sqlite3_prepare_v2(ppdb, query.c_str(), query.length(), &ppstmt, NULL) != SQLITE_OK)
+          {
+            db_error(ppdb, query);
+          }
+          
+          sqlite3_bind_int(ppstmt, 1, v.id);
+          sqlite3_bind_int(ppstmt, 2, gid);
           
           if (sqlite3_step(ppstmt) != SQLITE_DONE)
           {

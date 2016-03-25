@@ -3,13 +3,20 @@
 
 namespace verbly {
   
-  word::word(const data& _data, int _id) : _data(_data), _id(_id)
+  word::word()
+  {
+    
+  }
+  
+  word::word(const data& _data, int _id) : _data(&_data), _id(_id), _valid(true)
   {
     
   }
   
   std::list<std::string> word::rhyme_phonemes() const
   {
+    assert(_valid == true);
+    
     std::list<std::string> result;
     
     for (auto pronunciation : pronunciations)
@@ -32,6 +39,8 @@ namespace verbly {
   
   bool word::starts_with_vowel_sound() const
   {
+    assert(_valid == true);
+    
     if (pronunciations.size() > 0)
     {
       return std::any_of(std::begin(pronunciations), std::end(pronunciations), [] (std::list<std::string> phonemes) {

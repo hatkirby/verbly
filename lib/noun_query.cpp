@@ -1,0 +1,1453 @@
+#include "verbly.h"
+
+namespace verbly {
+  
+  noun_query::noun_query(const data& _data) : _data(_data)
+  {
+    
+  }
+  
+  noun_query& noun_query::limit(int _limit)
+  {
+    if ((_limit > 0) || (_limit == unlimited))
+    {
+      this->_limit = _limit;
+    }
+  
+    return *this;
+  }
+
+  noun_query& noun_query::random()
+  {
+    this->_random = true;
+  
+    return *this;
+  }
+  
+  noun_query& noun_query::except(const noun& _word)
+  {
+    _except.push_back(_word);
+    
+    return *this;
+  }
+  
+  noun_query& noun_query::rhymes_with(const word& _word)
+  {
+    for (auto rhyme : _word.rhyme_phonemes())
+    {
+      _rhymes.push_back(rhyme);
+    }
+    
+    if (dynamic_cast<const noun*>(&_word) != nullptr)
+    {
+      _except.push_back(dynamic_cast<const noun&>(_word));
+    }
+    
+    return *this;
+  }
+  
+  noun_query& noun_query::has_pronunciation()
+  {
+    this->_has_prn = true;
+    
+    return *this;
+  }
+  
+  noun_query& noun_query::with_singular_form(std::string _arg)
+  {
+    _with_singular_form.push_back(_arg);
+    
+    return *this;
+  }
+  
+  noun_query& noun_query::is_hypernym()
+  {
+    _is_hypernym = true;
+    
+    return *this;
+  }
+  
+  noun_query& noun_query::hypernym_of(filter<noun> _f)
+  {
+    _f.clean();
+    _hypernym_of = _f;
+    
+    return *this;
+  }
+  
+  noun_query& noun_query::full_hypernym_of(filter<noun> _f)
+  {
+    _f.clean();
+    _full_hypernym_of = _f;
+    
+    return *this;
+  }
+  
+  noun_query& noun_query::is_hyponym()
+  {
+    _is_hyponym = true;
+    
+    return *this;
+  }
+  
+  noun_query& noun_query::hyponym_of(filter<noun> _f)
+  {
+    _f.clean();
+    _hyponym_of = _f;
+    
+    return *this;
+  }
+  
+  noun_query& noun_query::full_hyponym_of(filter<noun> _f)
+  {
+    _f.clean();
+    _full_hyponym_of = _f;
+    
+    return *this;
+  }
+  
+  noun_query& noun_query::is_part_meronym()
+  {
+    _is_part_meronym = true;
+    
+    return *this;
+  }
+  
+  noun_query& noun_query::part_meronym_of(filter<noun> _f)
+  {
+    _f.clean();
+    _part_meronym_of = _f;
+    
+    return *this;
+  }
+  
+  noun_query& noun_query::is_part_holonym()
+  {
+    _is_part_holonym = true;
+    
+    return *this;
+  }
+  
+  noun_query& noun_query::part_holonym_of(filter<noun> _f)
+  {
+    _f.clean();
+    _part_holonym_of = _f;
+    
+    return *this;
+  }
+  
+  noun_query& noun_query::is_substance_meronym()
+  {
+    _is_substance_meronym = true;
+    
+    return *this;
+  }
+  
+  noun_query& noun_query::substance_meronym_of(filter<noun> _f)
+  {
+    _f.clean();
+    _substance_meronym_of = _f;
+    
+    return *this;
+  }
+  
+  noun_query& noun_query::is_substance_holonym()
+  {
+    _is_substance_holonym = true;
+    
+    return *this;
+  }
+  
+  noun_query& noun_query::substance_holonym_of(filter<noun> _f)
+  {
+    _f.clean();
+    _substance_holonym_of = _f;
+    
+    return *this;
+  }
+  
+  noun_query& noun_query::is_member_meronym()
+  {
+    _is_member_meronym = true;
+    
+    return *this;
+  }
+  
+  noun_query& noun_query::member_meronym_of(filter<noun> _f)
+  {
+    _f.clean();
+    _member_meronym_of = _f;
+    
+    return *this;
+  }
+  
+  noun_query& noun_query::is_member_holonym()
+  {
+    _is_member_holonym = true;
+    
+    return *this;
+  }
+  
+  noun_query& noun_query::member_holonym_of(filter<noun> _f)
+  {
+    _f.clean();
+    _member_holonym_of = _f;
+    
+    return *this;
+  }
+  
+  noun_query& noun_query::is_proper()
+  {
+    _is_proper = true;
+    
+    return *this;
+  }
+  
+  noun_query& noun_query::is_not_proper()
+  {
+    _is_not_proper = true;
+    
+    return *this;
+  }
+  
+  noun_query& noun_query::is_instance()
+  {
+    _is_instance = true;
+    
+    return *this;
+  }
+  
+  noun_query& noun_query::instance_of(filter<noun> _f)
+  {
+    _f.clean();
+    _instance_of = _f;
+    
+    return *this;
+  }
+  
+  noun_query& noun_query::is_class()
+  {
+    _is_class = true;
+    
+    return *this;
+  }
+  
+  noun_query& noun_query::class_of(filter<noun> _f)
+  {
+    _f.clean();
+    _class_of = _f;
+    
+    return *this;
+  }
+  
+  noun_query& noun_query::has_synonyms()
+  {
+    _has_synonyms = true;
+    
+    return *this;
+  }
+  
+  noun_query& noun_query::synonym_of(filter<noun> _f)
+  {
+    _f.clean();
+    _synonym_of = _f;
+    
+    return *this;
+  }
+  
+  noun_query& noun_query::has_antonyms()
+  {
+    _has_antonyms = true;
+    
+    return *this;
+  }
+  
+  noun_query& noun_query::antonym_of(filter<noun> _f)
+  {
+    _f.clean();
+    _antonym_of = _f;
+    
+    return *this;
+  }
+  
+  noun_query& noun_query::has_pertainym()
+  {
+    _has_pertainym = true;
+    
+    return *this;
+  }
+  
+  noun_query& noun_query::anti_pertainym_of(filter<adjective> _f)
+  {
+    _f.clean();
+    _anti_pertainym_of = _f;
+    
+    return *this;
+  }
+  
+  noun_query& noun_query::is_attribute()
+  {
+    _is_attribute = true;
+    
+    return *this;
+  }
+  
+  noun_query& noun_query::attribute_of(filter<adjective> _f)
+  {
+    _f.clean();
+    _attribute_of = _f;
+    
+    return *this;
+  }
+  /*
+  noun_query& noun_query::derived_from(const word& _w)
+  {
+    if (dynamic_cast<const adjective*>(&_w) != nullptr)
+    {
+      _derived_from_adjective.push_back(dynamic_cast<const adjective&>(_w));
+    } else if (dynamic_cast<const adverb*>(&_w) != nullptr)
+    {
+      _derived_from_adverb.push_back(dynamic_cast<const adverb&>(_w));
+    } else if (dynamic_cast<const noun*>(&_w) != nullptr)
+    {
+      _derived_from_noun.push_back(dynamic_cast<const noun&>(_w));
+    }
+    
+    return *this;
+  }
+  
+  noun_query& noun_query::not_derived_from(const word& _w)
+  {
+    if (dynamic_cast<const adjective*>(&_w) != nullptr)
+    {
+      _not_derived_from_adjective.push_back(dynamic_cast<const adjective&>(_w));
+    } else if (dynamic_cast<const adverb*>(&_w) != nullptr)
+    {
+      _not_derived_from_adverb.push_back(dynamic_cast<const adverb&>(_w));
+    } else if (dynamic_cast<const noun*>(&_w) != nullptr)
+    {
+      _not_derived_from_noun.push_back(dynamic_cast<const noun&>(_w));
+    }
+    
+    return *this;
+  }*/
+  
+  std::list<noun> noun_query::run() const
+  {
+    std::stringstream construct;
+    
+    if (!_full_hypernym_of.empty() || !_full_hyponym_of.empty())
+    {
+      construct << "WITH RECURSIVE ";
+      
+      std::list<std::string> ctes;
+      
+      for (auto hyponym : _full_hypernym_of.uniq_flatten())
+      {
+        ctes.push_back("hypernym_tree_" + std::to_string(hyponym._id) + " AS (SELECT hypernym_id FROM hypernymy WHERE hyponym_id = " + std::to_string(hyponym._id) + " UNION SELECT h.hypernym_id FROM hypernym_tree_" + std::to_string(hyponym._id) + " AS t INNER JOIN hypernymy AS h ON t.hypernym_id = h.hyponym_id)");
+      }
+      
+      for (auto hypernym : _full_hyponym_of.uniq_flatten())
+      {
+        ctes.push_back("hyponym_tree_" + std::to_string(hypernym._id) + " AS (SELECT hyponym_id FROM hypernymy WHERE hypernym_id = " + std::to_string(hypernym._id) + " UNION SELECT h.hyponym_id FROM hyponym_tree_" + std::to_string(hypernym._id) + " AS t INNER JOIN hypernymy AS h ON t.hyponym_id = h.hypernym_id)");
+      }
+      
+      construct << verbly::implode(std::begin(ctes), std::end(ctes), ", ");
+      construct << " ";
+    }
+    
+    construct << "SELECT noun_id, singular, plural FROM nouns";
+    std::list<std::string> conditions;
+    
+    if (_has_prn)
+    {
+      conditions.push_back("noun_id IN (SELECT noun_id FROM noun_pronunciations)");
+    }
+    
+    if (!_rhymes.empty())
+    {
+      std::list<std::string> clauses(_rhymes.size(), "pronunciation LIKE @RHMPRN");
+      std::string cond = "noun_id IN (SELECT noun_id FROM noun_pronunciations WHERE " + verbly::implode(std::begin(clauses), std::end(clauses), " OR ") + ")";
+      conditions.push_back(cond);
+    }
+    
+    for (auto except : _except)
+    {
+      conditions.push_back("noun_id != @EXCID");
+    }
+    
+    if (!_with_singular_form.empty())
+    {
+      std::list<std::string> clauses(_with_singular_form.size(), "singular = @SFORM");
+      std::string cond = "(" + verbly::implode(std::begin(clauses), std::end(clauses), " OR ") + ")";
+      conditions.push_back(cond);
+    }
+    
+    if (_is_hypernym)
+    {
+      conditions.push_back("noun_id IN (SELECT hypernym_id FROM hypernymy)");
+    }
+    
+    if (!_hypernym_of.empty())
+    {
+      std::stringstream cond;
+      if (_hypernym_of.get_notlogic())
+      {
+        cond << "noun_id NOT IN";
+      } else {
+        cond << "noun_id IN";
+      }
+      
+      cond << "(SELECT hypernym_id FROM hypernymy WHERE ";
+      
+      std::function<std::string (filter<noun>, bool)> recur = [&] (filter<noun> f, bool notlogic) -> std::string {
+        switch (f.get_type())
+        {
+          case filter<noun>::type::singleton:
+          {
+            if (notlogic == f.get_notlogic())
+            {
+              return "hyponym_id = @HYPO";
+            } else {
+              return "hyponym_id != @HYPO";
+            }
+          }
+          
+          case filter<noun>::type::group:
+          {
+            bool truelogic = notlogic != f.get_notlogic();
+            
+            std::list<std::string> clauses;
+            std::transform(std::begin(f), std::end(f), std::back_inserter(clauses), [&] (filter<noun> f2) {
+              return recur(f2, truelogic);
+            });
+            
+            if (truelogic == f.get_orlogic())
+            {
+              return "(" + verbly::implode(std::begin(clauses), std::end(clauses), " AND ") + ")";
+            } else {
+              return "(" + verbly::implode(std::begin(clauses), std::end(clauses), " OR ") + ")";
+            }
+          }
+        }
+      };
+      
+      cond << recur(_hypernym_of, _hypernym_of.get_notlogic());
+      cond << ")";
+      conditions.push_back(cond.str());
+    }
+    
+    if (!_full_hypernym_of.empty())
+    {
+      std::function<std::string (filter<noun>, bool)> recur = [&] (filter<noun> f, bool notlogic) -> std::string {
+        switch (f.get_type())
+        {
+          case filter<noun>::type::singleton:
+          {
+            if (notlogic == f.get_notlogic())
+            {
+              return "noun_id IN (SELECT hypernym_id FROM hypernym_tree_" + std::to_string(f.get_elem()._id) + ")";
+            } else {
+              return "noun_id NOT IN (SELECT hypernym_id FROM hypernym_tree_" + std::to_string(f.get_elem()._id) + ")";
+            }
+          }
+          
+          case filter<noun>::type::group:
+          {
+            bool truelogic = notlogic != f.get_notlogic();
+            
+            std::list<std::string> clauses;
+            std::transform(std::begin(f), std::end(f), std::back_inserter(clauses), [&] (filter<noun> f2) {
+              return recur(f2, truelogic);
+            });
+            
+            if (truelogic == f.get_orlogic())
+            {
+              return "(" + verbly::implode(std::begin(clauses), std::end(clauses), " AND ") + ")";
+            } else {
+              return "(" + verbly::implode(std::begin(clauses), std::end(clauses), " OR ") + ")";
+            }
+          }
+        }
+      };
+      
+      conditions.push_back(recur(_full_hypernym_of, false));
+    }
+    
+    if (!_full_hyponym_of.empty())
+    {
+      std::function<std::string (filter<noun>, bool)> recur = [&] (filter<noun> f, bool notlogic) -> std::string {
+        switch (f.get_type())
+        {
+          case filter<noun>::type::singleton:
+          {
+            if (notlogic == f.get_notlogic())
+            {
+              return "noun_id IN (SELECT hyponym_id FROM hyponym_tree_" + std::to_string(f.get_elem()._id) + ")";
+            } else {
+              return "noun_id NOT IN (SELECT hyponym_id FROM hyponym_tree_" + std::to_string(f.get_elem()._id) + ")";
+            }
+          }
+          
+          case filter<noun>::type::group:
+          {
+            bool truelogic = notlogic != f.get_notlogic();
+            
+            std::list<std::string> clauses;
+            std::transform(std::begin(f), std::end(f), std::back_inserter(clauses), [&] (filter<noun> f2) {
+              return recur(f2, truelogic);
+            });
+            
+            if (truelogic == f.get_orlogic())
+            {
+              return "(" + verbly::implode(std::begin(clauses), std::end(clauses), " AND ") + ")";
+            } else {
+              return "(" + verbly::implode(std::begin(clauses), std::end(clauses), " OR ") + ")";
+            }
+          }
+        }
+      };
+      
+      conditions.push_back(recur(_full_hyponym_of, false));
+    }
+    
+    if (_is_hyponym)
+    {
+      conditions.push_back("noun_id IN (SELECT hyponym_id FROM hypernymy)");
+    }
+    
+    if (!_hyponym_of.empty())
+    {
+      std::stringstream cond;
+      if (_hyponym_of.get_notlogic())
+      {
+        cond << "noun_id NOT IN";
+      } else {
+        cond << "noun_id IN";
+      }
+      
+      cond << "(SELECT hyponym_id FROM hypernymy WHERE ";
+      
+      std::function<std::string (filter<noun>, bool)> recur = [&] (filter<noun> f, bool notlogic) -> std::string {
+        switch (f.get_type())
+        {
+          case filter<noun>::type::singleton:
+          {
+            if (notlogic == f.get_notlogic())
+            {
+              return "hypernym_id = @HYPER";
+            } else {
+              return "hypernym_id != @HYPER";
+            }
+          }
+          
+          case filter<noun>::type::group:
+          {
+            bool truelogic = notlogic != f.get_notlogic();
+            
+            std::list<std::string> clauses;
+            std::transform(std::begin(f), std::end(f), std::back_inserter(clauses), [&] (filter<noun> f2) {
+              return recur(f2, truelogic);
+            });
+            
+            if (truelogic == f.get_orlogic())
+            {
+              return "(" + verbly::implode(std::begin(clauses), std::end(clauses), " AND ") + ")";
+            } else {
+              return "(" + verbly::implode(std::begin(clauses), std::end(clauses), " OR ") + ")";
+            }
+          }
+        }
+      };
+      
+      cond << recur(_hyponym_of, _hyponym_of.get_notlogic());
+      cond << ")";
+      conditions.push_back(cond.str());
+    }
+    
+    if (_is_part_meronym)
+    {
+      conditions.push_back("noun_id IN (SELECT meronym_id FROM part_meronymy)");
+    }
+    
+    if (!_part_meronym_of.empty())
+    {
+      std::stringstream cond;
+      if (_part_meronym_of.get_notlogic())
+      {
+        cond << "noun_id NOT IN";
+      } else {
+        cond << "noun_id IN";
+      }
+      
+      cond << "(SELECT meronym_id FROM part_meronymy WHERE ";
+      
+      std::function<std::string (filter<noun>, bool)> recur = [&] (filter<noun> f, bool notlogic) -> std::string {
+        switch (f.get_type())
+        {
+          case filter<noun>::type::singleton:
+          {
+            if (notlogic == f.get_notlogic())
+            {
+              return "holonym_id = @PHOLO";
+            } else {
+              return "holonym_id != @PHOLO";
+            }
+          }
+          
+          case filter<noun>::type::group:
+          {
+            bool truelogic = notlogic != f.get_notlogic();
+            
+            std::list<std::string> clauses;
+            std::transform(std::begin(f), std::end(f), std::back_inserter(clauses), [&] (filter<noun> f2) {
+              return recur(f2, truelogic);
+            });
+            
+            if (truelogic == f.get_orlogic())
+            {
+              return "(" + verbly::implode(std::begin(clauses), std::end(clauses), " AND ") + ")";
+            } else {
+              return "(" + verbly::implode(std::begin(clauses), std::end(clauses), " OR ") + ")";
+            }
+          }
+        }
+      };
+      
+      cond << recur(_part_meronym_of, _part_meronym_of.get_notlogic());
+      cond << ")";
+      conditions.push_back(cond.str());
+    }
+    
+    if (_is_part_holonym)
+    {
+      conditions.push_back("noun_id IN (SELECT holonym_id FROM part_meronymy)");
+    }
+    
+    if (!_part_holonym_of.empty())
+    {
+      std::stringstream cond;
+      if (_part_holonym_of.get_notlogic())
+      {
+        cond << "noun_id NOT IN";
+      } else {
+        cond << "noun_id IN";
+      }
+      
+      cond << "(SELECT holonym_id FROM part_meronymy WHERE ";
+      
+      std::function<std::string (filter<noun>, bool)> recur = [&] (filter<noun> f, bool notlogic) -> std::string {
+        switch (f.get_type())
+        {
+          case filter<noun>::type::singleton:
+          {
+            if (notlogic == f.get_notlogic())
+            {
+              return "meronym_id = @PMERO";
+            } else {
+              return "meronym_id != @PMERO";
+            }
+          }
+          
+          case filter<noun>::type::group:
+          {
+            bool truelogic = notlogic != f.get_notlogic();
+            
+            std::list<std::string> clauses;
+            std::transform(std::begin(f), std::end(f), std::back_inserter(clauses), [&] (filter<noun> f2) {
+              return recur(f2, truelogic);
+            });
+            
+            if (truelogic == f.get_orlogic())
+            {
+              return "(" + verbly::implode(std::begin(clauses), std::end(clauses), " AND ") + ")";
+            } else {
+              return "(" + verbly::implode(std::begin(clauses), std::end(clauses), " OR ") + ")";
+            }
+          }
+        }
+      };
+      
+      cond << recur(_part_holonym_of, _part_holonym_of.get_notlogic());
+      cond << ")";
+      conditions.push_back(cond.str());
+    }
+    
+    if (_is_substance_meronym)
+    {
+      conditions.push_back("noun_id IN (SELECT meronym_id FROM substance_meronymy)");
+    }
+    
+    if (!_substance_meronym_of.empty())
+    {
+      std::stringstream cond;
+      if (_substance_meronym_of.get_notlogic())
+      {
+        cond << "noun_id NOT IN";
+      } else {
+        cond << "noun_id IN";
+      }
+      
+      cond << "(SELECT meronym_id FROM substance_meronymy WHERE ";
+      
+      std::function<std::string (filter<noun>, bool)> recur = [&] (filter<noun> f, bool notlogic) -> std::string {
+        switch (f.get_type())
+        {
+          case filter<noun>::type::singleton:
+          {
+            if (notlogic == f.get_notlogic())
+            {
+              return "holonym_id = @SHOLO";
+            } else {
+              return "holonym_id != @SHOLO";
+            }
+          }
+          
+          case filter<noun>::type::group:
+          {
+            bool truelogic = notlogic != f.get_notlogic();
+            
+            std::list<std::string> clauses;
+            std::transform(std::begin(f), std::end(f), std::back_inserter(clauses), [&] (filter<noun> f2) {
+              return recur(f2, truelogic);
+            });
+            
+            if (truelogic == f.get_orlogic())
+            {
+              return "(" + verbly::implode(std::begin(clauses), std::end(clauses), " AND ") + ")";
+            } else {
+              return "(" + verbly::implode(std::begin(clauses), std::end(clauses), " OR ") + ")";
+            }
+          }
+        }
+      };
+      
+      cond << recur(_substance_meronym_of, _substance_meronym_of.get_notlogic());
+      cond << ")";
+      conditions.push_back(cond.str());
+    }
+    
+    if (_is_substance_holonym)
+    {
+      conditions.push_back("noun_id IN (SELECT holonym_id FROM substance_meronymy)");
+    }
+    
+    if (!_substance_holonym_of.empty())
+    {
+      std::stringstream cond;
+      if (_substance_holonym_of.get_notlogic())
+      {
+        cond << "noun_id NOT IN";
+      } else {
+        cond << "noun_id IN";
+      }
+      
+      cond << "(SELECT holonym_id FROM substance_meronymy WHERE ";
+      
+      std::function<std::string (filter<noun>, bool)> recur = [&] (filter<noun> f, bool notlogic) -> std::string {
+        switch (f.get_type())
+        {
+          case filter<noun>::type::singleton:
+          {
+            if (notlogic == f.get_notlogic())
+            {
+              return "meronym_id = @SMERO";
+            } else {
+              return "meronym_id != @SMERO";
+            }
+          }
+          
+          case filter<noun>::type::group:
+          {
+            bool truelogic = notlogic != f.get_notlogic();
+            
+            std::list<std::string> clauses;
+            std::transform(std::begin(f), std::end(f), std::back_inserter(clauses), [&] (filter<noun> f2) {
+              return recur(f2, truelogic);
+            });
+            
+            if (truelogic == f.get_orlogic())
+            {
+              return "(" + verbly::implode(std::begin(clauses), std::end(clauses), " AND ") + ")";
+            } else {
+              return "(" + verbly::implode(std::begin(clauses), std::end(clauses), " OR ") + ")";
+            }
+          }
+        }
+      };
+      
+      cond << recur(_substance_holonym_of, _substance_holonym_of.get_notlogic());
+      cond << ")";
+      conditions.push_back(cond.str());
+    }
+    
+    if (_is_member_meronym)
+    {
+      conditions.push_back("noun_id IN (SELECT meronym_id FROM member_meronymy)");
+    }
+    
+    if (!_member_meronym_of.empty())
+    {
+      std::stringstream cond;
+      if (_member_meronym_of.get_notlogic())
+      {
+        cond << "noun_id NOT IN";
+      } else {
+        cond << "noun_id IN";
+      }
+      
+      cond << "(SELECT meronym_id FROM member_meronymy WHERE ";
+      
+      std::function<std::string (filter<noun>, bool)> recur = [&] (filter<noun> f, bool notlogic) -> std::string {
+        switch (f.get_type())
+        {
+          case filter<noun>::type::singleton:
+          {
+            if (notlogic == f.get_notlogic())
+            {
+              return "holonym_id = @MHOLO";
+            } else {
+              return "holonym_id != @MHOLO";
+            }
+          }
+          
+          case filter<noun>::type::group:
+          {
+            bool truelogic = notlogic != f.get_notlogic();
+            
+            std::list<std::string> clauses;
+            std::transform(std::begin(f), std::end(f), std::back_inserter(clauses), [&] (filter<noun> f2) {
+              return recur(f2, truelogic);
+            });
+            
+            if (truelogic == f.get_orlogic())
+            {
+              return "(" + verbly::implode(std::begin(clauses), std::end(clauses), " AND ") + ")";
+            } else {
+              return "(" + verbly::implode(std::begin(clauses), std::end(clauses), " OR ") + ")";
+            }
+          }
+        }
+      };
+      
+      cond << recur(_member_meronym_of, _member_meronym_of.get_notlogic());
+      cond << ")";
+      conditions.push_back(cond.str());
+    }
+    
+    if (_is_member_holonym)
+    {
+      conditions.push_back("noun_id IN (SELECT holonym_id FROM member_meronym)");
+    }
+    
+    if (!_member_holonym_of.empty())
+    {
+      std::stringstream cond;
+      if (_member_holonym_of.get_notlogic())
+      {
+        cond << "noun_id NOT IN";
+      } else {
+        cond << "noun_id IN";
+      }
+      
+      cond << "(SELECT holonym_id FROM member_meronymy WHERE ";
+      
+      std::function<std::string (filter<noun>, bool)> recur = [&] (filter<noun> f, bool notlogic) -> std::string {
+        switch (f.get_type())
+        {
+          case filter<noun>::type::singleton:
+          {
+            if (notlogic == f.get_notlogic())
+            {
+              return "meronym_id = @MMERO";
+            } else {
+              return "meronym_id != @MMERO";
+            }
+          }
+          
+          case filter<noun>::type::group:
+          {
+            bool truelogic = notlogic != f.get_notlogic();
+            
+            std::list<std::string> clauses;
+            std::transform(std::begin(f), std::end(f), std::back_inserter(clauses), [&] (filter<noun> f2) {
+              return recur(f2, truelogic);
+            });
+            
+            if (truelogic == f.get_orlogic())
+            {
+              return "(" + verbly::implode(std::begin(clauses), std::end(clauses), " AND ") + ")";
+            } else {
+              return "(" + verbly::implode(std::begin(clauses), std::end(clauses), " OR ") + ")";
+            }
+          }
+        }
+      };
+      
+      cond << recur(_member_holonym_of, _member_holonym_of.get_notlogic());
+      cond << ")";
+      conditions.push_back(cond.str());
+    }
+    
+    if (_is_proper)
+    {
+      conditions.push_back("proper = 1");
+    }
+    
+    if (_is_not_proper)
+    {
+      conditions.push_back("proper = 0");
+    }
+    
+    if (_is_instance)
+    {
+      conditions.push_back("noun_id IN (SELECT instance_id FROM instantiation)");
+    }
+    
+    if (!_instance_of.empty())
+    {
+      std::stringstream cond;
+      if (_instance_of.get_notlogic())
+      {
+        cond << "noun_id NOT IN";
+      } else {
+        cond << "noun_id IN";
+      }
+      
+      cond << "(SELECT instance_id FROM instantiation WHERE ";
+      
+      std::function<std::string (filter<noun>, bool)> recur = [&] (filter<noun> f, bool notlogic) -> std::string {
+        switch (f.get_type())
+        {
+          case filter<noun>::type::singleton:
+          {
+            if (notlogic == f.get_notlogic())
+            {
+              return "class_id = @CLSID";
+            } else {
+              return "class_id != @CLSID";
+            }
+          }
+          
+          case filter<noun>::type::group:
+          {
+            bool truelogic = notlogic != f.get_notlogic();
+            
+            std::list<std::string> clauses;
+            std::transform(std::begin(f), std::end(f), std::back_inserter(clauses), [&] (filter<noun> f2) {
+              return recur(f2, truelogic);
+            });
+            
+            if (truelogic == f.get_orlogic())
+            {
+              return "(" + verbly::implode(std::begin(clauses), std::end(clauses), " AND ") + ")";
+            } else {
+              return "(" + verbly::implode(std::begin(clauses), std::end(clauses), " OR ") + ")";
+            }
+          }
+        }
+      };
+      
+      cond << recur(_instance_of, _instance_of.get_notlogic());
+      cond << ")";
+      conditions.push_back(cond.str());
+    }
+    
+    if (_is_class)
+    {
+      conditions.push_back("noun_id IN (SELECT class_id FROM instantiation)");
+    }
+    
+    if (!_class_of.empty())
+    {
+      std::stringstream cond;
+      if (_class_of.get_notlogic())
+      {
+        cond << "noun_id NOT IN";
+      } else {
+        cond << "noun_id IN";
+      }
+      
+      cond << "(SELECT class_id FROM instantiation WHERE ";
+      
+      std::function<std::string (filter<noun>, bool)> recur = [&] (filter<noun> f, bool notlogic) -> std::string {
+        switch (f.get_type())
+        {
+          case filter<noun>::type::singleton:
+          {
+            if (notlogic == f.get_notlogic())
+            {
+              return "instance_id = @INSID";
+            } else {
+              return "instance_id != @INSID";
+            }
+          }
+          
+          case filter<noun>::type::group:
+          {
+            bool truelogic = notlogic != f.get_notlogic();
+            
+            std::list<std::string> clauses;
+            std::transform(std::begin(f), std::end(f), std::back_inserter(clauses), [&] (filter<noun> f2) {
+              return recur(f2, truelogic);
+            });
+            
+            if (truelogic == f.get_orlogic())
+            {
+              return "(" + verbly::implode(std::begin(clauses), std::end(clauses), " AND ") + ")";
+            } else {
+              return "(" + verbly::implode(std::begin(clauses), std::end(clauses), " OR ") + ")";
+            }
+          }
+        }
+      };
+      
+      cond << recur(_class_of, _class_of.get_notlogic());
+      cond << ")";
+      conditions.push_back(cond.str());
+    }
+    
+    if (_has_synonyms)
+    {
+      conditions.push_back("noun_id IN (SELECT noun_2_id FROM noun_synonymy)");
+    }
+    
+    if (!_synonym_of.empty())
+    {
+      std::stringstream cond;
+      if (_synonym_of.get_notlogic())
+      {
+        cond << "noun_id NOT IN";
+      } else {
+        cond << "noun_id IN";
+      }
+      
+      cond << "(SELECT noun_2_id FROM noun_synonymy WHERE ";
+      
+      std::function<std::string (filter<noun>, bool)> recur = [&] (filter<noun> f, bool notlogic) -> std::string {
+        switch (f.get_type())
+        {
+          case filter<noun>::type::singleton:
+          {
+            if (notlogic == f.get_notlogic())
+            {
+              return "noun_1_id = @SYNID";
+            } else {
+              return "noun_1_id != @SYNID";
+            }
+          }
+          
+          case filter<noun>::type::group:
+          {
+            bool truelogic = notlogic != f.get_notlogic();
+            
+            std::list<std::string> clauses;
+            std::transform(std::begin(f), std::end(f), std::back_inserter(clauses), [&] (filter<noun> f2) {
+              return recur(f2, truelogic);
+            });
+            
+            if (truelogic == f.get_orlogic())
+            {
+              return "(" + verbly::implode(std::begin(clauses), std::end(clauses), " AND ") + ")";
+            } else {
+              return "(" + verbly::implode(std::begin(clauses), std::end(clauses), " OR ") + ")";
+            }
+          }
+        }
+      };
+      
+      cond << recur(_synonym_of, _synonym_of.get_notlogic());
+      cond << ")";
+      conditions.push_back(cond.str());
+    }
+    
+    if (_has_antonyms)
+    {
+      conditions.push_back("noun_id IN (SELECT noun_2_id FROM noun_antonymy)");
+    }
+    
+    if (!_antonym_of.empty())
+    {
+      std::stringstream cond;
+      if (_antonym_of.get_notlogic())
+      {
+        cond << "noun_id NOT IN";
+      } else {
+        cond << "noun_id IN";
+      }
+      
+      cond << "(SELECT noun_2_id FROM noun_antonymy WHERE ";
+      
+      std::function<std::string (filter<noun>, bool)> recur = [&] (filter<noun> f, bool notlogic) -> std::string {
+        switch (f.get_type())
+        {
+          case filter<noun>::type::singleton:
+          {
+            if (notlogic == f.get_notlogic())
+            {
+              return "noun_1_id = @ANTID";
+            } else {
+              return "noun_1_id != @ANTID";
+            }
+          }
+          
+          case filter<noun>::type::group:
+          {
+            bool truelogic = notlogic != f.get_notlogic();
+            
+            std::list<std::string> clauses;
+            std::transform(std::begin(f), std::end(f), std::back_inserter(clauses), [&] (filter<noun> f2) {
+              return recur(f2, truelogic);
+            });
+            
+            if (truelogic == f.get_orlogic())
+            {
+              return "(" + verbly::implode(std::begin(clauses), std::end(clauses), " AND ") + ")";
+            } else {
+              return "(" + verbly::implode(std::begin(clauses), std::end(clauses), " OR ") + ")";
+            }
+          }
+        }
+      };
+      
+      cond << recur(_antonym_of, _antonym_of.get_notlogic());
+      cond << ")";
+      conditions.push_back(cond.str());
+    }
+    
+    if (_has_pertainym)
+    {
+      conditions.push_back("noun_id IN (SELECT noun_id FROM pertainymy)");
+    }
+    
+    if (!_anti_pertainym_of.empty())
+    {
+      std::stringstream cond;
+      if (_anti_pertainym_of.get_notlogic())
+      {
+        cond << "noun_id NOT IN";
+      } else {
+        cond << "noun_id IN";
+      }
+      
+      cond << "(SELECT noun_id FROM pertainymy WHERE ";
+      
+      std::function<std::string (filter<adjective>, bool)> recur = [&] (filter<adjective> f, bool notlogic) -> std::string {
+        switch (f.get_type())
+        {
+          case filter<adjective>::type::singleton:
+          {
+            if (notlogic == f.get_notlogic())
+            {
+              return "pertainym_id = @PERID";
+            } else {
+              return "pertainym_id != @PERID";
+            }
+          }
+          
+          case filter<adjective>::type::group:
+          {
+            bool truelogic = notlogic != f.get_notlogic();
+            
+            std::list<std::string> clauses;
+            std::transform(std::begin(f), std::end(f), std::back_inserter(clauses), [&] (filter<adjective> f2) {
+              return recur(f2, truelogic);
+            });
+            
+            if (truelogic == f.get_orlogic())
+            {
+              return "(" + verbly::implode(std::begin(clauses), std::end(clauses), " AND ") + ")";
+            } else {
+              return "(" + verbly::implode(std::begin(clauses), std::end(clauses), " OR ") + ")";
+            }
+          }
+        }
+      };
+      
+      cond << recur(_anti_pertainym_of, _anti_pertainym_of.get_notlogic());
+      cond << ")";
+      conditions.push_back(cond.str());
+    }
+    
+    if (_is_attribute)
+    {
+      conditions.push_back("noun_id IN (SELECT noun_id FROM variation)");
+    }
+    
+    if (!_attribute_of.empty())
+    {
+      std::stringstream cond;
+      if (_attribute_of.get_notlogic())
+      {
+        cond << "noun_id NOT IN";
+      } else {
+        cond << "noun_id IN";
+      }
+      
+      cond << "(SELECT noun_id FROM variation WHERE ";
+      
+      std::function<std::string (filter<adjective>, bool)> recur = [&] (filter<adjective> f, bool notlogic) -> std::string {
+        switch (f.get_type())
+        {
+          case filter<adjective>::type::singleton:
+          {
+            if (notlogic == f.get_notlogic())
+            {
+              return "adjective_id = @VALID";
+            } else {
+              return "adjective_id != @VALID";
+            }
+          }
+          
+          case filter<adjective>::type::group:
+          {
+            bool truelogic = notlogic != f.get_notlogic();
+            
+            std::list<std::string> clauses;
+            std::transform(std::begin(f), std::end(f), std::back_inserter(clauses), [&] (filter<adjective> f2) {
+              return recur(f2, truelogic);
+            });
+            
+            if (truelogic == f.get_orlogic())
+            {
+              return "(" + verbly::implode(std::begin(clauses), std::end(clauses), " AND ") + ")";
+            } else {
+              return "(" + verbly::implode(std::begin(clauses), std::end(clauses), " OR ") + ")";
+            }
+          }
+        }
+      };
+      
+      cond << recur(_attribute_of, _attribute_of.get_notlogic());
+      cond << ")";
+      conditions.push_back(cond.str());
+    }
+    /*
+    if (!_derived_from_adjective.empty())
+    {
+      std::list<std::string> clauses(_derived_from_adjective.size(), "adjective_id = @DERADJ");
+      std::string cond = "noun_id IN (SELECT noun_id FROM noun_adjective_derivation WHERE " + verbly::implode(std::begin(clauses), std::end(clauses), " OR ") + ")";
+      conditions.push_back(cond);
+    }
+    
+    if (!_not_derived_from_adjective.empty())
+    {
+      std::list<std::string> clauses(_not_derived_from_adjective.size(), "adjective_id = @NDERADJ");
+      std::string cond = "noun_id NOT IN (SELECT noun_id FROM noun_adjective_derivation WHERE " + verbly::implode(std::begin(clauses), std::end(clauses), " OR ") + ")";
+      conditions.push_back(cond);
+    }
+    
+    if (!_derived_from_adverb.empty())
+    {
+      std::list<std::string> clauses(_derived_from_adverb.size(), "adverb_id = @DERADV");
+      std::string cond = "noun_id IN (SELECT noun_id FROM noun_adverb_derivation WHERE " + verbly::implode(std::begin(clauses), std::end(clauses), " OR ") + ")";
+      conditions.push_back(cond);
+    }
+    
+    if (!_not_derived_from_adverb.empty())
+    {
+      std::list<std::string> clauses(_not_derived_from_adverb.size(), "adverb_id = @NDERADV");
+      std::string cond = "noun_id NOT IN (SELECT noun_id FROM noun_adverb_derivation WHERE " + verbly::implode(std::begin(clauses), std::end(clauses), " OR ") + ")";
+      conditions.push_back(cond);
+    }
+    
+    if (!_derived_from_noun.empty())
+    {
+      std::list<std::string> clauses(_derived_from_noun.size(), "noun_2_id = @DERN");
+      std::string cond = "noun_id IN (SELECT noun_1_id FROM noun_noun_derivation WHERE " + verbly::implode(std::begin(clauses), std::end(clauses), " OR ") + ")";
+      conditions.push_back(cond);
+    }
+    
+    if (!_not_derived_from_noun.empty())
+    {
+      std::list<std::string> clauses(_not_derived_from_noun.size(), "noun_2_id = @NDERN");
+      std::string cond = "noun_id NOT IN (SELECT noun_1_id FROM noun_noun_derivation WHERE " + verbly::implode(std::begin(clauses), std::end(clauses), " OR ") + ")";
+      conditions.push_back(cond);
+    }
+    */
+    if (!conditions.empty())
+    {
+      construct << " WHERE ";
+      construct << verbly::implode(std::begin(conditions), std::end(conditions), " AND ");
+    }
+
+    if (_random)
+    {
+      construct << " ORDER BY RANDOM()";
+    }
+
+    if (_limit != unlimited)
+    {
+      construct << " LIMIT " << _limit;
+    }
+    
+    sqlite3_stmt* ppstmt;
+    std::string query = construct.str();
+    if (sqlite3_prepare_v2(_data.ppdb, query.c_str(), query.length(), &ppstmt, NULL) != SQLITE_OK)
+    {
+      throw std::runtime_error(sqlite3_errmsg(_data.ppdb));
+    }
+    
+    if (!_rhymes.empty())
+    {
+      int i = 0;
+      for (auto rhyme : _rhymes)
+      {
+        std::string rhymer = "%" + rhyme;
+        sqlite3_bind_text(ppstmt, sqlite3_bind_parameter_index(ppstmt, "@RHMPRN"), rhymer.c_str(), rhymer.length(), SQLITE_STATIC);
+        
+        i++;
+      }
+    }
+    
+    for (auto except : _except)
+    {
+      sqlite3_bind_int(ppstmt, sqlite3_bind_parameter_index(ppstmt, "@EXCID"), except._id);
+    }
+    
+    for (auto sform : _with_singular_form)
+    {
+      sqlite3_bind_text(ppstmt, sqlite3_bind_parameter_index(ppstmt, "@SFORM"), sform.c_str(), sform.size(), SQLITE_STATIC);
+    }
+    
+    for (auto hyponym : _hypernym_of.inorder_flatten())
+    {
+      sqlite3_bind_int(ppstmt, sqlite3_bind_parameter_index(ppstmt, "@HYPO"), hyponym._id);
+    }
+    
+    for (auto hypernym : _hyponym_of.inorder_flatten())
+    {
+      sqlite3_bind_int(ppstmt, sqlite3_bind_parameter_index(ppstmt, "@HYPER"), hypernym._id);
+    }
+    
+    for (auto holonym : _part_meronym_of.inorder_flatten())
+    {
+      sqlite3_bind_int(ppstmt, sqlite3_bind_parameter_index(ppstmt, "@PHOLO"), holonym._id);
+    }
+    
+    for (auto meronym : _part_holonym_of.inorder_flatten())
+    {
+      sqlite3_bind_int(ppstmt, sqlite3_bind_parameter_index(ppstmt, "@PMERO"), meronym._id);
+    }
+    
+    for (auto holonym : _substance_meronym_of.inorder_flatten())
+    {
+      sqlite3_bind_int(ppstmt, sqlite3_bind_parameter_index(ppstmt, "@SHOLO"), holonym._id);
+    }
+    
+    for (auto meronym : _substance_holonym_of.inorder_flatten())
+    {
+      sqlite3_bind_int(ppstmt, sqlite3_bind_parameter_index(ppstmt, "@SMERO"), meronym._id);
+    }
+    
+    for (auto holonym : _member_meronym_of.inorder_flatten())
+    {
+      sqlite3_bind_int(ppstmt, sqlite3_bind_parameter_index(ppstmt, "@MHOLO"), holonym._id);
+    }
+    
+    for (auto meronym : _member_holonym_of.inorder_flatten())
+    {
+      sqlite3_bind_int(ppstmt, sqlite3_bind_parameter_index(ppstmt, "@MMERO"), meronym._id);
+    }
+    
+    for (auto cls : _instance_of.inorder_flatten())
+    {
+      sqlite3_bind_int(ppstmt, sqlite3_bind_parameter_index(ppstmt, "@CLSID"), cls._id);
+    }
+    
+    for (auto inst : _class_of.inorder_flatten())
+    {
+      sqlite3_bind_int(ppstmt, sqlite3_bind_parameter_index(ppstmt, "@INSID"), inst._id);
+    }
+    
+    for (auto synonym : _synonym_of.inorder_flatten())
+    {
+      sqlite3_bind_int(ppstmt, sqlite3_bind_parameter_index(ppstmt, "@SYNID"), synonym._id);
+    }
+    
+    for (auto antonym : _antonym_of.inorder_flatten())
+    {
+      sqlite3_bind_int(ppstmt, sqlite3_bind_parameter_index(ppstmt, "@ANTID"), antonym._id);
+    }
+    
+    for (auto pertainym : _anti_pertainym_of.inorder_flatten())
+    {
+      sqlite3_bind_int(ppstmt, sqlite3_bind_parameter_index(ppstmt, "@PERID"), pertainym._id);
+    }
+    
+    for (auto value : _attribute_of.inorder_flatten())
+    {
+      sqlite3_bind_int(ppstmt, sqlite3_bind_parameter_index(ppstmt, "@VALID"), value._id);
+    }
+    /*
+    for (auto adj : _derived_from_adjective)
+    {
+      sqlite3_bind_int(ppstmt, sqlite3_bind_parameter_index(ppstmt, "@DERADJ"), adj._id);
+    }
+    
+    for (auto adj : _not_derived_from_adjective)
+    {
+      sqlite3_bind_int(ppstmt, sqlite3_bind_parameter_index(ppstmt, "@NDERADJ"), adj._id);
+    }
+    
+    for (auto adv : _derived_from_adverb)
+    {
+      sqlite3_bind_int(ppstmt, sqlite3_bind_parameter_index(ppstmt, "@DERADV"), adv._id);
+    }
+    
+    for (auto adv : _not_derived_from_adverb)
+    {
+      sqlite3_bind_int(ppstmt, sqlite3_bind_parameter_index(ppstmt, "@NDERADV"), adv._id);
+    }
+    
+    for (auto n : _derived_from_noun)
+    {
+      sqlite3_bind_int(ppstmt, sqlite3_bind_parameter_index(ppstmt, "@DERN"), n._id);
+    }
+    
+    for (auto n : _not_derived_from_noun)
+    {
+      sqlite3_bind_int(ppstmt, sqlite3_bind_parameter_index(ppstmt, "@NDERN"), n._id);
+    }
+*/
+    std::list<noun> output;
+    while (sqlite3_step(ppstmt) == SQLITE_ROW)
+    {
+      noun tnc {_data, sqlite3_column_int(ppstmt, 0)};
+      tnc._singular = std::string(reinterpret_cast<const char*>(sqlite3_column_text(ppstmt, 1)));
+      
+      if (sqlite3_column_type(ppstmt, 2) != SQLITE_NULL)
+      {
+        tnc._plural = std::string(reinterpret_cast<const char*>(sqlite3_column_text(ppstmt, 2)));
+      }
+  
+      output.push_back(tnc);
+    }
+
+    sqlite3_finalize(ppstmt);
+    
+    for (auto& noun : output)
+    {
+      query = "SELECT pronunciation FROM noun_pronunciations WHERE noun_id = ?";
+      if (sqlite3_prepare_v2(_data.ppdb, query.c_str(), query.length(), &ppstmt, NULL) != SQLITE_OK)
+      {
+        throw std::runtime_error(sqlite3_errmsg(_data.ppdb));
+      }
+      
+      sqlite3_bind_int(ppstmt, 1, noun._id);
+      
+      while (sqlite3_step(ppstmt) == SQLITE_ROW)
+      {
+        std::string pronunciation(reinterpret_cast<const char*>(sqlite3_column_text(ppstmt, 0)));
+        auto phonemes = verbly::split<std::list<std::string>>(pronunciation, " ");
+        
+        noun.pronunciations.push_back(phonemes);
+      }
+      
+      sqlite3_finalize(ppstmt);
+    }
+
+    return output;
+  }
+
+};

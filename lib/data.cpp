@@ -46,5 +46,15 @@ namespace verbly {
   {
     return noun_query(*this);
   }
-
+  
+  frame_query data::frames() const
+  {
+    return frame_query(*this);
+  }
+  
+  preposition_query data::prepositions() const
+  {
+    return preposition_query(*this);
+  }
+  
 };

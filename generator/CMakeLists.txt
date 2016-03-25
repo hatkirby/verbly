@@ -5,7 +5,7 @@ find_package(PkgConfig)
 pkg_check_modules(sqlite3 sqlite3 REQUIRED)
 find_package(libxml2 REQUIRED)
 
-include_directories(${sqlite3_INCLUDE_DIR} ${LIBXML2_INCLUDE_DIR})
+include_directories(${sqlite3_INCLUDE_DIR} ${LIBXML2_INCLUDE_DIR} ../vendor/json/src)
 add_executable(generator generator.cpp)
 set_property(TARGET generator PROPERTY CXX_STANDARD 11)
 set_property(TARGET generator PROPERTY CXX_STANDARD_REQUIRED ON)

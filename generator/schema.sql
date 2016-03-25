@@ -11,8 +11,7 @@ CREATE TABLE `verbs` (
 DROP TABLE IF EXISTS `groups`;
 CREATE TABLE `groups` (
   `group_id` INTEGER PRIMARY KEY,
-  `parent_id` INTEGER,
-  FOREIGN KEY (`parent_id`) REFERENCES `groups`(`group_id`)
+  `data` BLOB NOT NULL
 );
 
 DROP TABLE IF EXISTS `frames`;
@@ -250,4 +249,17 @@ CREATE TABLE `adverb_adverb_derivation` (
   `adverb_2_id` INTEGER NOT NULL,
   FOREIGN KEY (`adverb_1_id`) REFERENCES `adverbs`(`adverb_id`),
   FOREIGN KEY (`adverb_2_id`) REFERENCES `adverbs`(`adverb_id`)
+);
+
+DROP TABLE IF EXISTS `prepositions`;
+CREATE TABLE `prepositions` (
+  `preposition_id` INTEGER PRIMARY KEY,
+  `form` VARCHAR(32) NOT NULL
+);
+
+DROP TABLE IF EXISTS `preposition_groups`;
+CREATE TABLE `preposition_groups` (
+  `preposition_id` INTEGER NOT NULL,
+  `groupname` VARCHAR(32) NOT NULL,
+  FOREIGN KEY (`preposition_id`) REFERENCES `prepositions`(`preposition_id`)
 );

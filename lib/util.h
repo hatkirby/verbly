@@ -1,10 +1,6 @@
 #ifndef UTIL_H_15DDCA2D
 #define UTIL_H_15DDCA2D
 
-#include <string>
-#include <iterator>
-#include <sstream>
-
 namespace verbly {
   
   template <class InputIterator>
@@ -32,7 +28,7 @@ namespace verbly {
     
     while (!input.empty())
     {
-      int divider = input.find(" ");
+      int divider = input.find(delimiter);
       if (divider == std::string::npos)
       {
         result.push_back(input);
@@ -41,7 +37,7 @@ namespace verbly {
       } else {
         result.push_back(input.substr(0, divider));
         
-        input = input.substr(divider+1);
+        input = input.substr(divider+delimiter.length());
       }
     }
     
