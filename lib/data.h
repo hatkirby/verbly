@@ -203,7 +203,8 @@ namespace verbly {
               } else if (it->_group.elems.size() == 1)
               {
                 bool truelogic = it->_notlogic != it->_group.elems.front()._notlogic;
-                *it = it->_group.elems.front();
+                filter<T> e = it->_group.elems.front();
+                *it = e;
                 it->_notlogic = truelogic;
               }
             }
@@ -217,7 +218,8 @@ namespace verbly {
           if (_group.elems.size() == 1)
           {
             bool truelogic = _notlogic != _group.elems.front()._notlogic;
-            *this = _group.elems.front();
+            filter<T> e = _group.elems.front();
+            *this = e;
             _notlogic = truelogic;
           }
         }
