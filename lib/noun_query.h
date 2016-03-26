@@ -25,21 +25,27 @@ namespace verbly {
       
       noun_query& is_part_meronym();
       noun_query& part_meronym_of(filter<noun> _f);
+      noun_query& full_part_meronym_of(filter<noun> _f);
       
       noun_query& is_part_holonym();
       noun_query& part_holonym_of(filter<noun> _f);
+      noun_query& full_part_holonym_of(filter<noun> _f);
       
       noun_query& is_substance_meronym();
       noun_query& substance_meronym_of(filter<noun> _f);
+      noun_query& full_substance_meronym_of(filter<noun> _f);
       
       noun_query& is_substance_holonym();
       noun_query& substance_holonym_of(filter<noun> _f);
+      noun_query& full_substance_holonym_of(filter<noun> _f);
       
       noun_query& is_member_meronym();
       noun_query& member_meronym_of(filter<noun> _f);
+      noun_query& full_member_meronym_of(filter<noun> _f);
       
       noun_query& is_member_holonym();
       noun_query& member_holonym_of(filter<noun> _f);
+      noun_query& full_member_holonym_of(filter<noun> _f);
       
       noun_query& is_proper();
       noun_query& is_not_proper();
@@ -89,21 +95,27 @@ namespace verbly {
       
       bool _is_part_meronym = false;
       filter<noun> _part_meronym_of;
+      filter<noun> _full_part_meronym_of;
       
       bool _is_substance_meronym = false;
       filter<noun> _substance_meronym_of;
+      filter<noun> _full_substance_meronym_of;
       
       bool _is_member_meronym = false;
       filter<noun> _member_meronym_of;
+      filter<noun> _full_member_meronym_of;
       
       bool _is_part_holonym = false;
       filter<noun> _part_holonym_of;
+      filter<noun> _full_part_holonym_of;
       
       bool _is_substance_holonym = false;
       filter<noun> _substance_holonym_of;
+      filter<noun> _full_substance_holonym_of;
       
       bool _is_member_holonym = false;
       filter<noun> _member_holonym_of;
+      filter<noun> _full_member_holonym_of;
       
       bool _is_proper = false;
       bool _is_not_proper = false;

@@ -121,6 +121,14 @@ namespace verbly {
     return *this;
   }
   
+  noun_query& noun_query::full_part_meronym_of(filter<noun> _f)
+  {
+    _f.clean();
+    _full_part_meronym_of = _f;
+    
+    return *this;
+  }
+  
   noun_query& noun_query::is_part_holonym()
   {
     _is_part_holonym = true;
@@ -132,6 +140,14 @@ namespace verbly {
   {
     _f.clean();
     _part_holonym_of = _f;
+    
+    return *this;
+  }
+  
+  noun_query& noun_query::full_part_holonym_of(filter<noun> _f)
+  {
+    _f.clean();
+    _full_part_holonym_of = _f;
     
     return *this;
   }
@@ -151,6 +167,14 @@ namespace verbly {
     return *this;
   }
   
+  noun_query& noun_query::full_substance_meronym_of(filter<noun> _f)
+  {
+    _f.clean();
+    _full_substance_meronym_of = _f;
+    
+    return *this;
+  }
+  
   noun_query& noun_query::is_substance_holonym()
   {
     _is_substance_holonym = true;
@@ -162,6 +186,14 @@ namespace verbly {
   {
     _f.clean();
     _substance_holonym_of = _f;
+    
+    return *this;
+  }
+  
+  noun_query& noun_query::full_substance_holonym_of(filter<noun> _f)
+  {
+    _f.clean();
+    _full_substance_holonym_of = _f;
     
     return *this;
   }
@@ -181,6 +213,14 @@ namespace verbly {
     return *this;
   }
   
+  noun_query& noun_query::full_member_meronym_of(filter<noun> _f)
+  {
+    _f.clean();
+    _full_member_meronym_of = _f;
+    
+    return *this;
+  }
+  
   noun_query& noun_query::is_member_holonym()
   {
     _is_member_holonym = true;
@@ -192,6 +232,14 @@ namespace verbly {
   {
     _f.clean();
     _member_holonym_of = _f;
+    
+    return *this;
+  }
+  
+  noun_query& noun_query::full_member_holonym_of(filter<noun> _f)
+  {
+    _f.clean();
+    _full_member_holonym_of = _f;
     
     return *this;
   }
@@ -336,7 +384,7 @@ namespace verbly {
   {
     std::stringstream construct;
     
-    if (!_full_hypernym_of.empty() || !_full_hyponym_of.empty())
+    if (!_full_hypernym_of.empty() || !_full_hyponym_of.empty() || !_full_part_meronym_of.empty() || !_full_part_holonym_of.empty() || !_full_substance_meronym_of.empty() || !_full_substance_holonym_of.empty() || !_full_member_meronym_of.empty() || !_full_member_holonym_of.empty())
     {
       construct << "WITH RECURSIVE ";
       
@@ -350,6 +398,36 @@ namespace verbly {
       for (auto hypernym : _full_hyponym_of.uniq_flatten())
       {
         ctes.push_back("hyponym_tree_" + std::to_string(hypernym._id) + " AS (SELECT hyponym_id FROM hypernymy WHERE hypernym_id = " + std::to_string(hypernym._id) + " UNION SELECT h.hyponym_id FROM hyponym_tree_" + std::to_string(hypernym._id) + " AS t INNER JOIN hypernymy AS h ON t.hyponym_id = h.hypernym_id)");
+      }
+      
+      for (auto holonym : _full_part_meronym_of.uniq_flatten())
+      {
+        ctes.push_back("part_meronym_tree_" + std::to_string(holonym._id) + " AS (SELECT meronym_id FROM part_meronymy WHERE holonym_id = " + std::to_string(holonym._id) + " UNION SELECT h.meronym_id FROM part_meronym_tree_" + std::to_string(holonym._id) + " AS t INNER JOIN part_meronymy AS h ON t.meronym_id = h.holonym_id)");
+      }
+      
+      for (auto meronym : _full_part_holonym_of.uniq_flatten())
+      {
+        ctes.push_back("part_holonym_tree_" + std::to_string(meronym._id) + " AS (SELECT holonym_id FROM part_meronymy WHERE meronym_id = " + std::to_string(meronym._id) + " UNION SELECT h.holonym_id FROM part_holonym_tree_" + std::to_string(meronym._id) + " AS t INNER JOIN part_meronymy AS h ON t.holonym_id = h.meronym_id)");
+      }
+      
+      for (auto holonym : _full_substance_meronym_of.uniq_flatten())
+      {
+        ctes.push_back("substance_meronym_tree_" + std::to_string(holonym._id) + " AS (SELECT meronym_id FROM substance_meronymy WHERE holonym_id = " + std::to_string(holonym._id) + " UNION SELECT h.meronym_id FROM substance_meronym_tree_" + std::to_string(holonym._id) + " AS t INNER JOIN substance_meronymy AS h ON t.meronym_id = h.holonym_id)");
+      }
+      
+      for (auto meronym : _full_substance_holonym_of.uniq_flatten())
+      {
+        ctes.push_back("substance_holonym_tree_" + std::to_string(meronym._id) + " AS (SELECT holonym_id FROM substance_meronymy WHERE meronym_id = " + std::to_string(meronym._id) + " UNION SELECT h.holonym_id FROM substance_holonym_tree_" + std::to_string(meronym._id) + " AS t INNER JOIN substance_meronymy AS h ON t.holonym_id = h.meronym_id)");
+      }
+      
+      for (auto holonym : _full_member_meronym_of.uniq_flatten())
+      {
+        ctes.push_back("member_meronym_tree_" + std::to_string(holonym._id) + " AS (SELECT meronym_id FROM member_meronymy WHERE holonym_id = " + std::to_string(holonym._id) + " UNION SELECT h.meronym_id FROM member_meronym_tree_" + std::to_string(holonym._id) + " AS t INNER JOIN member_meronymy AS h ON t.meronym_id = h.holonym_id)");
+      }
+      
+      for (auto meronym : _full_member_holonym_of.uniq_flatten())
+      {
+        ctes.push_back("member_holonym_tree_" + std::to_string(meronym._id) + " AS (SELECT holonym_id FROM member_meronymy WHERE meronym_id = " + std::to_string(meronym._id) + " UNION SELECT h.holonym_id FROM member_holonym_tree_" + std::to_string(meronym._id) + " AS t INNER JOIN member_meronymy AS h ON t.holonym_id = h.meronym_id)");
       }
       
       construct << verbly::implode(std::begin(ctes), std::end(ctes), ", ");
@@ -619,6 +697,43 @@ namespace verbly {
       conditions.push_back(cond.str());
     }
     
+    if (!_full_part_meronym_of.empty())
+    {
+      std::function<std::string (filter<noun>, bool)> recur = [&] (filter<noun> f, bool notlogic) -> std::string {
+        switch (f.get_type())
+        {
+          case filter<noun>::type::singleton:
+          {
+            if (notlogic == f.get_notlogic())
+            {
+              return "noun_id IN (SELECT meronym_id FROM part_meronym_tree_" + std::to_string(f.get_elem()._id) + ")";
+            } else {
+              return "noun_id NOT IN (SELECT meronym_id FROM part_meronym_tree_" + std::to_string(f.get_elem()._id) + ")";
+            }
+          }
+          
+          case filter<noun>::type::group:
+          {
+            bool truelogic = notlogic != f.get_notlogic();
+            
+            std::list<std::string> clauses;
+            std::transform(std::begin(f), std::end(f), std::back_inserter(clauses), [&] (filter<noun> f2) {
+              return recur(f2, truelogic);
+            });
+            
+            if (truelogic == f.get_orlogic())
+            {
+              return "(" + verbly::implode(std::begin(clauses), std::end(clauses), " AND ") + ")";
+            } else {
+              return "(" + verbly::implode(std::begin(clauses), std::end(clauses), " OR ") + ")";
+            }
+          }
+        }
+      };
+      
+      conditions.push_back(recur(_full_part_meronym_of, false));
+    }
+    
     if (_is_part_holonym)
     {
       conditions.push_back("noun_id IN (SELECT holonym_id FROM part_meronymy)");
@@ -671,6 +786,43 @@ namespace verbly {
       cond << recur(_part_holonym_of, _part_holonym_of.get_notlogic());
       cond << ")";
       conditions.push_back(cond.str());
+    }
+    
+    if (!_full_part_holonym_of.empty())
+    {
+      std::function<std::string (filter<noun>, bool)> recur = [&] (filter<noun> f, bool notlogic) -> std::string {
+        switch (f.get_type())
+        {
+          case filter<noun>::type::singleton:
+          {
+            if (notlogic == f.get_notlogic())
+            {
+              return "noun_id IN (SELECT holonym_id FROM part_holonym_tree_" + std::to_string(f.get_elem()._id) + ")";
+            } else {
+              return "noun_id NOT IN (SELECT holonym_id FROM part_holonym_tree_" + std::to_string(f.get_elem()._id) + ")";
+            }
+          }
+          
+          case filter<noun>::type::group:
+          {
+            bool truelogic = notlogic != f.get_notlogic();
+            
+            std::list<std::string> clauses;
+            std::transform(std::begin(f), std::end(f), std::back_inserter(clauses), [&] (filter<noun> f2) {
+              return recur(f2, truelogic);
+            });
+            
+            if (truelogic == f.get_orlogic())
+            {
+              return "(" + verbly::implode(std::begin(clauses), std::end(clauses), " AND ") + ")";
+            } else {
+              return "(" + verbly::implode(std::begin(clauses), std::end(clauses), " OR ") + ")";
+            }
+          }
+        }
+      };
+      
+      conditions.push_back(recur(_full_part_holonym_of, false));
     }
     
     if (_is_substance_meronym)
@@ -727,6 +879,43 @@ namespace verbly {
       conditions.push_back(cond.str());
     }
     
+    if (!_full_substance_meronym_of.empty())
+    {
+      std::function<std::string (filter<noun>, bool)> recur = [&] (filter<noun> f, bool notlogic) -> std::string {
+        switch (f.get_type())
+        {
+          case filter<noun>::type::singleton:
+          {
+            if (notlogic == f.get_notlogic())
+            {
+              return "noun_id IN (SELECT meronym_id FROM substance_meronym_tree_" + std::to_string(f.get_elem()._id) + ")";
+            } else {
+              return "noun_id NOT IN (SELECT meronym_id FROM substance_meronym_tree_" + std::to_string(f.get_elem()._id) + ")";
+            }
+          }
+          
+          case filter<noun>::type::group:
+          {
+            bool truelogic = notlogic != f.get_notlogic();
+            
+            std::list<std::string> clauses;
+            std::transform(std::begin(f), std::end(f), std::back_inserter(clauses), [&] (filter<noun> f2) {
+              return recur(f2, truelogic);
+            });
+            
+            if (truelogic == f.get_orlogic())
+            {
+              return "(" + verbly::implode(std::begin(clauses), std::end(clauses), " AND ") + ")";
+            } else {
+              return "(" + verbly::implode(std::begin(clauses), std::end(clauses), " OR ") + ")";
+            }
+          }
+        }
+      };
+      
+      conditions.push_back(recur(_full_substance_meronym_of, false));
+    }
+    
     if (_is_substance_holonym)
     {
       conditions.push_back("noun_id IN (SELECT holonym_id FROM substance_meronymy)");
@@ -779,6 +968,43 @@ namespace verbly {
       cond << recur(_substance_holonym_of, _substance_holonym_of.get_notlogic());
       cond << ")";
       conditions.push_back(cond.str());
+    }
+    
+    if (!_full_substance_holonym_of.empty())
+    {
+      std::function<std::string (filter<noun>, bool)> recur = [&] (filter<noun> f, bool notlogic) -> std::string {
+        switch (f.get_type())
+        {
+          case filter<noun>::type::singleton:
+          {
+            if (notlogic == f.get_notlogic())
+            {
+              return "noun_id IN (SELECT holonym_id FROM substance_holonym_tree_" + std::to_string(f.get_elem()._id) + ")";
+            } else {
+              return "noun_id NOT IN (SELECT holonym_id FROM substance_holonym_tree_" + std::to_string(f.get_elem()._id) + ")";
+            }
+          }
+          
+          case filter<noun>::type::group:
+          {
+            bool truelogic = notlogic != f.get_notlogic();
+            
+            std::list<std::string> clauses;
+            std::transform(std::begin(f), std::end(f), std::back_inserter(clauses), [&] (filter<noun> f2) {
+              return recur(f2, truelogic);
+            });
+            
+            if (truelogic == f.get_orlogic())
+            {
+              return "(" + verbly::implode(std::begin(clauses), std::end(clauses), " AND ") + ")";
+            } else {
+              return "(" + verbly::implode(std::begin(clauses), std::end(clauses), " OR ") + ")";
+            }
+          }
+        }
+      };
+      
+      conditions.push_back(recur(_full_substance_holonym_of, false));
     }
     
     if (_is_member_meronym)
@@ -835,6 +1061,43 @@ namespace verbly {
       conditions.push_back(cond.str());
     }
     
+    if (!_full_member_meronym_of.empty())
+    {
+      std::function<std::string (filter<noun>, bool)> recur = [&] (filter<noun> f, bool notlogic) -> std::string {
+        switch (f.get_type())
+        {
+          case filter<noun>::type::singleton:
+          {
+            if (notlogic == f.get_notlogic())
+            {
+              return "noun_id IN (SELECT meronym_id FROM member_meronym_tree_" + std::to_string(f.get_elem()._id) + ")";
+            } else {
+              return "noun_id NOT IN (SELECT meronym_id FROM member_meronym_tree_" + std::to_string(f.get_elem()._id) + ")";
+            }
+          }
+          
+          case filter<noun>::type::group:
+          {
+            bool truelogic = notlogic != f.get_notlogic();
+            
+            std::list<std::string> clauses;
+            std::transform(std::begin(f), std::end(f), std::back_inserter(clauses), [&] (filter<noun> f2) {
+              return recur(f2, truelogic);
+            });
+            
+            if (truelogic == f.get_orlogic())
+            {
+              return "(" + verbly::implode(std::begin(clauses), std::end(clauses), " AND ") + ")";
+            } else {
+              return "(" + verbly::implode(std::begin(clauses), std::end(clauses), " OR ") + ")";
+            }
+          }
+        }
+      };
+      
+      conditions.push_back(recur(_full_member_meronym_of, false));
+    }
+    
     if (_is_member_holonym)
     {
       conditions.push_back("noun_id IN (SELECT holonym_id FROM member_meronym)");
@@ -887,6 +1150,43 @@ namespace verbly {
       cond << recur(_member_holonym_of, _member_holonym_of.get_notlogic());
       cond << ")";
       conditions.push_back(cond.str());
+    }
+    
+    if (!_full_member_holonym_of.empty())
+    {
+      std::function<std::string (filter<noun>, bool)> recur = [&] (filter<noun> f, bool notlogic) -> std::string {
+        switch (f.get_type())
+        {
+          case filter<noun>::type::singleton:
+          {
+            if (notlogic == f.get_notlogic())
+            {
+              return "noun_id IN (SELECT holonym_id FROM member_holonym_tree_" + std::to_string(f.get_elem()._id) + ")";
+            } else {
+              return "noun_id NOT IN (SELECT holonym_id FROM member_holonym_tree_" + std::to_string(f.get_elem()._id) + ")";
+            }
+          }
+          
+          case filter<noun>::type::group:
+          {
+            bool truelogic = notlogic != f.get_notlogic();
+            
+            std::list<std::string> clauses;
+            std::transform(std::begin(f), std::end(f), std::back_inserter(clauses), [&] (filter<noun> f2) {
+              return recur(f2, truelogic);
+            });
+            
+            if (truelogic == f.get_orlogic())
+            {
+              return "(" + verbly::implode(std::begin(clauses), std::end(clauses), " AND ") + ")";
+            } else {
+              return "(" + verbly::implode(std::begin(clauses), std::end(clauses), " OR ") + ")";
+            }
+          }
+        }
+      };
+      
+      conditions.push_back(recur(_full_member_holonym_of, false));
     }
     
     if (_is_proper)
