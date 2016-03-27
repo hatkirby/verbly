@@ -1027,9 +1027,9 @@ int main(int argc, char** argv)
         {
           if (nouns.count(word) == 1)
           {
-            query = "INSERT INTO nouns (singular, proper, plural) VALUES (?, ?, ?)";
+            query = "INSERT INTO nouns (singular, proper, complexity, plural) VALUES (?, ?, ?, ?)";
           } else {
-            query = "INSERT INTO nouns (singular, proper) VALUES (?, ?)";
+            query = "INSERT INTO nouns (singular, proper, complexity) VALUES (?, ?, ?)";
           }
         
           break;
@@ -1046,9 +1046,9 @@ int main(int argc, char** argv)
         {
           if (adjectives.count(word) == 1)
           {
-            query = "INSERT INTO adjectives (base_form, comparative, superlative) VALUES (?, ?, ?)";
+            query = "INSERT INTO adjectives (base_form, complexity, comparative, superlative) VALUES (?, ?, ?, ?)";
           } else {
-            query = "INSERT INTO adjectives (base_form) VALUES (?)";
+            query = "INSERT INTO adjectives (base_form, complexity) VALUES (?, ?)";
           }
         
           break;
@@ -1058,9 +1058,9 @@ int main(int argc, char** argv)
         {
           if (adjectives.count(word) == 1)
           {
-            query = "INSERT INTO adverbs (base_form, comparative, superlative) VALUES (?, ?, ?)";
+            query = "INSERT INTO adverbs (base_form, complexity, comparative, superlative) VALUES (?, ?, ?, ?)";
           } else {
-            query = "INSERT INTO adverbs (base_form) VALUES (?)";
+            query = "INSERT INTO adverbs (base_form, complexity) VALUES (?, ?)";
           }
         
           break;
@@ -1082,9 +1082,11 @@ int main(int argc, char** argv)
             return isupper(ch);
           }) ? 1 : 0));
           
+          sqlite3_bind_int(ppstmt, 3, verbly::split<std::list<std::string>>(word, " ").size());
+          
           if (nouns.count(word) == 1)
           {
-            sqlite3_bind_text(ppstmt, 3, nouns[word].plural.c_str(), nouns[word].plural.length(), SQLITE_STATIC);
+            sqlite3_bind_text(ppstmt, 4, nouns[word].plural.c_str(), nouns[word].plural.length(), SQLITE_STATIC);
           }
           
           break;
@@ -1093,10 +1095,12 @@ int main(int argc, char** argv)
         case 3: // Adjective
         case 4: // Adverb
         {
+          sqlite3_bind_int(ppstmt, 2, verbly::split<std::list<std::string>>(word, " ").size());
+          
           if (adjectives.count(word) == 1)
           {
-            sqlite3_bind_text(ppstmt, 2, adjectives[word].comparative.c_str(), adjectives[word].comparative.length(), SQLITE_STATIC);
-            sqlite3_bind_text(ppstmt, 3, adjectives[word].superlative.c_str(), adjectives[word].superlative.length(), SQLITE_STATIC);
+            sqlite3_bind_text(ppstmt, 3, adjectives[word].comparative.c_str(), adjectives[word].comparative.length(), SQLITE_STATIC);
+            sqlite3_bind_text(ppstmt, 4, adjectives[word].superlative.c_str(), adjectives[word].superlative.length(), SQLITE_STATIC);
           }
           
           break;

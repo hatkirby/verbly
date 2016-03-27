@@ -14,6 +14,10 @@ namespace verbly {
       noun_query& has_pronunciation();
       
       noun_query& with_singular_form(std::string _arg);
+      noun_query& with_prefix(filter<std::string> _f);
+      noun_query& with_suffix(filter<std::string> _f);
+      
+      noun_query& with_complexity(int _arg);
       
       noun_query& is_hypernym();
       noun_query& hypernym_of(filter<noun> _f);
@@ -84,6 +88,10 @@ namespace verbly {
       bool _has_prn = false;
       
       std::list<std::string> _with_singular_form;
+      filter<std::string> _with_prefix;
+      filter<std::string> _with_suffix;
+      
+      int _with_complexity = unlimited;
       
       bool _is_hypernym = false;
       filter<noun> _hypernym_of;

@@ -16,6 +16,11 @@ namespace verbly {
       adverb_query& requires_comparative_form();
       adverb_query& requires_superlative_form();
       
+      adverb_query& with_prefix(filter<std::string> _f);
+      adverb_query& with_suffix(filter<std::string> _f);
+      
+      adverb_query& with_complexity(int _arg);
+      
       adverb_query& has_antonyms();
       adverb_query& antonym_of(filter<adverb> _f);
       
@@ -42,6 +47,11 @@ namespace verbly {
       
       bool _requires_comparative_form = false;
       bool _requires_superlative_form = false;
+      
+      filter<std::string> _with_prefix;
+      filter<std::string> _with_suffix;
+      
+      int _with_complexity = unlimited;
       
       bool _has_antonyms = false;
       filter<adverb> _antonym_of;

@@ -25,11 +25,17 @@ namespace verbly {
       noun_query hyponyms() const;
       noun_query full_hyponyms() const;
       noun_query part_meronyms() const;
+      noun_query full_part_meronyms() const;
       noun_query part_holonyms() const;
+      noun_query full_part_holonyms() const;
       noun_query substance_meronyms() const;
+      noun_query full_substance_meronyms() const;
       noun_query substance_holonyms() const;
+      noun_query full_substance_holonyms() const;
       noun_query member_meronyms() const;
+      noun_query full_member_meronyms() const;
       noun_query member_holonyms() const;
+      noun_query full_member_holonyms() const;
       noun_query classes() const;
       noun_query instances() const;
       noun_query synonyms() const;

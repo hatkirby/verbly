@@ -17,6 +17,11 @@ namespace verbly {
       adjective_query& requires_superlative_form();
       adjective_query& position(adjective::positioning pos);
       
+      adjective_query& with_prefix(filter<std::string> _f);
+      adjective_query& with_suffix(filter<std::string> _f);
+      
+      adjective_query& with_complexity(int _arg);
+      
       adjective_query& is_variant();
       adjective_query& variant_of(filter<noun> _f);
       
@@ -56,6 +61,11 @@ namespace verbly {
       bool _requires_comparative_form = false;
       bool _requires_superlative_form = false;
       adjective::positioning _position = adjective::positioning::undefined;
+      
+      filter<std::string> _with_prefix;
+      filter<std::string> _with_suffix;
+      
+      int _with_complexity = unlimited;
       
       bool _is_variant = false;
       filter<noun> _variant_of;

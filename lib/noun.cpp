@@ -77,11 +77,25 @@ namespace verbly {
     return _data->nouns().part_meronym_of(*this);
   }
   
+  noun_query noun::full_part_meronyms() const
+  {
+    assert(_valid == true);
+    
+    return _data->nouns().full_part_meronym_of(*this);
+  }
+  
   noun_query noun::part_holonyms() const
   {
     assert(_valid == true);
     
     return _data->nouns().part_holonym_of(*this);
+  }
+  
+  noun_query noun::full_part_holonyms() const
+  {
+    assert(_valid == true);
+    
+    return _data->nouns().full_part_holonym_of(*this);
   }
   
   noun_query noun::substance_meronyms() const
@@ -91,11 +105,25 @@ namespace verbly {
     return _data->nouns().substance_meronym_of(*this);
   }
   
+  noun_query noun::full_substance_meronyms() const
+  {
+    assert(_valid == true);
+    
+    return _data->nouns().full_substance_meronym_of(*this);
+  }
+  
   noun_query noun::substance_holonyms() const
   {
     assert(_valid == true);
     
     return _data->nouns().substance_holonym_of(*this);
+  }
+  
+  noun_query noun::full_substance_holonyms() const
+  {
+    assert(_valid == true);
+    
+    return _data->nouns().full_substance_holonym_of(*this);
   }
   
   noun_query noun::member_meronyms() const
@@ -105,11 +133,25 @@ namespace verbly {
     return _data->nouns().member_meronym_of(*this);
   }
   
+  noun_query noun::full_member_meronyms() const
+  {
+    assert(_valid == true);
+    
+    return _data->nouns().full_member_meronym_of(*this);
+  }
+  
   noun_query noun::member_holonyms() const
   {
     assert(_valid == true);
     
     return _data->nouns().member_holonym_of(*this);
+  }
+  
+  noun_query noun::full_member_holonyms() const
+  {
+    assert(_valid == true);
+    
+    return _data->nouns().full_member_holonym_of(*this);
   }
   
   noun_query noun::classes() const

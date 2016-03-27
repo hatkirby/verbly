@@ -36,7 +36,8 @@ CREATE TABLE `adjectives` (
   `base_form` VARCHAR(32) NOT NULL,
   `comparative` VARCHAR(32),
   `superlative` VARCHAR(32),
-  `position` CHAR(1)
+  `position` CHAR(1),
+  `complexity` INTEGER NOT NULL
 );
 
 DROP TABLE IF EXISTS `adverbs`;
@@ -44,7 +45,8 @@ CREATE TABLE `adverbs` (
   `adverb_id` INTEGER PRIMARY KEY,
   `base_form` VARCHAR(32) NOT NULL,
   `comparative` VARCHAR(32),
-  `superlative` VARCHAR(32)
+  `superlative` VARCHAR(32),
+  `complexity` INTEGER NOT NULL
 );
 
 DROP TABLE IF EXISTS `nouns`;
@@ -52,7 +54,8 @@ CREATE TABLE `nouns` (
   `noun_id` INTEGER PRIMARY KEY,
   `singular` VARCHAR(32) NOT NULL,
   `plural` VARCHAR(32),
-  `proper` INTEGER(1) NOT NULL
+  `proper` INTEGER(1) NOT NULL,
+  `complexity` INTEGER NOT NULL
 );
 
 DROP TABLE IF EXISTS `hypernymy`;

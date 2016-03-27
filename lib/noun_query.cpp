@@ -60,6 +60,29 @@ namespace verbly {
     return *this;
   }
   
+  noun_query& noun_query::with_prefix(filter<std::string> _f)
+  {
+    _f.clean();
+    _with_prefix = _f;
+    
+    return *this;
+  }
+  
+  noun_query& noun_query::with_suffix(filter<std::string> _f)
+  {
+    _f.clean();
+    _with_suffix = _f;
+    
+    return *this;
+  }
+  
+  noun_query& noun_query::with_complexity(int _arg)
+  {
+    _with_complexity = _arg;
+    
+    return *this;
+  }
+  
   noun_query& noun_query::is_hypernym()
   {
     _is_hypernym = true;
@@ -459,6 +482,85 @@ namespace verbly {
       std::list<std::string> clauses(_with_singular_form.size(), "singular = @SFORM");
       std::string cond = "(" + verbly::implode(std::begin(clauses), std::end(clauses), " OR ") + ")";
       conditions.push_back(cond);
+    }
+    
+    if (!_with_prefix.empty())
+    {
+      std::function<std::string (filter<std::string>, bool)> recur = [&] (filter<std::string> f, bool notlogic) -> std::string {
+        switch (f.get_type())
+        {
+          case filter<std::string>::type::singleton:
+          {
+            if (notlogic == f.get_notlogic())
+            {
+              return "singular LIKE @PREFIX";
+            } else {
+              return "singular NOT LIKE @PREFIX";
+            }
+          }
+          
+          case filter<std::string>::type::group:
+          {
+            bool truelogic = notlogic != f.get_notlogic();
+            
+            std::list<std::string> clauses;
+            std::transform(std::begin(f), std::end(f), std::back_inserter(clauses), [&] (filter<std::string> f2) {
+              return recur(f2, truelogic);
+            });
+            
+            if (truelogic == f.get_orlogic())
+            {
+              return "(" + verbly::implode(std::begin(clauses), std::end(clauses), " AND ") + ")";
+            } else {
+              return "(" + verbly::implode(std::begin(clauses), std::end(clauses), " OR ") + ")";
+            }
+          }
+        }
+      };
+      
+      conditions.push_back(recur(_with_prefix, false));
+    }
+    
+    if (!_with_suffix.empty())
+    {
+      std::function<std::string (filter<std::string>, bool)> recur = [&] (filter<std::string> f, bool notlogic) -> std::string {
+        switch (f.get_type())
+        {
+          case filter<std::string>::type::singleton:
+          {
+            if (notlogic == f.get_notlogic())
+            {
+              return "singular LIKE @SUFFIX";
+            } else {
+              return "singular NOT LIKE @SUFFIX";
+            }
+          }
+          
+          case filter<std::string>::type::group:
+          {
+            bool truelogic = notlogic != f.get_notlogic();
+            
+            std::list<std::string> clauses;
+            std::transform(std::begin(f), std::end(f), std::back_inserter(clauses), [&] (filter<std::string> f2) {
+              return recur(f2, truelogic);
+            });
+            
+            if (truelogic == f.get_orlogic())
+            {
+              return "(" + verbly::implode(std::begin(clauses), std::end(clauses), " AND ") + ")";
+            } else {
+              return "(" + verbly::implode(std::begin(clauses), std::end(clauses), " OR ") + ")";
+            }
+          }
+        }
+      };
+      
+      conditions.push_back(recur(_with_suffix, false));
+    }
+    
+    if (_with_complexity != unlimited)
+    {
+      conditions.push_back("complexity = @COMPLEX");
     }
     
     if (_is_hypernym)
@@ -1608,6 +1710,23 @@ namespace verbly {
     for (auto sform : _with_singular_form)
     {
       sqlite3_bind_text(ppstmt, sqlite3_bind_parameter_index(ppstmt, "@SFORM"), sform.c_str(), sform.size(), SQLITE_STATIC);
+    }
+    
+    for (auto prefix : _with_prefix.inorder_flatten())
+    {
+      std::string pfat = prefix + "%";
+      sqlite3_bind_text(ppstmt, sqlite3_bind_parameter_index(ppstmt, "@PREFIX"), pfat.c_str(), pfat.length(), SQLITE_STATIC);
+    }
+    
+    for (auto suffix : _with_suffix.inorder_flatten())
+    {
+      std::string pfat = "%" + suffix;
+      sqlite3_bind_text(ppstmt, sqlite3_bind_parameter_index(ppstmt, "@SUFFIX"), pfat.c_str(), pfat.length(), SQLITE_STATIC);
+    }
+    
+    if (_with_complexity != unlimited)
+    {
+      sqlite3_bind_int(ppstmt, sqlite3_bind_parameter_index(ppstmt, "@COMPLEX"), _with_complexity);
     }
     
     for (auto hyponym : _hypernym_of.inorder_flatten())
