@@ -172,6 +172,7 @@ namespace verbly {
     std::stringstream construct;
     construct << "SELECT adverb_id, base_form, comparative, superlative FROM adverbs";
     std::list<std::string> conditions;
+    std::list<binding> bindings;
     
     if (_has_prn)
     {
@@ -180,14 +181,20 @@ namespace verbly {
     
     if (!_rhymes.empty())
     {
-      std::list<std::string> clauses(_rhymes.size(), "pronunciation LIKE @RHMPRN");
+      std::list<std::string> clauses(_rhymes.size(), "pronunciation LIKE ?");
       std::string cond = "adverb_id IN (SELECT adverb_id FROM adverb_pronunciations WHERE " + verbly::implode(std::begin(clauses), std::end(clauses), " OR ") + ")";
       conditions.push_back(cond);
+      
+      for (auto rhyme : _rhymes)
+      {
+        bindings.emplace_back("%" + rhyme);
+      }
     }
     
     for (auto except : _except)
     {
-      conditions.push_back("adverb_id != @EXCID");
+      conditions.push_back("adverb_id != ?");
+      bindings.emplace_back(except._id);
     }
     
     if (_requires_comparative_form)
@@ -207,11 +214,13 @@ namespace verbly {
         {
           case filter<std::string>::type::singleton:
           {
+            bindings.emplace_back(f.get_elem() + "%");
+            
             if (notlogic == f.get_notlogic())
             {
-              return "base_form LIKE @PREFIX";
+              return "base_form LIKE ?";
             } else {
-              return "base_form NOT LIKE @PREFIX";
+              return "base_form NOT LIKE ?";
             }
           }
           
@@ -244,11 +253,13 @@ namespace verbly {
         {
           case filter<std::string>::type::singleton:
           {
+            bindings.emplace_back("%" + f.get_elem());
+            
             if (notlogic == f.get_notlogic())
             {
-              return "base_form LIKE @SUFFIX";
+              return "base_form LIKE ?";
             } else {
-              return "base_form NOT LIKE @SUFFIX";
+              return "base_form NOT LIKE ?";
             }
           }
           
@@ -276,7 +287,8 @@ namespace verbly {
     
     if (_with_complexity != unlimited)
     {
-      conditions.push_back("complexity = @COMPLEX");
+      conditions.push_back("complexity = ?");
+      bindings.emplace_back(_with_complexity);
     }
     
     if (_has_antonyms)
@@ -301,11 +313,13 @@ namespace verbly {
         {
           case filter<adverb>::type::singleton:
           {
+            bindings.emplace_back(f.get_elem()._id);
+            
             if (notlogic == f.get_notlogic())
             {
-              return "adverb_1_id = @ANTID";
+              return "adverb_1_id = ?";
             } else {
-              return "adverb_1_id != @ANTID";
+              return "adverb_1_id != ?";
             }
           }
           
@@ -355,11 +369,13 @@ namespace verbly {
         {
           case filter<adverb>::type::singleton:
           {
+            bindings.emplace_back(f.get_elem()._id);
+            
             if (notlogic == f.get_notlogic())
             {
-              return "adverb_1_id = @SYNID";
+              return "adverb_1_id = ?";
             } else {
-              return "adverb_1_id != @SYNID";
+              return "adverb_1_id != ?";
             }
           }
           
@@ -409,11 +425,13 @@ namespace verbly {
         {
           case filter<adjective>::type::singleton:
           {
+            bindings.emplace_back(f.get_elem()._id);
+            
             if (notlogic == f.get_notlogic())
             {
-              return "adjective_id = @AMANID";
+              return "adjective_id = ?";
             } else {
-              return "adjective_id != @AMANID";
+              return "adjective_id != ?";
             }
           }
           
@@ -506,54 +524,29 @@ namespace verbly {
       throw std::runtime_error(sqlite3_errmsg(_data.ppdb));
     }
     
-    if (!_rhymes.empty())
+    int i = 1;
+    for (auto& binding : bindings)
     {
-      int i = 0;
-      for (auto rhyme : _rhymes)
+      switch (binding.get_type())
       {
-        std::string rhymer = "%" + rhyme;
-        sqlite3_bind_text(ppstmt, sqlite3_bind_parameter_index(ppstmt, "@RHMPRN"), rhymer.c_str(), rhymer.length(), SQLITE_STATIC);
+        case binding::type::integer:
+        {
+          sqlite3_bind_int(ppstmt, i, binding.get_integer());
+          
+          break;
+        }
         
-        i++;
+        case binding::type::string:
+        {
+          sqlite3_bind_text(ppstmt, i, binding.get_string().c_str(), binding.get_string().length(), SQLITE_STATIC);
+          
+          break;
+        }
       }
+      
+      i++;
     }
     
-    for (auto except : _except)
-    {
-      sqlite3_bind_int(ppstmt, sqlite3_bind_parameter_index(ppstmt, "@EXCID"), except._id);
-    }
-    
-    for (auto prefix : _with_prefix.inorder_flatten())
-    {
-      std::string pfat = prefix + "%";
-      sqlite3_bind_text(ppstmt, sqlite3_bind_parameter_index(ppstmt, "@PREFIX"), pfat.c_str(), pfat.length(), SQLITE_STATIC);
-    }
-    
-    for (auto suffix : _with_suffix.inorder_flatten())
-    {
-      std::string pfat = "%" + suffix;
-      sqlite3_bind_text(ppstmt, sqlite3_bind_parameter_index(ppstmt, "@SUFFIX"), pfat.c_str(), pfat.length(), SQLITE_STATIC);
-    }
-    
-    if (_with_complexity != unlimited)
-    {
-      sqlite3_bind_int(ppstmt, sqlite3_bind_parameter_index(ppstmt, "@COMPLEX"), _with_complexity);
-    }
-    
-    for (auto antonym : _antonym_of.inorder_flatten())
-    {
-      sqlite3_bind_int(ppstmt, sqlite3_bind_parameter_index(ppstmt, "@ANTID"), antonym._id);
-    }
-    
-    for (auto synonym : _synonym_of.inorder_flatten())
-    {
-      sqlite3_bind_int(ppstmt, sqlite3_bind_parameter_index(ppstmt, "@SYNID"), synonym._id);
-    }
-    
-    for (auto adj : _mannernym_of.inorder_flatten())
-    {
-      sqlite3_bind_int(ppstmt, sqlite3_bind_parameter_index(ppstmt, "@AMANID"), adj._id);
-    }
     /*
     for (auto adj : _derived_from_adjective)
     {

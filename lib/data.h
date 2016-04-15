@@ -343,6 +343,38 @@ namespace verbly {
       };
   };
   
+  class binding {
+    public:
+      enum class type {
+        integer,
+        string
+      };
+  
+      type get_type() const;
+      binding(const binding& other);
+      ~binding();
+      binding& operator=(const binding& other);
+    
+      // Integer
+      binding(int _arg);
+      int get_integer() const;
+      void set_integer(int _arg);
+      binding& operator=(int _arg);
+    
+      // String
+      binding(std::string _arg);
+      std::string get_string() const;
+      void set_string(std::string _arg);
+      binding& operator=(std::string _arg);
+    
+    private:
+      union {
+        int _integer;
+        std::string _string;
+      };
+      type _type;
+  };
+  
 };
 
 #endif /* end of include guard: DATA_H_C4AEC3DD */

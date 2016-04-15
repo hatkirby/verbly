@@ -55,7 +55,9 @@ CREATE TABLE `nouns` (
   `singular` VARCHAR(32) NOT NULL,
   `plural` VARCHAR(32),
   `proper` INTEGER(1) NOT NULL,
-  `complexity` INTEGER NOT NULL
+  `complexity` INTEGER NOT NULL,
+  `images` INTEGER NOT NULL,
+  `wnid` INTEGER NOT NULL
 );
 
 DROP TABLE IF EXISTS `hypernymy`;

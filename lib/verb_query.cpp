@@ -65,6 +65,7 @@ namespace verbly {
     std::stringstream construct;
     construct << "SELECT verb_id, infinitive, past_tense, past_participle, ing_form, s_form FROM verbs";
     std::list<std::string> conditions;
+    std::list<binding> bindings;
     
     if (_has_prn)
     {
@@ -73,14 +74,20 @@ namespace verbly {
     
     if (!_rhymes.empty())
     {
-      std::list<std::string> clauses(_rhymes.size(), "pronunciation LIKE @RHMPRN");
+      std::list<std::string> clauses(_rhymes.size(), "pronunciation LIKE ?");
       std::string cond = "verb_id IN (SELECT verb_id FROM verb_pronunciations WHERE " + verbly::implode(std::begin(clauses), std::end(clauses), " OR ") + ")";
       conditions.push_back(cond);
+      
+      for (auto rhyme : _rhymes)
+      {
+        bindings.emplace_back("%" + rhyme);
+      }
     }
     
     for (auto except : _except)
     {
-      conditions.push_back("verb_id != @EXCID");
+      conditions.push_back("verb_id != ?");
+      bindings.emplace_back(except._id);
     }
     
     if (!_has_frames)
@@ -111,21 +118,27 @@ namespace verbly {
       throw std::runtime_error(sqlite3_errmsg(_data.ppdb));
     }
     
-    if (!_rhymes.empty())
+    int i = 1;
+    for (auto& binding : bindings)
     {
-      int i = 0;
-      for (auto rhyme : _rhymes)
+      switch (binding.get_type())
       {
-        std::string rhymer = "%" + rhyme;
-        sqlite3_bind_text(ppstmt, sqlite3_bind_parameter_index(ppstmt, "@RHMPRN"), rhymer.c_str(), rhymer.length(), SQLITE_STATIC);
+        case binding::type::integer:
+        {
+          sqlite3_bind_int(ppstmt, i, binding.get_integer());
+          
+          break;
+        }
         
-        i++;
+        case binding::type::string:
+        {
+          sqlite3_bind_text(ppstmt, i, binding.get_string().c_str(), binding.get_string().length(), SQLITE_STATIC);
+          
+          break;
+        }
       }
-    }
-    
-    for (auto except : _except)
-    {
-      sqlite3_bind_int(ppstmt, sqlite3_bind_parameter_index(ppstmt, "@EXCID"), except._id);
+      
+      i++;
     }
     
     std::list<verb> output;

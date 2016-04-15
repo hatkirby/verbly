@@ -81,6 +81,7 @@ std::map<std::string, verb_t> verbs;
 std::map<std::string, adjective_t> adjectives;
 std::map<std::string, noun_t> nouns;
 std::map<int, std::map<int, int>> wn;
+std::map<int, int> images;
 std::map<std::string, std::set<std::string>> pronunciations;
 
 void print_usage()
@@ -89,10 +90,10 @@ void print_usage()
   std::cout << "-------------------------" << std::endl;
   std::cout << "Requires exactly six arguments." << std::endl;
   std::cout << "1. The path to a VerbNet data directory." << std::endl;
-  std::cout << "2. The path to a SemLink vnpbMappings file." << std::endl;
-  std::cout << "3. The path to an AGID infl.txt file." << std::endl;
-  std::cout << "4. The path to a WordNet prolog data directory." << std::endl;
-  std::cout << "5. The path to a CMUDICT pronunciation file." << std::endl;
+  std::cout << "2. The path to an AGID infl.txt file." << std::endl;
+  std::cout << "3. The path to a WordNet prolog data directory." << std::endl;
+  std::cout << "4. The path to a CMUDICT pronunciation file." << std::endl;
+  std::cout << "5. The path to an ImageNet urls.txt file." << std::endl;
   std::cout << "6. Datafile output path." << std::endl;
   
   exit(1);
@@ -431,10 +432,10 @@ int main(int argc, char** argv)
   // Get verbs from AGID
   std::cout << "Reading inflections..." << std::endl;
   
-  std::ifstream agidfile(argv[3]);
+  std::ifstream agidfile(argv[2]);
   if (!agidfile.is_open())
   {
-    std::cout << "Could not open AGID file: " << argv[3] << std::endl;
+    std::cout << "Could not open AGID file: " << argv[2] << std::endl;
     print_usage();
   }
   
@@ -562,10 +563,10 @@ int main(int argc, char** argv)
   // Pronounciations
   std::cout << "Reading pronunciations..." << std::endl;
   
-  std::ifstream pronfile(argv[5]);
+  std::ifstream pronfile(argv[4]);
   if (!pronfile.is_open())
   {
-    std::cout << "Could not open CMUDICT file: " << argv[5] << std::endl;
+    std::cout << "Could not open CMUDICT file: " << argv[4] << std::endl;
     print_usage();
   }
   
@@ -592,6 +593,36 @@ int main(int argc, char** argv)
       pronunciations[canonical].insert(phoneme_data[2]);
     }
   }
+  
+  // Images
+  std::cout << "Reading images..." << std::endl;
+  
+  std::ifstream imagefile(argv[5]);
+  if (!imagefile.is_open())
+  {
+    std::cout << "Could not open ImageNet file: " << argv[5] << std::endl;
+    print_usage();
+  }
+  
+  for (;;)
+  {
+    std::string line;
+    if (!getline(imagefile, line))
+    {
+      break;
+    }
+    
+    if (line.back() == '\r')
+    {
+      line.pop_back();
+    }
+    
+    std::string wnid_s = line.substr(1, 8);
+    int wnid = stoi(wnid_s) + 100000000;
+    images[wnid]++;
+  }
+  
+  imagefile.close();
   
   // Start writing output
   std::cout << "Writing schema..." << std::endl;
@@ -972,7 +1003,7 @@ int main(int argc, char** argv)
   // - sa: specification (e.g. inaccurate (general) can mean imprecise or incorrect (specific))
   // - sim: synonymy (e.g. cheerful/happy, happy/cheerful)
   // - syntax: positioning flags for some adjectives
-  std::string wnpref {argv[4]};
+  std::string wnpref {argv[3]};
   if (wnpref.back() != '/')
   {
     wnpref += '/';
@@ -1027,9 +1058,9 @@ int main(int argc, char** argv)
         {
           if (nouns.count(word) == 1)
           {
-            query = "INSERT INTO nouns (singular, proper, complexity, plural) VALUES (?, ?, ?, ?)";
+            query = "INSERT INTO nouns (singular, proper, complexity, images, wnid, plural) VALUES (?, ?, ?, ?, ?, ?)";
           } else {
-            query = "INSERT INTO nouns (singular, proper, complexity) VALUES (?, ?, ?)";
+            query = "INSERT INTO nouns (singular, proper, complexity, images, wnid) VALUES (?, ?, ?, ?, ?)";
           }
         
           break;
@@ -1083,10 +1114,12 @@ int main(int argc, char** argv)
           }) ? 1 : 0));
           
           sqlite3_bind_int(ppstmt, 3, verbly::split<std::list<std::string>>(word, " ").size());
+          sqlite3_bind_int(ppstmt, 4, images[synset_id]);
+          sqlite3_bind_int(ppstmt, 5, synset_id);
           
           if (nouns.count(word) == 1)
           {
-            sqlite3_bind_text(ppstmt, 4, nouns[word].plural.c_str(), nouns[word].plural.length(), SQLITE_STATIC);
+            sqlite3_bind_text(ppstmt, 6, nouns[word].plural.c_str(), nouns[word].plural.length(), SQLITE_STATIC);
           }
           
           break;

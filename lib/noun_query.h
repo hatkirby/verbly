@@ -72,6 +72,9 @@ namespace verbly {
       noun_query& is_attribute();
       noun_query& attribute_of(filter<adjective> _f);
       
+      noun_query& at_least_n_images(int _arg);
+      noun_query& with_wnid(int _arg);
+      
 /*      noun_query& derived_from(const word& _w);
       noun_query& not_derived_from(const word& _w);*/
       
@@ -145,6 +148,9 @@ namespace verbly {
       
       bool _is_attribute = false;
       filter<adjective> _attribute_of;
+      
+      int _at_least_n_images = unlimited;
+      std::set<int> _with_wnid;
       
 /*      std::list<adjective> _derived_from_adjective;
       std::list<adjective> _not_derived_from_adjective;
