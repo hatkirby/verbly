@@ -76,13 +76,24 @@ struct group_t {
   std::list<std::list<framepart_t>> frames;
 };
 
+struct pronunciation_t {
+  std::string phonemes;
+  std::string prerhyme;
+  std::string rhyme;
+  
+  bool operator<(const pronunciation_t& other) const
+  {
+    return phonemes < other.phonemes;
+  }
+};
+
 std::map<std::string, group_t> groups;
 std::map<std::string, verb_t> verbs;
 std::map<std::string, adjective_t> adjectives;
 std::map<std::string, noun_t> nouns;
 std::map<int, std::map<int, int>> wn;
 std::map<int, int> images;
-std::map<std::string, std::set<std::string>> pronunciations;
+std::map<std::string, std::set<pronunciation_t>> pronunciations;
 
 void print_usage()
 {
@@ -590,7 +601,47 @@ int main(int argc, char** argv)
       std::string canonical(phoneme_data[1]);
       std::transform(std::begin(canonical), std::end(canonical), std::begin(canonical), ::tolower);
       
-      pronunciations[canonical].insert(phoneme_data[2]);
+      std::string phonemes = phoneme_data[2];
+      auto phoneme_set = verbly::split<std::list<std::string>>(phonemes, " ");
+      auto phemstrt = std::find_if(std::begin(phoneme_set), std::end(phoneme_set), [] (std::string phoneme) {
+        return phoneme.find("1") != std::string::npos;
+      });
+      
+      pronunciation_t p;
+      p.phonemes = phonemes;
+      if (phemstrt != std::end(phoneme_set))
+      {
+        std::stringstream rhymer;
+        for (auto it = phemstrt; it != std::end(phoneme_set); it++)
+        {
+          std::string naked;
+          std::remove_copy_if(std::begin(*it), std::end(*it), std::back_inserter(naked), [] (char ch) {
+            return isdigit(ch);
+          });
+          
+          if (it != phemstrt)
+          {
+            rhymer << " ";
+          }
+          
+          rhymer << naked;
+        }
+        
+        p.rhyme = rhymer.str();
+        
+        if (phemstrt != std::begin(phoneme_set))
+        {
+          phemstrt--;
+          p.prerhyme = *phemstrt;
+        } else {
+          p.prerhyme = "";
+        }
+      } else {
+        p.prerhyme = "";
+        p.rhyme = "";
+      }
+      
+      pronunciations[canonical].insert(p);
     }
   }
   
@@ -720,7 +771,7 @@ int main(int argc, char** argv)
       db_error(ppdb, query);
     }
     
-    sqlite3_bind_text(ppstmt, 1, prep.c_str(), prep.length(), SQLITE_STATIC);
+    sqlite3_bind_text(ppstmt, 1, prep.c_str(), prep.length(), SQLITE_TRANSIENT);
     
     if (sqlite3_step(ppstmt) != SQLITE_DONE)
     {
@@ -752,7 +803,7 @@ int main(int argc, char** argv)
       }
       
       sqlite3_bind_int(ppstmt, 1, rowid);
-      sqlite3_bind_text(ppstmt, 2, group.c_str(), group.length(), SQLITE_STATIC);
+      sqlite3_bind_text(ppstmt, 2, group.c_str(), group.length(), SQLITE_TRANSIENT);
       
       if (sqlite3_step(ppstmt) != SQLITE_DONE)
       {
@@ -775,11 +826,11 @@ int main(int argc, char** argv)
         db_error(ppdb, query);
       }
     
-      sqlite3_bind_text(ppstmt, 1, mapping.second.infinitive.c_str(), mapping.second.infinitive.length(), SQLITE_STATIC);
-      sqlite3_bind_text(ppstmt, 2, mapping.second.past_tense.c_str(), mapping.second.past_tense.length(), SQLITE_STATIC);
-      sqlite3_bind_text(ppstmt, 3, mapping.second.past_participle.c_str(), mapping.second.past_participle.length(), SQLITE_STATIC);
-      sqlite3_bind_text(ppstmt, 4, mapping.second.ing_form.c_str(), mapping.second.ing_form.length(), SQLITE_STATIC);
-      sqlite3_bind_text(ppstmt, 5, mapping.second.s_form.c_str(), mapping.second.s_form.length(), SQLITE_STATIC);
+      sqlite3_bind_text(ppstmt, 1, mapping.second.infinitive.c_str(), mapping.second.infinitive.length(), SQLITE_TRANSIENT);
+      sqlite3_bind_text(ppstmt, 2, mapping.second.past_tense.c_str(), mapping.second.past_tense.length(), SQLITE_TRANSIENT);
+      sqlite3_bind_text(ppstmt, 3, mapping.second.past_participle.c_str(), mapping.second.past_participle.length(), SQLITE_TRANSIENT);
+      sqlite3_bind_text(ppstmt, 4, mapping.second.ing_form.c_str(), mapping.second.ing_form.length(), SQLITE_TRANSIENT);
+      sqlite3_bind_text(ppstmt, 5, mapping.second.s_form.c_str(), mapping.second.s_form.length(), SQLITE_TRANSIENT);
     
       if (sqlite3_step(ppstmt) != SQLITE_DONE)
       {
@@ -811,14 +862,26 @@ int main(int argc, char** argv)
         
         for (auto pronunciation : pronunciations[canonical])
         {
-          query = "INSERT INTO verb_pronunciations (verb_id, pronunciation) VALUES (?, ?)";
+          if (!pronunciation.rhyme.empty())
+          {
+            query = "INSERT INTO verb_pronunciations (verb_id, pronunciation, prerhyme, rhyme) VALUES (?, ?, ?, ?)";
+          } else {
+            query = "INSERT INTO verb_pronunciations (verb_id, pronunciation) VALUES (?, ?)";
+          }
+          
           if (sqlite3_prepare_v2(ppdb, query.c_str(), query.length(), &ppstmt, NULL) != SQLITE_OK)
           {
             db_error(ppdb, query);
           }
           
           sqlite3_bind_int(ppstmt, 1, rowid);
-          sqlite3_bind_text(ppstmt, 2, pronunciation.c_str(), pronunciation.length(), SQLITE_STATIC);
+          sqlite3_bind_text(ppstmt, 2, pronunciation.phonemes.c_str(), pronunciation.phonemes.length(), SQLITE_TRANSIENT);
+          
+          if (!pronunciation.rhyme.empty())
+          {
+            sqlite3_bind_text(ppstmt, 3, pronunciation.prerhyme.c_str(), pronunciation.prerhyme.length(), SQLITE_TRANSIENT);
+            sqlite3_bind_text(ppstmt, 4, pronunciation.rhyme.c_str(), pronunciation.rhyme.length(), SQLITE_TRANSIENT);
+          }
           
           if (sqlite3_step(ppstmt) != SQLITE_DONE)
           {
@@ -856,7 +919,7 @@ int main(int argc, char** argv)
         db_error(ppdb, query);
       }
       
-      sqlite3_bind_blob(ppstmt, 1, rdm.c_str(), rdm.size(), SQLITE_STATIC);
+      sqlite3_bind_blob(ppstmt, 1, rdm.c_str(), rdm.size(), SQLITE_TRANSIENT);
       
       if (sqlite3_step(ppstmt) != SQLITE_DONE)
       {
@@ -949,7 +1012,7 @@ int main(int argc, char** argv)
         }
         
         sqlite3_bind_int(ppstmt, 1, gid);
-        sqlite3_bind_blob(ppstmt, 2, marshall.c_str(), marshall.length(), SQLITE_STATIC);
+        sqlite3_bind_blob(ppstmt, 2, marshall.c_str(), marshall.length(), SQLITE_TRANSIENT);
         
         if (sqlite3_step(ppstmt) != SQLITE_DONE)
         {
@@ -1104,7 +1167,7 @@ int main(int argc, char** argv)
         db_error(ppdb, query);
       }
     
-      sqlite3_bind_text(ppstmt, 1, word.c_str(), word.length(), SQLITE_STATIC);
+      sqlite3_bind_text(ppstmt, 1, word.c_str(), word.length(), SQLITE_TRANSIENT);
       switch (synset_id / 100000000)
       {
         case 1: // Noun
@@ -1119,7 +1182,7 @@ int main(int argc, char** argv)
           
           if (nouns.count(word) == 1)
           {
-            sqlite3_bind_text(ppstmt, 6, nouns[word].plural.c_str(), nouns[word].plural.length(), SQLITE_STATIC);
+            sqlite3_bind_text(ppstmt, 6, nouns[word].plural.c_str(), nouns[word].plural.length(), SQLITE_TRANSIENT);
           }
           
           break;
@@ -1132,8 +1195,8 @@ int main(int argc, char** argv)
           
           if (adjectives.count(word) == 1)
           {
-            sqlite3_bind_text(ppstmt, 3, adjectives[word].comparative.c_str(), adjectives[word].comparative.length(), SQLITE_STATIC);
-            sqlite3_bind_text(ppstmt, 4, adjectives[word].superlative.c_str(), adjectives[word].superlative.length(), SQLITE_STATIC);
+            sqlite3_bind_text(ppstmt, 3, adjectives[word].comparative.c_str(), adjectives[word].comparative.length(), SQLITE_TRANSIENT);
+            sqlite3_bind_text(ppstmt, 4, adjectives[word].superlative.c_str(), adjectives[word].superlative.length(), SQLITE_TRANSIENT);
           }
           
           break;
@@ -1173,21 +1236,36 @@ int main(int argc, char** argv)
           {
             case 1: // Noun
             {
-              query = "INSERT INTO noun_pronunciations (noun_id, pronunciation) VALUES (?, ?)";
+              if (!pronunciation.rhyme.empty())
+              {
+                query = "INSERT INTO noun_pronunciations (noun_id, pronunciation, prerhyme, rhyme) VALUES (?, ?, ?, ?)";
+              } else {
+                query = "INSERT INTO noun_pronunciations (noun_id, pronunciation) VALUES (?, ?)";
+              }
               
               break;
             }
             
             case 3: // Adjective
             {
-              query = "INSERT INTO adjective_pronunciations (adjective_id, pronunciation) VALUES (?, ?)";
+              if (!pronunciation.rhyme.empty())
+              {
+                query = "INSERT INTO adjective_pronunciations (adjective_id, pronunciation, prerhyme, rhyme) VALUES (?, ?, ?, ?)";
+              } else {
+                query = "INSERT INTO adjective_pronunciations (adjective_id, pronunciation) VALUES (?, ?)";
+              }
               
               break;
             }
             
             case 4: // Adverb
             {
-              query = "INSERT INTO adverb_pronunciations (adverb_id, pronunciation) VALUES (?, ?)";
+              if (!pronunciation.rhyme.empty())
+              {
+                query = "INSERT INTO adverb_pronunciations (adverb_id, pronunciation, prerhyme, rhyme) VALUES (?, ?, ?, ?)";
+              } else {
+                query = "INSERT INTO adverb_pronunciations (adverb_id, pronunciation) VALUES (?, ?)";
+              }
               
               break;
             }
@@ -1199,7 +1277,13 @@ int main(int argc, char** argv)
           }
         
           sqlite3_bind_int(ppstmt, 1, rowid);
-          sqlite3_bind_text(ppstmt, 2, pronunciation.c_str(), pronunciation.length(), SQLITE_STATIC);
+          sqlite3_bind_text(ppstmt, 2, pronunciation.phonemes.c_str(), pronunciation.phonemes.length(), SQLITE_TRANSIENT);
+          
+          if (!pronunciation.rhyme.empty())
+          {
+            sqlite3_bind_text(ppstmt, 3, pronunciation.prerhyme.c_str(), pronunciation.prerhyme.length(), SQLITE_TRANSIENT);
+            sqlite3_bind_text(ppstmt, 4, pronunciation.rhyme.c_str(), pronunciation.rhyme.length(), SQLITE_TRANSIENT);
+          }
         
           if (sqlite3_step(ppstmt) != SQLITE_DONE)
           {
@@ -2188,7 +2272,7 @@ int main(int argc, char** argv)
         db_error(ppdb, query);
       }
       
-      sqlite3_bind_text(ppstmt, 1, syn.c_str(), 1, SQLITE_STATIC);
+      sqlite3_bind_text(ppstmt, 1, syn.c_str(), 1, SQLITE_TRANSIENT);
       sqlite3_bind_int(ppstmt, 2, wn[synset_id][wnum]);
       
       if (sqlite3_step(ppstmt) != SQLITE_DONE)

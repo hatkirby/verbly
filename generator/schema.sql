@@ -184,6 +184,8 @@ DROP TABLE IF EXISTS `noun_pronunciations`;
 CREATE TABLE `noun_pronunciations` (
   `noun_id` INTEGER NOT NULL,
   `pronunciation` VARCHAR(64) NOT NULL,
+  `prerhyme` VARCHAR(8),
+  `rhyme` VARCHAR(64),
   FOREIGN KEY (`noun_id`) REFERENCES `nouns`(`noun_id`)
 );
 
@@ -191,6 +193,8 @@ DROP TABLE IF EXISTS `verb_pronunciations`;
 CREATE TABLE `verb_pronunciations` (
   `verb_id` INTEGER NOT NULL,
   `pronunciation` VARCHAR(64) NOT NULL,
+  `prerhyme` VARCHAR(8),
+  `rhyme` VARCHAR(64),
   FOREIGN KEY (`verb_id`) REFERENCES `verbs`(`verb_id`)
 );
 
@@ -198,6 +202,8 @@ DROP TABLE IF EXISTS `adjective_pronunciations`;
 CREATE TABLE `adjective_pronunciations` (
   `adjective_id` INTEGER NOT NULL,
   `pronunciation` VARCHAR(64) NOT NULL,
+  `prerhyme` VARCHAR(8),
+  `rhyme` VARCHAR(64),
   FOREIGN KEY (`adjective_id`) REFERENCES `adjectives`(`adjective_id`)
 );
 
@@ -205,6 +211,8 @@ DROP TABLE IF EXISTS `adverb_pronunciations`;
 CREATE TABLE `adverb_pronunciations` (
   `adverb_id` INTEGER NOT NULL,
   `pronunciation` VARCHAR(64) NOT NULL,
+  `prerhyme` VARCHAR(8),
+  `rhyme` VARCHAR(64),
   FOREIGN KEY (`adverb_id`) REFERENCES `adverbs`(`adverb_id`)
 );
 

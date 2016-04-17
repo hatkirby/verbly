@@ -12,6 +12,10 @@ namespace verbly {
       noun_query& except(const noun& _word);
       noun_query& rhymes_with(const word& _word);
       noun_query& has_pronunciation();
+      noun_query& has_rhyming_noun();
+      noun_query& has_rhyming_adjective();
+      noun_query& has_rhyming_adverb();
+      noun_query& has_rhyming_verb();
       
       noun_query& with_singular_form(std::string _arg);
       noun_query& with_prefix(filter<std::string> _f);
@@ -86,9 +90,13 @@ namespace verbly {
       const data& _data;
       int _limit = unlimited;
       bool _random = false;
-      std::list<std::string> _rhymes;
+      std::list<rhyme> _rhymes;
       std::list<noun> _except;
       bool _has_prn = false;
+      bool _has_rhyming_noun = false;
+      bool _has_rhyming_adjective = false;
+      bool _has_rhyming_adverb = false;
+      bool _has_rhyming_verb = false;
       
       std::list<std::string> _with_singular_form;
       filter<std::string> _with_prefix;

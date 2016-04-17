@@ -3,6 +3,20 @@
 
 namespace verbly {
   
+  class rhyme {
+    public:
+      rhyme(std::string prerhyme, std::string phonemes);
+      
+      std::string get_prerhyme() const;
+      std::string get_rhyme() const;
+      
+      bool operator==(const rhyme& other) const;
+      
+    private:
+      std::string _prerhyme;
+      std::string _rhyme;
+  };
+  
   class word {
     protected:
       const data* _data;
@@ -10,6 +24,7 @@ namespace verbly {
       bool _valid = false;
       
       std::list<std::list<std::string>> pronunciations;
+      std::list<rhyme> rhymes;
       
       word();
       word(const data& _data, int _id);
@@ -24,7 +39,7 @@ namespace verbly {
     public:
       virtual std::string base_form() const = 0;
       
-      std::list<std::string> rhyme_phonemes() const;
+      std::list<rhyme> get_rhymes() const;
       bool starts_with_vowel_sound() const;
   };
   

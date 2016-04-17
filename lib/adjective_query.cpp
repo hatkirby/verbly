@@ -33,7 +33,7 @@ namespace verbly {
   
   adjective_query& adjective_query::rhymes_with(const word& _word)
   {
-    for (auto rhyme : _word.rhyme_phonemes())
+    for (auto rhyme : _word.get_rhymes())
     {
       _rhymes.push_back(rhyme);
     }
@@ -49,6 +49,34 @@ namespace verbly {
   adjective_query& adjective_query::has_pronunciation()
   {
     this->_has_prn = true;
+    
+    return *this;
+  }
+  
+  adjective_query& adjective_query::has_rhyming_noun()
+  {
+    _has_rhyming_noun = true;
+    
+    return *this;
+  }
+  
+  adjective_query& adjective_query::has_rhyming_adjective()
+  {
+    _has_rhyming_adjective = true;
+    
+    return *this;
+  }
+  
+  adjective_query& adjective_query::has_rhyming_adverb()
+  {
+    _has_rhyming_adverb = true;
+    
+    return *this;
+  }
+  
+  adjective_query& adjective_query::has_rhyming_verb()
+  {
+    _has_rhyming_verb = true;
     
     return *this;
   }
@@ -227,14 +255,35 @@ namespace verbly {
     
     if (!_rhymes.empty())
     {
-      std::list<std::string> clauses(_rhymes.size(), "pronunciation LIKE ?");
+      std::list<std::string> clauses(_rhymes.size(), "(prerhyme != ? AND rhyme = ?)");
       std::string cond = "adjective_id IN (SELECT adjective_id FROM adjective_pronunciations WHERE " + verbly::implode(std::begin(clauses), std::end(clauses), " OR ") + ")";
       conditions.push_back(cond);
       
-      for (auto rhyme : _rhymes)
+      for (auto rhy : _rhymes)
       {
-        bindings.emplace_back("%" + rhyme);
+        bindings.emplace_back(rhy.get_prerhyme());
+        bindings.emplace_back(rhy.get_rhyme());
       }
+    }
+    
+    if (_has_rhyming_noun)
+    {
+      conditions.push_back("adjective_id IN (SELECT a.adjective_id FROM adjectives AS a INNER JOIN adjective_pronunciations AS curp ON curp.adjective_id = a.adjective_id INNER JOIN noun_pronunciations AS rhmp ON rhmp.prerhyme != curp.prerhyme AND rhmp.rhyme = curp.rhyme)");
+    }
+    
+    if (_has_rhyming_adjective)
+    {
+      conditions.push_back("adjective_id IN (SELECT a.adjective_id FROM adjectives AS a INNER JOIN adjective_pronunciations AS curp ON curp.adjective_id = a.adjective_id INNER JOIN adjective_pronunciations AS rhmp ON rhmp.prerhyme != curp.prerhyme AND rhmp.rhyme = curp.rhyme AND rhmp.adjective_id != curp.adjective_id)");
+    }
+    
+    if (_has_rhyming_adverb)
+    {
+      conditions.push_back("adjective_id IN (SELECT a.adjective_id FROM adjectives AS a INNER JOIN adjective_pronunciations AS curp ON curp.adjective_id = a.adjective_id INNER JOIN adverb_pronunciations AS rhmp ON rhmp.prerhyme != curp.prerhyme AND rhmp.rhyme = curp.rhyme)");
+    }
+    
+    if (_has_rhyming_verb)
+    {
+      conditions.push_back("adjective_id IN (SELECT a.adjective_id FROM adjectives AS a INNER JOIN adjective_pronunciations AS curp ON curp.adjective_id = a.adjective_id INNER JOIN verb_pronunciations AS rhmp ON rhmp.prerhyme != curp.prerhyme AND rhmp.rhyme = curp.rhyme)");
     }
     
     for (auto except : _except)
@@ -816,7 +865,7 @@ namespace verbly {
         
         case binding::type::string:
         {
-          sqlite3_bind_text(ppstmt, i, binding.get_string().c_str(), binding.get_string().length(), SQLITE_STATIC);
+          sqlite3_bind_text(ppstmt, i, binding.get_string().c_str(), binding.get_string().length(), SQLITE_TRANSIENT);
           
           break;
         }
@@ -894,7 +943,7 @@ namespace verbly {
     
     for (auto& adjective : output)
     {
-      query = "SELECT pronunciation FROM adjective_pronunciations WHERE adjective_id = ?";
+      query = "SELECT pronunciation, prerhyme, rhyme FROM adjective_pronunciations WHERE adjective_id = ?";
       if (sqlite3_prepare_v2(_data.ppdb, query.c_str(), query.length(), &ppstmt, NULL) != SQLITE_OK)
       {
         throw std::runtime_error(sqlite3_errmsg(_data.ppdb));
@@ -908,6 +957,13 @@ namespace verbly {
         auto phonemes = verbly::split<std::list<std::string>>(pronunciation, " ");
         
         adjective.pronunciations.push_back(phonemes);
+        
+        if ((sqlite3_column_type(ppstmt, 1) != SQLITE_NULL) && (sqlite3_column_type(ppstmt, 2) != SQLITE_NULL))
+        {
+          std::string prerhyme(reinterpret_cast<const char*>(sqlite3_column_text(ppstmt, 1)));
+          std::string rhyming(reinterpret_cast<const char*>(sqlite3_column_text(ppstmt, 2)));
+          adjective.rhymes.emplace_back(prerhyme, rhyming);
+        }
       }
       
       sqlite3_finalize(ppstmt);

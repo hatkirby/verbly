@@ -73,7 +73,7 @@ namespace verbly {
         
         case binding::type::string:
         {
-          sqlite3_bind_text(ppstmt, i, binding.get_string().c_str(), binding.get_string().length(), SQLITE_STATIC);
+          sqlite3_bind_text(ppstmt, i, binding.get_string().c_str(), binding.get_string().length(), SQLITE_TRANSIENT);
           
           break;
         }

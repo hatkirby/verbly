@@ -1,7 +1,7 @@
 #include "verbly.h"
 
 namespace verbly {
-
+  
   data::data(std::string datafile)
   {
     if (sqlite3_open_v2(datafile.c_str(), &ppdb, SQLITE_OPEN_READONLY, NULL) != SQLITE_OK)
