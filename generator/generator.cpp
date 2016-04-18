@@ -1103,7 +1103,7 @@ int main(int argc, char** argv)
     {
       ppgs.update();
       
-      std::regex relation("^s\\(([134]\\d{8}),(\\d+),'([\\w ]+)',");
+      std::regex relation("^s\\(([134]\\d{8}),(\\d+),'(.+)',\\w,\\d+,\\d+\\)\\.$");
       std::smatch relation_data;
       if (!std::regex_search(line, relation_data, relation))
       {
@@ -1113,6 +1113,11 @@ int main(int argc, char** argv)
       int synset_id = stoi(relation_data[1]);
       int wnum = stoi(relation_data[2]);
       std::string word = relation_data[3];
+      size_t word_it;
+      while ((word_it = word.find("''")) != std::string::npos)
+      {
+        word.erase(word_it, 1);
+      }
     
       std::string query;
       switch (synset_id / 100000000)
