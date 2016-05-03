@@ -3,6 +3,26 @@
 
 namespace verbly {
   
+  rhyme::rhyme(std::string prerhyme, std::string phonemes) : _prerhyme(prerhyme), _rhyme(phonemes)
+  {
+    
+  }
+  
+  std::string rhyme::get_prerhyme() const
+  {
+    return _prerhyme;
+  }
+  
+  std::string rhyme::get_rhyme() const
+  {
+    return _rhyme;
+  }
+  
+  bool rhyme::operator==(const rhyme& other) const
+  {
+    return std::tie(_prerhyme, _rhyme) == std::tie(other._prerhyme, other._rhyme);
+  }
+  
   word::word()
   {
     
@@ -13,28 +33,11 @@ namespace verbly {
     
   }
   
-  std::list<std::string> word::rhyme_phonemes() const
+  std::list<rhyme> word::get_rhymes() const
   {
     assert(_valid == true);
     
-    std::list<std::string> result;
-    
-    for (auto pronunciation : pronunciations)
-    {
-      auto phemstrt = std::find_if(std::begin(pronunciation), std::end(pronunciation), [] (std::string phoneme) {
-        return phoneme.find("1") != std::string::npos;
-      });
-      
-      std::stringstream rhymer;
-      for (auto it = phemstrt; it != std::end(pronunciation); it++)
-      {
-        rhymer << " " << *it;
-      }
-      
-      result.push_back(rhymer.str());
-    }
-    
-    return result;
+    return rhymes;
   }
   
   bool word::starts_with_vowel_sound() const

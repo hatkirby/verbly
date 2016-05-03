@@ -34,6 +34,13 @@ namespace verbly {
     
     return _plural;
   }
+  
+  int noun::wnid() const
+  {
+    assert(_valid == true);
+    
+    return _wnid;
+  }
 
   bool noun::has_plural_form() const
   {
@@ -194,6 +201,16 @@ namespace verbly {
     assert(_valid == true);
     
     return _data->adjectives().variant_of(*this);
+  }
+  
+  std::string noun::imagenet_url() const
+  {
+    std::stringstream url;
+    url << "http://www.image-net.org/api/text/imagenet.synset.geturls?wnid=n";
+    url.width(8);
+    url.fill('0');
+    url << (_wnid % 100000000);
+    return url.str();
   }
   
   bool noun::operator<(const noun& other) const

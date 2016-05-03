@@ -7,6 +7,7 @@ namespace verbly {
     private:
       std::string _singular;
       std::string _plural;
+      int _wnid;
       
       friend class noun_query;
       
@@ -17,6 +18,7 @@ namespace verbly {
       std::string base_form() const;
       std::string singular_form() const;
       std::string plural_form() const;
+      int wnid() const;
       
       bool has_plural_form() const;
       
@@ -42,6 +44,8 @@ namespace verbly {
       noun_query antonyms() const;
       adjective_query pertainyms() const;
       adjective_query variations() const;
+      
+      std::string imagenet_url() const;
       
       bool operator<(const noun& other) const;
   };

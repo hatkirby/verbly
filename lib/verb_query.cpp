@@ -33,7 +33,7 @@ namespace verbly {
   
   verb_query& verb_query::rhymes_with(const word& _word)
   {
-    for (auto rhyme : _word.rhyme_phonemes())
+    for (auto rhyme : _word.get_rhymes())
     {
       _rhymes.push_back(rhyme);
     }
@@ -53,6 +53,34 @@ namespace verbly {
     return *this;
   }
   
+  verb_query& verb_query::has_rhyming_noun()
+  {
+    _has_rhyming_noun = true;
+    
+    return *this;
+  }
+  
+  verb_query& verb_query::has_rhyming_adjective()
+  {
+    _has_rhyming_adjective = true;
+    
+    return *this;
+  }
+  
+  verb_query& verb_query::has_rhyming_adverb()
+  {
+    _has_rhyming_adverb = true;
+    
+    return *this;
+  }
+  
+  verb_query& verb_query::has_rhyming_verb()
+  {
+    _has_rhyming_verb = true;
+    
+    return *this;
+  }
+  
   verb_query& verb_query::has_frames()
   {
     this->_has_frames = true;
@@ -65,6 +93,7 @@ namespace verbly {
     std::stringstream construct;
     construct << "SELECT verb_id, infinitive, past_tense, past_participle, ing_form, s_form FROM verbs";
     std::list<std::string> conditions;
+    std::list<binding> bindings;
     
     if (_has_prn)
     {
@@ -73,14 +102,41 @@ namespace verbly {
     
     if (!_rhymes.empty())
     {
-      std::list<std::string> clauses(_rhymes.size(), "pronunciation LIKE @RHMPRN");
+      std::list<std::string> clauses(_rhymes.size(), "(prerhyme != ? AND rhyme = ?)");
       std::string cond = "verb_id IN (SELECT verb_id FROM verb_pronunciations WHERE " + verbly::implode(std::begin(clauses), std::end(clauses), " OR ") + ")";
       conditions.push_back(cond);
+      
+      for (auto rhy : _rhymes)
+      {
+        bindings.emplace_back(rhy.get_prerhyme());
+        bindings.emplace_back(rhy.get_rhyme());
+      }
+    }
+    
+    if (_has_rhyming_noun)
+    {
+      conditions.push_back("verb_id IN (SELECT a.verb_id FROM verbs AS a INNER JOIN verb_pronunciations AS curp ON curp.noun_id = a.adverb_id INNER JOIN noun_pronunciations AS rhmp ON rhmp.prerhyme != curp.prerhyme AND rhmp.rhyme = curp.rhyme)");
+    }
+    
+    if (_has_rhyming_adjective)
+    {
+      conditions.push_back("verb_id IN (SELECT a.verb_id FROM verbs AS a INNER JOIN verb_pronunciations AS curp ON curp.noun_id = a.adverb_id INNER JOIN adjective_pronunciations AS rhmp ON rhmp.prerhyme != curp.prerhyme AND rhmp.rhyme = curp.rhyme)");
+    }
+    
+    if (_has_rhyming_adverb)
+    {
+      conditions.push_back("verb_id IN (SELECT a.verb_id FROM verbs AS a INNER JOIN verb_pronunciations AS curp ON curp.noun_id = a.adverb_id INNER JOIN adverb_pronunciations AS rhmp ON rhmp.prerhyme != curp.prerhyme AND rhmp.rhyme = curp.rhyme)");
+    }
+    
+    if (_has_rhyming_verb)
+    {
+      conditions.push_back("verb_id IN (SELECT a.verb_id FROM verbs AS a INNER JOIN verb_pronunciations AS curp ON curp.noun_id = a.adverb_id INNER JOIN verb_pronunciations AS rhmp ON rhmp.prerhyme != curp.prerhyme AND rhmp.rhyme = curp.rhyme AND rhmp.verb_id != curp.verb_id)");
     }
     
     for (auto except : _except)
     {
-      conditions.push_back("verb_id != @EXCID");
+      conditions.push_back("verb_id != ?");
+      bindings.emplace_back(except._id);
     }
     
     if (!_has_frames)
@@ -111,21 +167,27 @@ namespace verbly {
       throw std::runtime_error(sqlite3_errmsg(_data.ppdb));
     }
     
-    if (!_rhymes.empty())
+    int i = 1;
+    for (auto& binding : bindings)
     {
-      int i = 0;
-      for (auto rhyme : _rhymes)
+      switch (binding.get_type())
       {
-        std::string rhymer = "%" + rhyme;
-        sqlite3_bind_text(ppstmt, sqlite3_bind_parameter_index(ppstmt, "@RHMPRN"), rhymer.c_str(), rhymer.length(), SQLITE_STATIC);
+        case binding::type::integer:
+        {
+          sqlite3_bind_int(ppstmt, i, binding.get_integer());
+          
+          break;
+        }
         
-        i++;
+        case binding::type::string:
+        {
+          sqlite3_bind_text(ppstmt, i, binding.get_string().c_str(), binding.get_string().length(), SQLITE_TRANSIENT);
+          
+          break;
+        }
       }
-    }
-    
-    for (auto except : _except)
-    {
-      sqlite3_bind_int(ppstmt, sqlite3_bind_parameter_index(ppstmt, "@EXCID"), except._id);
+      
+      i++;
     }
     
     std::list<verb> output;
@@ -145,7 +207,7 @@ namespace verbly {
     
     for (auto& verb : output)
     {
-      query = "SELECT pronunciation FROM verb_pronunciations WHERE verb_id = ?";
+      query = "SELECT pronunciation, prerhyme, rhyme FROM verb_pronunciations WHERE verb_id = ?";
       if (sqlite3_prepare_v2(_data.ppdb, query.c_str(), query.length(), &ppstmt, NULL) != SQLITE_OK)
       {
         throw std::runtime_error(sqlite3_errmsg(_data.ppdb));
@@ -159,6 +221,13 @@ namespace verbly {
         auto phonemes = verbly::split<std::list<std::string>>(pronunciation, " ");
         
         verb.pronunciations.push_back(phonemes);
+        
+        if ((sqlite3_column_type(ppstmt, 1) != SQLITE_NULL) && (sqlite3_column_type(ppstmt, 2) != SQLITE_NULL))
+        {
+          std::string prerhyme(reinterpret_cast<const char*>(sqlite3_column_text(ppstmt, 1)));
+          std::string rhyming(reinterpret_cast<const char*>(sqlite3_column_text(ppstmt, 2)));
+          verb.rhymes.emplace_back(prerhyme, rhyming);
+        }
       }
       
       sqlite3_finalize(ppstmt);

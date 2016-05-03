@@ -37,13 +37,19 @@ namespace verbly {
   {
     std::stringstream construct;
     construct << "SELECT frames.data, groups.data FROM frames INNER JOIN groups ON frames.group_id = groups.group_id";
+    std::list<binding> bindings;
     
     if (!_for_verb.empty())
     {
-      std::list<std::string> clauses(_for_verb.size(), "verb_id = @VERID");
+      std::list<std::string> clauses(_for_verb.size(), "verb_id = ?");
       construct << " WHERE frames.group_id IN (SELECT group_id FROM verb_groups WHERE ";
       construct << verbly::implode(std::begin(clauses), std::end(clauses), " OR ");
       construct << ")";
+      
+      for (auto v : _for_verb)
+      {
+        bindings.emplace_back(v._id);
+      }
     }
     
     sqlite3_stmt* ppstmt;
@@ -53,9 +59,27 @@ namespace verbly {
       throw std::runtime_error(sqlite3_errmsg(_data.ppdb));
     }
     
-    for (auto verb : _for_verb)
+    int i = 1;
+    for (auto& binding : bindings)
     {
-      sqlite3_bind_int(ppstmt, sqlite3_bind_parameter_index(ppstmt, "@VERID"), verb._id);
+      switch (binding.get_type())
+      {
+        case binding::type::integer:
+        {
+          sqlite3_bind_int(ppstmt, i, binding.get_integer());
+          
+          break;
+        }
+        
+        case binding::type::string:
+        {
+          sqlite3_bind_text(ppstmt, i, binding.get_string().c_str(), binding.get_string().length(), SQLITE_TRANSIENT);
+          
+          break;
+        }
+      }
+      
+      i++;
     }
     
     std::list<frame> output;

@@ -37,13 +37,19 @@ namespace verbly {
   {
     std::stringstream construct;
     construct << "SELECT form FROM prepositions";
+    std::list<binding> bindings;
     
     if (!_in_group.empty())
     {
-      std::list<std::string> clauses(_in_group.size(), "groupname = @GNAME");
+      std::list<std::string> clauses(_in_group.size(), "groupname = ?");
       construct << " WHERE preposition_id IN (SELECT preposition_id FROM preposition_groups WHERE ";
       construct << verbly::implode(std::begin(clauses), std::end(clauses), " OR ");
       construct << ")";
+      
+      for (auto g : _in_group)
+      {
+        bindings.emplace_back(g);
+      }
     }
     
     if (_random)
@@ -63,9 +69,27 @@ namespace verbly {
       throw std::runtime_error(sqlite3_errmsg(_data.ppdb));
     }
     
-    for (auto& group : _in_group)
+    int i = 1;
+    for (auto& binding : bindings)
     {
-      sqlite3_bind_text(ppstmt, sqlite3_bind_parameter_index(ppstmt, "@GNAME"), group.c_str(), group.length(), SQLITE_STATIC);
+      switch (binding.get_type())
+      {
+        case binding::type::integer:
+        {
+          sqlite3_bind_int(ppstmt, i, binding.get_integer());
+          
+          break;
+        }
+        
+        case binding::type::string:
+        {
+          sqlite3_bind_text(ppstmt, i, binding.get_string().c_str(), binding.get_string().length(), SQLITE_TRANSIENT);
+          
+          break;
+        }
+      }
+      
+      i++;
     }
     
     std::list<preposition> output;

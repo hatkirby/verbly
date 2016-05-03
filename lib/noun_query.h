@@ -12,6 +12,10 @@ namespace verbly {
       noun_query& except(const noun& _word);
       noun_query& rhymes_with(const word& _word);
       noun_query& has_pronunciation();
+      noun_query& has_rhyming_noun();
+      noun_query& has_rhyming_adjective();
+      noun_query& has_rhyming_adverb();
+      noun_query& has_rhyming_verb();
       
       noun_query& with_singular_form(std::string _arg);
       noun_query& with_prefix(filter<std::string> _f);
@@ -74,6 +78,9 @@ namespace verbly {
       noun_query& is_attribute();
       noun_query& attribute_of(filter<adjective> _f);
       
+      noun_query& at_least_n_images(int _arg);
+      noun_query& with_wnid(int _arg);
+      
 /*      noun_query& derived_from(const word& _w);
       noun_query& not_derived_from(const word& _w);*/
       
@@ -85,9 +92,13 @@ namespace verbly {
       const data& _data;
       int _limit = unlimited;
       bool _random = false;
-      std::list<std::string> _rhymes;
+      std::list<rhyme> _rhymes;
       std::list<noun> _except;
       bool _has_prn = false;
+      bool _has_rhyming_noun = false;
+      bool _has_rhyming_adjective = false;
+      bool _has_rhyming_adverb = false;
+      bool _has_rhyming_verb = false;
       
       std::list<std::string> _with_singular_form;
       filter<std::string> _with_prefix;
@@ -149,6 +160,9 @@ namespace verbly {
       
       bool _is_attribute = false;
       filter<adjective> _attribute_of;
+      
+      int _at_least_n_images = unlimited;
+      std::set<int> _with_wnid;
       
 /*      std::list<adjective> _derived_from_adjective;
       std::list<adjective> _not_derived_from_adjective;

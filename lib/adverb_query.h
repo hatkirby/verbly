@@ -12,6 +12,10 @@ namespace verbly {
       adverb_query& except(const adverb& _word);
       adverb_query& rhymes_with(const word& _word);
       adverb_query& has_pronunciation();
+      adverb_query& has_rhyming_noun();
+      adverb_query& has_rhyming_adjective();
+      adverb_query& has_rhyming_adverb();
+      adverb_query& has_rhyming_verb();
       
       adverb_query& requires_comparative_form();
       adverb_query& requires_superlative_form();
@@ -41,9 +45,13 @@ namespace verbly {
       const data& _data;
       int _limit = unlimited;
       bool _random = false;
-      std::list<std::string> _rhymes;
+      std::list<rhyme> _rhymes;
       std::list<adverb> _except;
       bool _has_prn = false;
+      bool _has_rhyming_noun = false;
+      bool _has_rhyming_adjective = false;
+      bool _has_rhyming_adverb = false;
+      bool _has_rhyming_verb = false;
       
       bool _requires_comparative_form = false;
       bool _requires_superlative_form = false;
