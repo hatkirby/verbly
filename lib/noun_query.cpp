@@ -76,6 +76,13 @@ namespace verbly {
     return *this;
   }
   
+  noun_query& noun_query::requires_plural_form()
+  {
+    _requires_plural_form = true;
+    
+    return *this;
+  }
+  
   noun_query& noun_query::with_complexity(int _arg)
   {
     _with_complexity = _arg;
@@ -482,6 +489,11 @@ namespace verbly {
       std::list<std::string> clauses(_with_singular_form.size(), "singular = @SFORM");
       std::string cond = "(" + verbly::implode(std::begin(clauses), std::end(clauses), " OR ") + ")";
       conditions.push_back(cond);
+    }
+    
+    if (_requires_plural_form)
+    {
+      conditions.push_back("plural IS NOT NULL");
     }
     
     if (!_with_prefix.empty())

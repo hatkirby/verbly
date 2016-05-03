@@ -17,6 +17,8 @@ namespace verbly {
       noun_query& with_prefix(filter<std::string> _f);
       noun_query& with_suffix(filter<std::string> _f);
       
+      noun_query& requires_plural_form();
+      
       noun_query& with_complexity(int _arg);
       
       noun_query& is_hypernym();
@@ -92,6 +94,8 @@ namespace verbly {
       filter<std::string> _with_suffix;
       
       int _with_complexity = unlimited;
+      
+      bool _requires_plural_form = false;
       
       bool _is_hypernym = false;
       filter<noun> _hypernym_of;
