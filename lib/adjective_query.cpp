@@ -104,6 +104,27 @@ namespace verbly {
     return *this;
   }
   
+  adjective_query& adjective_query::requires_comparative_form()
+  {
+    _requires_comparative_form = true;
+    
+    return *this;
+  }
+  
+  adjective_query& adjective_query::requires_superlative_form()
+  {
+    _requires_superlative_form = true;
+    
+    return *this;
+  }
+  
+  adjective_query& adjective_query::position(adjective::positioning pos)
+  {
+    _position = pos;
+    
+    return *this;
+  }
+  
   adjective_query& adjective_query::is_variant()
   {
     this->_is_variant = true;
