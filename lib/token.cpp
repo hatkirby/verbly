@@ -627,4 +627,19 @@ namespace verbly {
     _string._str = _str;
   }
   
+  std::ostream& operator<<(std::ostream& os, token::type _type)
+  {
+    switch (_type)
+    {
+      case token::type::verb: return os << "verb";
+      case token::type::noun: return os << "noun";
+      case token::type::adjective: return os << "adjective";
+      case token::type::adverb: return os << "adverb";
+      case token::type::preposition: return os << "preposition";
+      case token::type::fillin: return os << "fillin";
+      case token::type::utterance: return os << "utterance";
+      case token::type::string: return os << "string";
+    }
+  }
+  
 };

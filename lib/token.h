@@ -163,6 +163,8 @@ namespace verbly {
         } _utterance;
       };
   };
+  
+  std::ostream& operator<<(std::ostream& os, token::type _type);
 
 };
 
