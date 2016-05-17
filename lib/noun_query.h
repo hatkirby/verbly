@@ -11,6 +11,7 @@ namespace verbly {
       noun_query& random();
       noun_query& except(const noun& _word);
       noun_query& rhymes_with(const word& _word);
+      noun_query& rhymes_with(rhyme _r);
       noun_query& has_pronunciation();
       noun_query& has_rhyming_noun();
       noun_query& has_rhyming_adjective();

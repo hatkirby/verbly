@@ -46,6 +46,13 @@ namespace verbly {
     return *this;
   }
   
+  verb_query& verb_query::rhymes_with(rhyme _r)
+  {
+    _rhymes.push_back(_r);
+    
+    return *this;
+  }
+  
   verb_query& verb_query::has_pronunciation()
   {
     this->_has_prn = true;
