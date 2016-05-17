@@ -20,6 +20,7 @@ namespace verbly {
   token::token(const token& other)
   {
     _type = other._type;
+    _extra = other._extra;
     
     switch (_type)
     {
@@ -90,6 +91,7 @@ namespace verbly {
     this->~token();
     
     _type = other._type;
+    _extra = other._extra;
     
     switch (_type)
     {
