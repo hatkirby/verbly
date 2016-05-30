@@ -17,6 +17,7 @@ namespace verbly {
       noun_query& has_rhyming_adjective();
       noun_query& has_rhyming_adverb();
       noun_query& has_rhyming_verb();
+      noun_query& with_stress(filter<std::vector<bool>> _arg);
       
       noun_query& with_singular_form(std::string _arg);
       noun_query& with_prefix(filter<std::string> _f);
@@ -100,6 +101,7 @@ namespace verbly {
       bool _has_rhyming_adjective = false;
       bool _has_rhyming_adverb = false;
       bool _has_rhyming_verb = false;
+      filter<std::vector<bool>> _stress;
       
       std::list<std::string> _with_singular_form;
       filter<std::string> _with_prefix;

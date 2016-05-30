@@ -17,6 +17,7 @@ namespace verbly {
       adverb_query& has_rhyming_adjective();
       adverb_query& has_rhyming_adverb();
       adverb_query& has_rhyming_verb();
+      adverb_query& with_stress(filter<std::vector<bool>> _arg);
       
       adverb_query& requires_comparative_form();
       adverb_query& requires_superlative_form();
@@ -53,6 +54,7 @@ namespace verbly {
       bool _has_rhyming_adjective = false;
       bool _has_rhyming_adverb = false;
       bool _has_rhyming_verb = false;
+      filter<std::vector<bool>> _stress;
       
       bool _requires_comparative_form = false;
       bool _requires_superlative_form = false;

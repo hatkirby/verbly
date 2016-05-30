@@ -17,6 +17,7 @@ namespace verbly {
       verb_query& has_rhyming_adjective();
       verb_query& has_rhyming_adverb();
       verb_query& has_rhyming_verb();
+      verb_query& with_stress(filter<std::vector<bool>> _arg);
       
       verb_query& has_frames();
       
@@ -36,6 +37,7 @@ namespace verbly {
       bool _has_rhyming_adjective = false;
       bool _has_rhyming_adverb = false;
       bool _has_rhyming_verb = false;
+      filter<std::vector<bool>> _stress;
   };
 
 };

@@ -186,6 +186,8 @@ CREATE TABLE `noun_pronunciations` (
   `pronunciation` VARCHAR(64) NOT NULL,
   `prerhyme` VARCHAR(8),
   `rhyme` VARCHAR(64),
+  `syllables` INT NOT NULL,
+  `stress` VARCHAR(64) NOT NULL,
   FOREIGN KEY (`noun_id`) REFERENCES `nouns`(`noun_id`)
 );
 
@@ -195,6 +197,8 @@ CREATE TABLE `verb_pronunciations` (
   `pronunciation` VARCHAR(64) NOT NULL,
   `prerhyme` VARCHAR(8),
   `rhyme` VARCHAR(64),
+  `syllables` INT NOT NULL,
+  `stress` VARCHAR(64) NOT NULL,
   FOREIGN KEY (`verb_id`) REFERENCES `verbs`(`verb_id`)
 );
 
@@ -204,6 +208,8 @@ CREATE TABLE `adjective_pronunciations` (
   `pronunciation` VARCHAR(64) NOT NULL,
   `prerhyme` VARCHAR(8),
   `rhyme` VARCHAR(64),
+  `syllables` INT NOT NULL,
+  `stress` VARCHAR(64) NOT NULL,
   FOREIGN KEY (`adjective_id`) REFERENCES `adjectives`(`adjective_id`)
 );
 
@@ -213,6 +219,8 @@ CREATE TABLE `adverb_pronunciations` (
   `pronunciation` VARCHAR(64) NOT NULL,
   `prerhyme` VARCHAR(8),
   `rhyme` VARCHAR(64),
+  `syllables` INT NOT NULL,
+  `stress` VARCHAR(64) NOT NULL,
   FOREIGN KEY (`adverb_id`) REFERENCES `adverbs`(`adverb_id`)
 );
 

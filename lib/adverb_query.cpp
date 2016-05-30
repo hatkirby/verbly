@@ -102,6 +102,13 @@ namespace verbly {
     return *this;
   }
   
+  adverb_query& adverb_query::with_stress(filter<std::vector<bool>> _arg)
+  {
+    _stress = _arg;
+    
+    return *this;
+  }
+  
   adverb_query& adverb_query::with_prefix(filter<std::string> _f)
   {
     _f.clean();
@@ -261,6 +268,68 @@ namespace verbly {
     if (_requires_superlative_form)
     {
       conditions.push_back("superlative IS NOT NULL");
+    }
+    
+    if (!_stress.empty())
+    {
+      std::stringstream cond;
+      if (_stress.get_notlogic())
+      {
+        cond << "adverb_id NOT IN";
+      } else {
+        cond << "adverb_id IN";
+      }
+      
+      cond << "(SELECT adverb_id FROM adverb_pronunciations WHERE ";
+      
+      std::function<std::string (filter<std::vector<bool>>, bool)> recur = [&] (filter<std::vector<bool>> f, bool notlogic) -> std::string {
+        switch (f.get_type())
+        {
+          case filter<std::vector<bool>>::type::singleton:
+          {
+            std::ostringstream _val;
+            for (auto syl : f.get_elem())
+            {
+              if (syl)
+              {
+                _val << "1";
+              } else {
+                _val << "0";
+              }
+            }
+            
+            bindings.emplace_back(_val.str());
+            
+            if (notlogic == f.get_notlogic())
+            {
+              return "stress = ?";
+            } else {
+              return "stress != ?";
+            }
+          }
+          
+          case filter<std::vector<bool>>::type::group:
+          {
+            bool truelogic = notlogic != f.get_notlogic();
+            
+            std::list<std::string> clauses;
+            std::transform(std::begin(f), std::end(f), std::back_inserter(clauses), [&] (filter<std::vector<bool>> f2) {
+              return recur(f2, truelogic);
+            });
+            
+            if (truelogic == f.get_orlogic())
+            {
+              return "(" + verbly::implode(std::begin(clauses), std::end(clauses), " AND ") + ")";
+            } else {
+              return "(" + verbly::implode(std::begin(clauses), std::end(clauses), " OR ") + ")";
+            }
+          }
+        }
+      };
+      
+      cond << recur(_stress, _stress.get_notlogic());
+      cond << ")";
+      conditions.push_back(cond.str());
     }
     
     if (!_with_prefix.empty())

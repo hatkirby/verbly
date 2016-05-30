@@ -80,6 +80,8 @@ struct pronunciation_t {
   std::string phonemes;
   std::string prerhyme;
   std::string rhyme;
+  int syllables = 0;
+  std::string stress;
   
   bool operator<(const pronunciation_t& other) const
   {
@@ -609,6 +611,8 @@ int main(int argc, char** argv)
       
       pronunciation_t p;
       p.phonemes = phonemes;
+      
+      // Rhyme detection
       if (phemstrt != std::end(phoneme_set))
       {
         std::stringstream rhymer;
@@ -639,6 +643,23 @@ int main(int argc, char** argv)
       } else {
         p.prerhyme = "";
         p.rhyme = "";
+      }
+      
+      // Syllable/stress
+      for (auto phm : phoneme_set)
+      {
+        if (isdigit(phm.back()))
+        {
+          // It's a vowel!
+          p.syllables++;
+        
+          if (phm.back() == '1')
+          {
+            p.stress.push_back('1');
+          } else {
+            p.stress.push_back('0');
+          }
+        }
       }
       
       pronunciations[canonical].insert(p);
@@ -864,9 +885,9 @@ int main(int argc, char** argv)
         {
           if (!pronunciation.rhyme.empty())
           {
-            query = "INSERT INTO verb_pronunciations (verb_id, pronunciation, prerhyme, rhyme) VALUES (?, ?, ?, ?)";
+            query = "INSERT INTO verb_pronunciations (verb_id, pronunciation, syllables, stress, prerhyme, rhyme) VALUES (?, ?, ?, ?, ?, ?)";
           } else {
-            query = "INSERT INTO verb_pronunciations (verb_id, pronunciation) VALUES (?, ?)";
+            query = "INSERT INTO verb_pronunciations (verb_id, pronunciation, syllables, stress) VALUES (?, ?, ?, ?)";
           }
           
           if (sqlite3_prepare_v2(ppdb, query.c_str(), query.length(), &ppstmt, NULL) != SQLITE_OK)
@@ -876,11 +897,13 @@ int main(int argc, char** argv)
           
           sqlite3_bind_int(ppstmt, 1, rowid);
           sqlite3_bind_text(ppstmt, 2, pronunciation.phonemes.c_str(), pronunciation.phonemes.length(), SQLITE_TRANSIENT);
+          sqlite3_bind_int(ppstmt, 3, pronunciation.syllables);
+          sqlite3_bind_text(ppstmt, 4, pronunciation.stress.c_str(), pronunciation.stress.length(), SQLITE_TRANSIENT);
           
           if (!pronunciation.rhyme.empty())
           {
-            sqlite3_bind_text(ppstmt, 3, pronunciation.prerhyme.c_str(), pronunciation.prerhyme.length(), SQLITE_TRANSIENT);
-            sqlite3_bind_text(ppstmt, 4, pronunciation.rhyme.c_str(), pronunciation.rhyme.length(), SQLITE_TRANSIENT);
+            sqlite3_bind_text(ppstmt, 5, pronunciation.prerhyme.c_str(), pronunciation.prerhyme.length(), SQLITE_TRANSIENT);
+            sqlite3_bind_text(ppstmt, 6, pronunciation.rhyme.c_str(), pronunciation.rhyme.length(), SQLITE_TRANSIENT);
           }
           
           if (sqlite3_step(ppstmt) != SQLITE_DONE)
@@ -1243,9 +1266,9 @@ int main(int argc, char** argv)
             {
               if (!pronunciation.rhyme.empty())
               {
-                query = "INSERT INTO noun_pronunciations (noun_id, pronunciation, prerhyme, rhyme) VALUES (?, ?, ?, ?)";
+                query = "INSERT INTO noun_pronunciations (noun_id, pronunciation, syllables, stress, prerhyme, rhyme) VALUES (?, ?, ?, ?, ?, ?)";
               } else {
-                query = "INSERT INTO noun_pronunciations (noun_id, pronunciation) VALUES (?, ?)";
+                query = "INSERT INTO noun_pronunciations (noun_id, pronunciation, syllables, stress) VALUES (?, ?, ?, ?)";
               }
               
               break;
@@ -1255,9 +1278,9 @@ int main(int argc, char** argv)
             {
               if (!pronunciation.rhyme.empty())
               {
-                query = "INSERT INTO adjective_pronunciations (adjective_id, pronunciation, prerhyme, rhyme) VALUES (?, ?, ?, ?)";
+                query = "INSERT INTO adjective_pronunciations (adjective_id, pronunciation, syllables, stress, prerhyme, rhyme) VALUES (?, ?, ?, ?, ?, ?)";
               } else {
-                query = "INSERT INTO adjective_pronunciations (adjective_id, pronunciation) VALUES (?, ?)";
+                query = "INSERT INTO adjective_pronunciations (adjective_id, pronunciation, syllables, stress) VALUES (?, ?, ?, ?)";
               }
               
               break;
@@ -1267,9 +1290,9 @@ int main(int argc, char** argv)
             {
               if (!pronunciation.rhyme.empty())
               {
-                query = "INSERT INTO adverb_pronunciations (adverb_id, pronunciation, prerhyme, rhyme) VALUES (?, ?, ?, ?)";
+                query = "INSERT INTO adverb_pronunciations (adverb_id, pronunciation, syllables, stress, prerhyme, rhyme) VALUES (?, ?, ?, ?, ?, ?)";
               } else {
-                query = "INSERT INTO adverb_pronunciations (adverb_id, pronunciation) VALUES (?, ?)";
+                query = "INSERT INTO adverb_pronunciations (adverb_id, pronunciation, syllables, stress) VALUES (?, ?, ?, ?)";
               }
               
               break;
@@ -1283,11 +1306,13 @@ int main(int argc, char** argv)
         
           sqlite3_bind_int(ppstmt, 1, rowid);
           sqlite3_bind_text(ppstmt, 2, pronunciation.phonemes.c_str(), pronunciation.phonemes.length(), SQLITE_TRANSIENT);
+          sqlite3_bind_int(ppstmt, 3, pronunciation.syllables);
+          sqlite3_bind_text(ppstmt, 4, pronunciation.stress.c_str(), pronunciation.stress.length(), SQLITE_TRANSIENT);
           
           if (!pronunciation.rhyme.empty())
           {
-            sqlite3_bind_text(ppstmt, 3, pronunciation.prerhyme.c_str(), pronunciation.prerhyme.length(), SQLITE_TRANSIENT);
-            sqlite3_bind_text(ppstmt, 4, pronunciation.rhyme.c_str(), pronunciation.rhyme.length(), SQLITE_TRANSIENT);
+            sqlite3_bind_text(ppstmt, 5, pronunciation.prerhyme.c_str(), pronunciation.prerhyme.length(), SQLITE_TRANSIENT);
+            sqlite3_bind_text(ppstmt, 6, pronunciation.rhyme.c_str(), pronunciation.rhyme.length(), SQLITE_TRANSIENT);
           }
         
           if (sqlite3_step(ppstmt) != SQLITE_DONE)

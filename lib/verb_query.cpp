@@ -88,6 +88,13 @@ namespace verbly {
     return *this;
   }
   
+  verb_query& verb_query::with_stress(filter<std::vector<bool>> _arg)
+  {
+    _stress = _arg;
+    
+    return *this;
+  }
+  
   verb_query& verb_query::has_frames()
   {
     this->_has_frames = true;
@@ -138,6 +145,68 @@ namespace verbly {
     if (_has_rhyming_verb)
     {
       conditions.push_back("verb_id IN (SELECT a.verb_id FROM verbs AS a INNER JOIN verb_pronunciations AS curp ON curp.noun_id = a.adverb_id INNER JOIN verb_pronunciations AS rhmp ON rhmp.prerhyme != curp.prerhyme AND rhmp.rhyme = curp.rhyme AND rhmp.verb_id != curp.verb_id)");
+    }
+    
+    if (!_stress.empty())
+    {
+      std::stringstream cond;
+      if (_stress.get_notlogic())
+      {
+        cond << "verb_id NOT IN";
+      } else {
+        cond << "verb_id IN";
+      }
+      
+      cond << "(SELECT verb_id FROM verb_pronunciations WHERE ";
+      
+      std::function<std::string (filter<std::vector<bool>>, bool)> recur = [&] (filter<std::vector<bool>> f, bool notlogic) -> std::string {
+        switch (f.get_type())
+        {
+          case filter<std::vector<bool>>::type::singleton:
+          {
+            std::ostringstream _val;
+            for (auto syl : f.get_elem())
+            {
+              if (syl)
+              {
+                _val << "1";
+              } else {
+                _val << "0";
+              }
+            }
+            
+            bindings.emplace_back(_val.str());
+            
+            if (notlogic == f.get_notlogic())
+            {
+              return "stress = ?";
+            } else {
+              return "stress != ?";
+            }
+          }
+          
+          case filter<std::vector<bool>>::type::group:
+          {
+            bool truelogic = notlogic != f.get_notlogic();
+            
+            std::list<std::string> clauses;
+            std::transform(std::begin(f), std::end(f), std::back_inserter(clauses), [&] (filter<std::vector<bool>> f2) {
+              return recur(f2, truelogic);
+            });
+            
+            if (truelogic == f.get_orlogic())
+            {
+              return "(" + verbly::implode(std::begin(clauses), std::end(clauses), " AND ") + ")";
+            } else {
+              return "(" + verbly::implode(std::begin(clauses), std::end(clauses), " OR ") + ")";
+            }
+          }
+        }
+      };
+      
+      cond << recur(_stress, _stress.get_notlogic());
+      cond << ")";
+      conditions.push_back(cond.str());
     }
     
     for (auto except : _except)
