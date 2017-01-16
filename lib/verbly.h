@@ -1,35 +1,17 @@
 #ifndef VERBLY_H_5B39CE50
 #define VERBLY_H_5B39CE50
 
-#include <string>
-#include <list>
-#include <sstream>
-#include <algorithm>
-#include <cassert>
-#include <set>
-#include <stdexcept>
-#include <vector>
-#include <map>
-#include <iterator>
-#include <sstream>
-#include <functional>
-#include <iostream>
-#include <new>
-
 #include "util.h"
-#include "data.h"
+#include "database.h"
+#include "filter.h"
+#include "field.h"
+#include "query.h"
+#include "notion.h"
 #include "word.h"
-#include "verb.h"
-#include "adverb.h"
-#include "adjective.h"
-#include "noun.h"
+#include "group.h"
 #include "frame.h"
-#include "preposition.h"
-#include "token.h"
-#include "noun_query.h"
-#include "adverb_query.h"
-#include "adjective_query.h"
-#include "verb_query.h"
-#include "frame_query.h"
+#include "lemma.h"
+#include "form.h"
+#include "pronunciation.h"
 
 #endif /* end of include guard: VERBLY_H_5B39CE50 */

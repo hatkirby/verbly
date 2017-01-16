@@ -1,8 +1,9 @@
-#ifndef FRAME_H_EA29065A
-#define FRAME_H_EA29065A
+#ifndef GROUP_H_BD6933C0
+#define GROUP_H_BD6933C0
 
 #include <stdexcept>
 #include <list>
+#include <vector>
 #include "field.h"
 #include "filter.h"
 
@@ -11,17 +12,18 @@ struct sqlite3_stmt;
 namespace verbly {
   
   class database;
+  class frame;
   
-  class frame {
+  class group {
   public:
     
     // Default constructor
     
-    frame() = default;
+    group() = default;
     
     // Construct from database
     
-    frame(const database& db, sqlite3_stmt* row);
+    group(const database& db, sqlite3_stmt* row);
     
     // Accessors
     
@@ -34,11 +36,13 @@ namespace verbly {
     {
       if (!valid_)
       {
-        throw std::domain_error("Bad access to uninitialized frame");
+        throw std::domain_error("Bad access to uninitialized group");
       }
       
       return id_;
     }
+    
+    const std::vector<frame>& getFrames() const;
     
     // Type info
     
@@ -54,7 +58,7 @@ namespace verbly {
     {
       if (!valid_)
       {
-        throw std::domain_error("Bad access to uninitialized frame");
+        throw std::domain_error("Bad access to uninitialized group");
       }
       
       return (id == id_);
@@ -62,7 +66,9 @@ namespace verbly {
     
     // Relationships to other objects
     
-    static const field group;
+    static const field frame;
+    
+    static const field word;
     
   private:
     bool valid_ = false;
@@ -71,8 +77,11 @@ namespace verbly {
     
     const database* db_;
     
+    mutable bool initializedFrames_ = false;
+    mutable std::vector<class frame> frames_;
+    
   };
   
 };
 
-#endif /* end of include guard: FRAME_H_EA29065A */
+#endif /* end of include guard: GROUP_H_BD6933C0 */
