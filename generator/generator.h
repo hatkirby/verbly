@@ -16,10 +16,11 @@
 #include "frame.h"
 
 namespace verbly {
+  
+  enum class part_of_speech;
+  class selrestr;
+  
   namespace generator {
-
-    enum class part_of_speech;
-    class selrestr;
     
     class generator {
     public:

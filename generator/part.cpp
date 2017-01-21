@@ -1,6 +1,5 @@
 #include "part.h"
 #include <stdexcept>
-#include "selrestr.h"
 
 namespace verbly {
   namespace generator {

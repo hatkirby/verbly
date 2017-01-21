@@ -5,7 +5,7 @@
 #include <set>
 #include <string>
 #include <cassert>
-#include "role.h"
+#include "../lib/role.h"
 
 namespace verbly {
   namespace generator {
@@ -24,7 +24,7 @@ namespace verbly {
       
       void setParent(const group& parent);
       
-      void addRole(std::string name, role r);
+      void addRole(role r);
       
       void addFrame(const frame& f);
       

@@ -4,7 +4,7 @@
 #include <cassert>
 #include <list>
 #include <string>
-#include "enums.h"
+#include "../lib/enums.h"
 
 namespace verbly {
   namespace generator {

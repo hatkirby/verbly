@@ -2,7 +2,7 @@
 #define WORD_H_91F99D46
 
 #include <cassert>
-#include "enums.h"
+#include "../lib/enums.h"
 
 namespace verbly {
   namespace generator {

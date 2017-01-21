@@ -5,10 +5,10 @@
 #include <regex>
 #include <dirent.h>
 #include <fstream>
-#include "enums.h"
+#include "../lib/enums.h"
 #include "progress.h"
-#include "selrestr.h"
-#include "role.h"
+#include "../lib/selrestr.h"
+#include "../lib/role.h"
 #include "part.h"
 #include "field.h"
 #include "../lib/util.h"
@@ -1290,21 +1290,20 @@ namespace verbly {
           {
             if (!xmlStrcmp(roletopnode->name, reinterpret_cast<const xmlChar*>("THEMROLE")))
             {
-              role r;
-              
               key = xmlGetProp(roletopnode, reinterpret_cast<const xmlChar*>("type"));
               std::string roleName = reinterpret_cast<const char*>(key);
               xmlFree(key);
               
+              selrestr roleSelrestrs;
               for (xmlNodePtr rolenode = roletopnode->xmlChildrenNode; rolenode != nullptr; rolenode = rolenode->next)
               {
                 if (!xmlStrcmp(rolenode->name, reinterpret_cast<const xmlChar*>("SELRESTRS")))
                 {
-                  r.setSelrestrs(parseSelrestr(rolenode));
+                  roleSelrestrs = parseSelrestr(rolenode);
                 }
               }
 
-              grp.addRole(roleName, std::move(r));
+              grp.addRole({roleName, std::move(roleSelrestrs)});
             }
           }
         } else if (!xmlStrcmp(node->name, reinterpret_cast<const xmlChar*>("FRAMES")))

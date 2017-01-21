@@ -4,7 +4,7 @@
 #include <string>
 #include <map>
 #include <set>
-#include "enums.h"
+#include "../lib/enums.h"
 
 namespace verbly {
   namespace generator {

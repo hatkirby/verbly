@@ -23,10 +23,11 @@ namespace verbly {
       parent_ = &parent;
     }
     
-    void group::addRole(std::string name, role r)
+    void group::addRole(role r)
     {
-      roleNames_.insert(name);
+      std::string name = r.getName();
       roles_[name] = std::move(r);
+      roleNames_.insert(std::move(name));
     }
     
     void group::addFrame(const frame& f)

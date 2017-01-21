@@ -3,7 +3,7 @@
 
 #include <string>
 #include <set>
-#include "selrestr.h"
+#include "../lib/selrestr.h"
 
 namespace verbly {
   namespace generator {
