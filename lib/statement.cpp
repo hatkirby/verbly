@@ -723,7 +723,26 @@ namespace verbly {
       
       case type::singleton:
       {
-        return {singleton_.value_};
+        switch (singleton_.comparison_)
+        {
+          case comparison::equals:
+          case comparison::does_not_equal:
+          case comparison::is_greater_than:
+          case comparison::is_at_most:
+          case comparison::is_less_than:
+          case comparison::is_at_least:
+          case comparison::is_like:
+          case comparison::is_not_like:
+          {
+            return {singleton_.value_};
+          }
+          
+          case comparison::is_not_null:
+          case comparison::is_null:
+          {
+            return {};
+          }
+        }
       }
       
       case type::group:
