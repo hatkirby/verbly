@@ -405,6 +405,19 @@ diff /Users/hatkirby/Downloads/new_vn 2/spank-18.3.xml datadir/vn/spank-18.3.xml
 >                   <SYNRESTRS>
 >                     <SYNRESTR Value="+" type="body_part"/>
 >                   </SYNRESTRS>
+diff /Users/hatkirby/Downloads/new_vn 2/split-23.2.xml datadir/vn/split-23.2.xml
+59c59
+<                 <PREP value="off off of from">
+---
+>                 <PREP value="off off_of from">
+143c143
+<                 <PREP value="off off of from">
+---
+>                 <PREP value="off off_of from">
+212c212
+<                 <PREP value="off off of from">
+---
+>                 <PREP value="off off_of from">
 diff /Users/hatkirby/Downloads/new_vn 2/swat-18.2.xml datadir/vn/swat-18.2.xml
 264c264,266
 <                     <SYNRESTRS/>
