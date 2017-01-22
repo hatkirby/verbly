@@ -1367,8 +1367,17 @@ namespace verbly {
                         key = xmlGetProp(syntaxnode, reinterpret_cast<const xmlChar*>("value"));
                         std::string choicesStr = reinterpret_cast<const char*>(key);
                         xmlFree(key);
-                        
-                        split(choicesStr, " ", std::inserter(partChoices, std::end(partChoices)));
+
+                        for (std::string choice : split<std::list<std::string>>(choicesStr, " "))
+                        {
+                          int chloc;
+                          while ((chloc = choice.find_first_of("_")) != std::string::npos)
+                          {
+                            choice.replace(chloc, 1, " ");
+                          }
+
+                          partChoices.insert(std::move(choice));
+                        }
                       } else {
                         partLiteral = false;
                         
