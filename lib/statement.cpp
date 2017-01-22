@@ -52,20 +52,24 @@ namespace verbly {
           cteStream << cte.getCondition().toSql();
         }
         
-        cteStream << " UNION SELECT l.* FROM ";
-        cteStream << cte.getIdentifier();
-        cteStream << " AS t INNER JOIN ";
-        cteStream << cte.getField().getTable();
-        cteStream << " AS j ON t.";
-        cteStream << cte.getField().getColumn();
-        cteStream << " = j.";
-        cteStream << cte.getField().getForeignJoinColumn();
-        cteStream << " INNER JOIN ";
-        cteStream << cte.getTableForId(cte.getTopTable());
-        cteStream << " AS l ON j.";
-        cteStream << cte.getField().getJoinColumn();
-        cteStream << " = l.";
-        cteStream << cte.getField().getColumn();
+        if (cte.isRecursive())
+        {
+          cteStream << " UNION SELECT l.* FROM ";
+          cteStream << cte.getIdentifier();
+          cteStream << " AS t INNER JOIN ";
+          cteStream << cte.getField().getTable();
+          cteStream << " AS j ON t.";
+          cteStream << cte.getField().getColumn();
+          cteStream << " = j.";
+          cteStream << cte.getField().getForeignJoinColumn();
+          cteStream << " INNER JOIN ";
+          cteStream << cte.getTableForId(cte.getTopTable());
+          cteStream << " AS l ON j.";
+          cteStream << cte.getField().getJoinColumn();
+          cteStream << " = l.";
+          cteStream << cte.getField().getColumn();
+        }
+        
         cteStream << ")";
 
         ctes.push_back(cteStream.str());
@@ -146,6 +150,13 @@ namespace verbly {
   {
   }
   
+  /**
+   * This function recursively parses the query's filter condition. It is not
+   * idempotent. It returns a condition object representing the passed filter,
+   * but it also modifies the statement object, specifically by adding any joins
+   * and CTEs that may be required to represent the passed filter. This may also
+   * involve instantiating tables.
+   */
   statement::condition statement::parseFilter(filter clause)
   {
     switch (clause.getType())
@@ -164,6 +175,9 @@ namespace verbly {
             return {};
           }
         
+          // For primitive type filters, all we need to do is translate the
+          // filter object directly into a condition object. No joins are
+          // necessary.
           case field::type::string:
           case field::type::integer:
           case field::type::boolean:
@@ -247,6 +261,7 @@ namespace verbly {
         
           case field::type::join:
           {
+            // First, figure out what table we need to join against.
             std::string joinTableName;
             if (clause.getField().hasTable())
             {
@@ -255,6 +270,9 @@ namespace verbly {
               joinTableName = getTableForContext(clause.getField().getJoinObject());
             }
 
+            // Recursively parse the subquery, and therefore obtain an
+            // instantiated table to join against, as well as any joins or CTEs
+            // that the subquery may require to function.
             statement joinStmt(
               joinTableName,
               clause.getJoinCondition().normalize(clause.getField().getJoinObject()),
@@ -262,23 +280,71 @@ namespace verbly {
               nextWithId_);
             
             std::string joinTable = joinStmt.topTable_;
-            condition curCond = integrate(std::move(joinStmt));
             
-            bool outer = false;
             if (clause.getComparison() == filter::comparison::does_not_match)
             {
-              outer = true;
+              // If the comparison is actually a negative filter, we can't just
+              // integrate the subquery statement into this statement and then
+              // join against it. Even if we LEFT JOIN against the subquery's
+              // top level table and then condition on the join column being
+              // NULL, if that table joins against any other table, the query
+              // will return zero results. Instead, we create a non-recursive
+              // CTE that represents the subquery, then LEFT JOIN against it and
+              // condition on the join column being NULL as before.
+              std::string withName = instantiateWith(clause.getField().getTable());
+              std::string withInstName = instantiateTable(withName);
               
-              curCond &= condition(joinTable, clause.getField().getColumn(), true);
+              // LEFT JOIN against the CTE.
+              joins_.emplace_back(
+                true,
+                withName,
+                topTable_,
+                clause.getField().getColumn(),
+                withInstName,
+                clause.getField().getColumn());
+
+              // All CTEs have to be in the main statement, so integrate any
+              // CTEs that our subquery uses. Also, retrieve the table mapping,
+              // joins list, and subquery condition, and use them to create the
+              // CTE.
+              std::map<std::string, std::string> cteTables = std::move(joinStmt.tables_);
+              std::list<join> cteJoins = std::move(joinStmt.joins_);
+              condition cteCondition = integrate(std::move(joinStmt), true);
+            
+              withs_.emplace_back(
+                std::move(withName),
+                clause.getField(),
+                std::move(cteTables),
+                std::move(joinTable),
+                std::move(cteCondition),
+                std::move(cteJoins),
+                false);
+              
+              // Condition on the join column being NULL, which causes the query
+              // to only return results that do not match the subquery.
+              return condition(std::move(withInstName), clause.getField().getColumn(), true);
+            } else {
+              // INNER JOIN against the top table of the subquery.
+              joins_.emplace_back(
+                false,
+                std::move(joinTableName),
+                topTable_,
+                clause.getField().getColumn(),
+                std::move(joinTable),
+                clause.getField().getColumn());
+              
+              // Integrate the subquery's table mappings, joins, and CTEs into
+              // this statement, and return the subquery condition as our
+              // condition.
+              return integrate(std::move(joinStmt));
             }
-            
-            joins_.emplace_back(outer, joinTableName, topTable_, clause.getField().getColumn(), joinTable, clause.getField().getColumn());
-            
-            return curCond;
           }
         
           case field::type::join_through:
           {
+            // Recursively parse the subquery, and therefore obtain an
+            // instantiated table to join against, as well as any joins or CTEs
+            // that the subquery may require to function.
             statement joinStmt(
               getTableForContext(clause.getField().getJoinObject()),
               clause.getJoinCondition().normalize(clause.getField().getJoinObject()),
@@ -286,58 +352,143 @@ namespace verbly {
               nextWithId_);
               
             std::string joinTable = joinStmt.topTable_;
-            std::string throughTable = instantiateTable(clause.getField().getTable());
-            condition curCond = integrate(std::move(joinStmt));
             
-            bool outer = false;
             if (clause.getComparison() == filter::comparison::does_not_match)
             {
-              outer = true;
+              // If the comparison is actually a negative filter, we can't just
+              // integrate the subquery statement into this statement and then
+              // join against it. Even if we LEFT JOIN against the subquery's
+              // through table and then condition on the join column being NULL,
+              // the query will return zero results because the through table
+              // joins against the subquery's top level table. Instead, we
+              // create a non-recursive CTE that represents the through table
+              // joined against the subquery, then LEFT JOIN against it and
+              // condition on the join column being NULL as before.
+              std::string withName = instantiateWith(clause.getField().getTable());
+              std::string withInstName = instantiateTable(withName);
               
-              curCond &= condition(throughTable, clause.getField().getJoinColumn(), true);
+              // LEFT JOIN against the CTE.
+              joins_.emplace_back(
+                true,
+                withName,
+                topTable_,
+                clause.getField().getColumn(),
+                withInstName,
+                clause.getField().getJoinColumn());
+                
+              // Modify the substatement such that the through table is the top
+              // table, and such that it joins against the previous top table.
+              std::string throughTable = joinStmt.instantiateTable(clause.getField().getTable());
+              joinStmt.joins_.emplace_back(
+                false,
+                getTableForContext(clause.getField().getJoinObject()),
+                throughTable,
+                clause.getField().getForeignJoinColumn(),
+                std::move(joinTable),
+                clause.getField().getForeignColumn());
+                
+              joinStmt.topTable_ = throughTable;
+
+              // All CTEs have to be in the main statement, so integrate any
+              // CTEs that our subquery uses. Also, retrieve the table mapping,
+              // joins list, and subquery condition, and use them to create the
+              // CTE.
+              std::map<std::string, std::string> cteTables = std::move(joinStmt.tables_);
+              std::list<join> cteJoins = std::move(joinStmt.joins_);
+              condition cteCondition = integrate(std::move(joinStmt), true);
+            
+              withs_.emplace_back(
+                std::move(withName),
+                clause.getField(),
+                std::move(cteTables),
+                std::move(throughTable),
+                std::move(cteCondition),
+                std::move(cteJoins),
+                false);
+              
+              // Condition on the join column being NULL, which causes the query
+              // to only return results that do not match the subquery.
+              return condition(std::move(withInstName), clause.getField().getJoinColumn(), true);
+            } else {
+              // Instantiate the through table.
+              std::string throughTable = instantiateTable(clause.getField().getTable());
+              
+              // INNER JOIN against the through table.
+              joins_.emplace_back(
+                false,
+                clause.getField().getTable(),
+                topTable_,
+                clause.getField().getColumn(),
+                throughTable,
+                clause.getField().getJoinColumn());
+              
+              // INNER JOIN from the through table to the top table of the subquery.
+              joins_.emplace_back(
+                false,
+                getTableForContext(clause.getField().getJoinObject()),
+                std::move(throughTable),
+                clause.getField().getForeignJoinColumn(),
+                std::move(joinTable),
+                clause.getField().getForeignColumn());
+              
+              // Integrate the subquery's table mappings, joins, and CTEs into
+              // this statement, and return the subquery condition as our
+              // condition.
+              return integrate(std::move(joinStmt));
             }
-            
-            joins_.emplace_back(outer, clause.getField().getTable(), topTable_, clause.getField().getColumn(), throughTable, clause.getField().getJoinColumn());
-            joins_.emplace_back(false, getTableForContext(clause.getField().getJoinObject()), throughTable, clause.getField().getForeignJoinColumn(), joinTable, clause.getField().getForeignColumn());
-            
-            return curCond;
           }
         
           case field::type::hierarchal_join:
           {
-            std::string withName = std::string(clause.getField().getTable()) + "_tree_" + std::to_string(nextWithId_++);
+            // Create a recursive CTE that represents the results of the subquery.
+            std::string withName = instantiateWith(clause.getField().getTable());
             std::string withInstName = instantiateTable(withName);
             
+            // If we are matching against the subquery, we INNER JOIN with the
+            // CTE. If we are negatively matching the subquery, we LEFT JOIN
+            // with the CTE.
             bool outer = false;
             if (clause.getComparison() == filter::comparison::does_not_hierarchally_match)
             {
               outer = true;
             }
             
-            joins_.emplace_back(outer, withName, topTable_, clause.getField().getColumn(), withInstName, clause.getField().getColumn());
+            // Join against the CTE.
+            joins_.emplace_back(
+              outer,
+              withName,
+              topTable_,
+              clause.getField().getColumn(),
+              withInstName,
+              clause.getField().getColumn());
             
+            // Recursively parse the subquery in order to create the CTE.
             statement withStmt(
               getTableForContext(clause.getField().getObject()),
               clause.getJoinCondition().normalize(clause.getField().getObject()),
               nextTableId_,
               nextWithId_);
               
-            for (auto& w : withStmt.withs_)
-            {
-              withs_.push_back(std::move(w));
-            }
-              
-            nextTableId_ = withStmt.nextTableId_;
-            nextWithId_ = withStmt.nextWithId_;
-            
+            // All CTEs have to be in the main statement, so integrate any CTEs
+            // that our subquery uses. Also, retrieve the table mapping, joins
+            // list, and subquery condition, and use them to create the CTE.
+            std::string cteTopTable = std::move(withStmt.topTable_);
+            std::map<std::string, std::string> cteTables = std::move(withStmt.tables_);
+            std::list<join> cteJoins = std::move(withStmt.joins_);
+            condition cteCondition = integrate(std::move(withStmt), true);
+          
             withs_.emplace_back(
-              withName,
+              std::move(withName),
               clause.getField(),
-              std::move(withStmt.tables_),
-              std::move(withStmt.topTable_),
-              std::move(withStmt.topCondition_),
-              std::move(withStmt.joins_));
+              std::move(cteTables),
+              std::move(cteTopTable),
+              std::move(cteCondition),
+              std::move(cteJoins),
+              true);
 
+            // If we are matching against the subquery, no condition is
+            // necessary. If we are negatively matching the subquery, we
+            // condition on the join column being NULL.
             if (clause.getComparison() == filter::comparison::does_not_hierarchally_match)
             {
               return condition(withInstName, clause.getField().getColumn(), true);
@@ -379,16 +530,32 @@ namespace verbly {
     return identifier;
   }
   
-  statement::condition statement::integrate(statement subStmt)
+  std::string statement::instantiateWith(std::string name)
   {
-    for (auto& mapping : subStmt.tables_)
+    return name + "_tree_" + std::to_string(nextWithId_++);
+  }
+  
+  /**
+   * This method integrates the parts of a recursively generated statement into
+   * this statement. This is used because filters are recursive objects, but
+   * statements need to be flat to be compiled into a SQL query. Thus, all CTEs
+   * have to be in the main statement, and all table mappings & joins that
+   * aren't part of a CTE have to be in the main statement as well. Finally, we
+   * need to copy up the next ID fields in order to properly prevent ID reuse.
+   */
+  statement::condition statement::integrate(statement subStmt, bool cte)
+  {
+    if (!cte)
     {
-      tables_[mapping.first] = mapping.second;
-    }
+      for (auto& mapping : subStmt.tables_)
+      {
+        tables_[mapping.first] = mapping.second;
+      }
         
-    for (auto& j : subStmt.joins_)
-    {
-      joins_.push_back(j);
+      for (auto& j : subStmt.joins_)
+      {
+        joins_.push_back(j);
+      }
     }
     
     for (auto& w : subStmt.withs_)

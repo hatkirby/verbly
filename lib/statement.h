@@ -184,13 +184,15 @@ namespace verbly {
         std::map<std::string, std::string> tables,
         std::string topTable,
         condition where,
-        std::list<join> joins) :
+        std::list<join> joins,
+        bool recursive) :
           identifier_(std::move(identifier)),
           field_(f),
           tables_(std::move(tables)),
           topTable_(std::move(topTable)),
           topCondition_(std::move(where)),
-          joins_(std::move(joins))
+          joins_(std::move(joins)),
+          recursive_(recursive)
       {
       }
       
@@ -224,6 +226,11 @@ namespace verbly {
         return joins_;
       }
       
+      bool isRecursive() const
+      {
+        return recursive_;
+      }
+      
     private:
       std::string identifier_;
       field field_;
@@ -231,6 +238,7 @@ namespace verbly {
       std::string topTable_;
       condition topCondition_;
       std::list<join> joins_;
+      bool recursive_;
       
     };
     
@@ -254,7 +262,9 @@ namespace verbly {
     
     std::string instantiateTable(std::string name);
     
-    condition integrate(statement subStmt);
+    std::string instantiateWith(std::string name);
+    
+    condition integrate(statement subStmt, bool cte = false);
     
     int nextTableId_;
     int nextWithId_;
