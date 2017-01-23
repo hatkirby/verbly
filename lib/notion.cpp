@@ -3,16 +3,16 @@
 #include <sstream>
 
 namespace verbly {
-  
+
   const object notion::objectType = object::notion;
-  
+
   const std::list<std::string> notion::select = {"notion_id", "part_of_speech", "wnid", "images"};
-  
+
   const field notion::id = field::integerField(object::notion, "notion_id");
   const field notion::partOfSpeech = field::integerField(object::notion, "part_of_speech");
   const field notion::wnid = field::integerField(object::notion, "wnid", true);
   const field notion::numOfImages = field::integerField(object::notion, "images", true);
-  
+
   const field notion::word = field::joinField(object::notion, "word_id", object::word);
 
   const field notion::hypernyms = field::selfJoin(object::notion, "notion_id", "hypernymy", "hyponym_id", "hypernym_id");
@@ -52,30 +52,30 @@ namespace verbly {
 
   const field notion::causes = field::selfJoin(object::notion, "notion_id", "causality", "effect_id", "cause_id");
   const field notion::effects = field::selfJoin(object::notion, "notion_id", "causality", "cause_id", "effect_id");
-  
-  const notion::preposition_group_field prepositionGroup = {};
-  
+
+  const notion::preposition_group_field notion::prepositionGroup = {};
+
   const field notion::preposition_group_field::isA = field::joinField(object::notion, "notion_id", "is_a");
   const field notion::preposition_group_field::groupNameField = field::stringField("is_a", "groupname");
-  
+
   notion::notion(const database& db, sqlite3_stmt* row) : db_(&db), valid_(true)
   {
     id_ = sqlite3_column_int(row, 0);
     partOfSpeech_ = static_cast<part_of_speech>(sqlite3_column_int(row, 1));
-    
+
     if (sqlite3_column_type(row, 2) != SQLITE_NULL)
     {
       hasWnid_ = true;
       wnid_ = sqlite3_column_int(row, 2);
     }
-    
+
     if (sqlite3_column_type(row, 3) != SQLITE_NULL)
     {
       hasNumOfImages_ = true;
       numOfImages_ = sqlite3_column_int(row, 3);
     }
   }
-  
+
   std::string notion::getImageNetUrl() const
   {
     std::stringstream url;
@@ -85,10 +85,10 @@ namespace verbly {
     url << (getWnid() % 100000000);
     return url.str();
   }
-  
+
   filter notion::preposition_group_field::operator==(std::string groupName) const
   {
     return (isA %= (groupNameField == groupName));
   }
-  
+
 };
