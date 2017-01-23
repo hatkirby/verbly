@@ -16,7 +16,7 @@ namespace verbly {
   statement::statement(
     object context,
     filter queryFilter) :
-      statement(getTableForContext(context), queryFilter.normalize(context))
+      statement(getTableForContext(context), queryFilter.compact().normalize(context))
   {
   }
   

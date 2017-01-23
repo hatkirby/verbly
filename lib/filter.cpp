@@ -871,7 +871,7 @@ namespace verbly {
       throw std::domain_error("This filter has no children");
     }
   }
-  
+
   filter filter::operator!() const
   {
     switch (type_)
@@ -1367,6 +1367,38 @@ namespace verbly {
 
           return result;
         }
+      }
+    }
+  }
+
+  filter filter::compact() const
+  {
+    switch (type_)
+    {
+      case type::empty:
+      case type::singleton:
+      {
+        return *this;
+      }
+
+      case type::group:
+      {
+        filter result(group_.orlogic);
+        for (const filter& child : group_.children)
+        {
+          filter compactedChild = child.compact();
+          if (compactedChild.type_ != type::empty)
+          {
+            result += child;
+          }
+        }
+
+        if (group_.children.empty())
+        {
+          result = {};
+        }
+
+        return result;
       }
     }
   }
