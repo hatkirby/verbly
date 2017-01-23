@@ -1,170 +1,116 @@
 #ifndef TOKEN_H_AD62C505
 #define TOKEN_H_AD62C505
 
+#include <ostream>
+#include <string>
+#include <list>
+#include <set>
+#include "enums.h"
+#include "word.h"
+#include "part.h"
+
 namespace verbly {
-  
+
   class token {
     public:
       enum class type {
-        verb,
-        noun,
-        adjective,
-        adverb,
-        preposition,
+        word,
+        literal,
+        part,
         fillin,
-        utterance,
-        string
+        utterance
       };
-      
-      enum class verb_inflection {
-        infinitive,
-        past_tense,
-        past_participle,
-        s_form,
-        ing_form
-      };
-      
-      enum class noun_inflection {
-        singular,
-        plural
-      };
-      
-      enum class adjective_inflection {
-        base,
-        comparative,
-        superlative
-      };
-      
-      enum class adverb_inflection {
-        base,
-        comparative,
-        superlative
-      };
-      
-      enum class fillin_type {
-        generic,
-        noun_phrase,
-        adjective_phrase,
-        adverb_phrase,
-        participle_phrase,
-        infinitive_phrase
-      };
-      
-      type get_type() const;
-      
-      int get_extra() const;
-      void set_extra(int _arg);
-      
+
+      // Copy & move constructors
+
       token(const token& other);
-      token& operator=(const token& other);
+      token(token&& other);
+
+      // Assignment operator
+
+      token& operator=(token other);
+
+      // Swap
+
+      friend void swap(token& first, token& second);
+
+      // Destructor
+
       ~token();
-      
-      bool is_complete() const;
+
+      // Accessors
+
+      type getType() const
+      {
+        return type_;
+      }
+
+      bool isComplete() const;
+
       std::string compile() const;
-      
-      // Verb
-      token(verb _verb);
-      token(verb _verb, verb_inflection _infl);
-      token& operator=(verb _verb);
-      verb get_verb() const;
-      void set_verb(verb _verb);
-      verb_inflection get_verb_inflection() const;
-      void set_verb_inflection(verb_inflection _infl);
-      
-      // Noun
-      token(noun _noun);
-      token(noun _noun, noun_inflection _infl);
-      token& operator=(noun _noun);
-      noun get_noun() const;
-      void set_noun(noun _noun);
-      noun_inflection get_noun_inflection() const;
-      void set_noun_inflection(noun_inflection _infl);
-      
-      // Adjective
-      token(adjective _adjective);
-      token(adjective _adjective, adjective_inflection _infl);
-      token& operator=(adjective _adjective);
-      adjective get_adjective() const;
-      void set_adjective(adjective _adjective);
-      adjective_inflection get_adjective_inflection() const;
-      void set_adjective_inflection(adjective_inflection _infl);
-      
-      // Adverb
-      token(adverb _adverb);
-      token(adverb _adverb, adverb_inflection _infl);
-      token& operator=(adverb _adverb);
-      adverb get_adverb() const;
-      void set_adverb(adverb _adverb);
-      adverb_inflection get_adverb_inflection() const;
-      void set_adverb_inflection(adverb_inflection _infl);
-      
-      // Preposition
-      token(preposition _preposition);
-      token& operator=(preposition _preposition);
-      preposition get_preposition() const;
-      void set_preposition(preposition _preposition);
-      
+
+      // Word
+
+      token(word arg, inflection category = inflection::base);
+
+      const word& getWord() const;
+
+      token inflect(inflection category) const;
+
+      // Literal
+
+      token(std::string arg);
+      token(const char* arg);
+
+      std::string getLiteral() const;
+
+      // Part
+
+      token(part arg);
+
+      part getPart() const;
+
       // Fillin
-      token(fillin_type _ft);
-      token& operator=(fillin_type _ft);
-      fillin_type get_fillin_type() const;
-      void set_fillin_type(fillin_type _ft);
-      
+
+      token(std::set<std::string> synrestrs);
+
+      const std::set<std::string>& getSynrestrs() const;
+
+      bool hasSynrestr(std::string synrestr) const;
+
+      void addSynrestr(std::string synrestr);
+
       // Utterance
-      typedef std::list<token>::iterator iterator;
-      
+
+      using iterator = std::list<token>::iterator;
+      using const_iterator = std::list<token>::const_iterator;
+
       token();
-      token(std::initializer_list<token> _init);
+      token(std::vector<part> parts);
+
       iterator begin();
+      const_iterator begin() const;
+
       iterator end();
-      token& operator<<(token _tkn);
-      void push_back(token _tkn);
-      void insert(iterator before, token _tkn);
-      void replace(iterator torepl, token _tkn);
-      void erase(iterator toer);
-      
-      // String
-      token(std::string _str);
-      token& operator=(std::string _str);
-      std::string get_string() const;
-      void set_string(std::string _str);
-      
+      const_iterator end() const;
+
+      token& operator<<(token arg);
+
     private:
-      type _type;
-      int _extra = 0;
       union {
         struct {
-          verb _verb;
-          verb_inflection _infl;
-        } _verb;
-        struct {
-          noun _noun;
-          noun_inflection _infl;
-        } _noun;
-        struct {
-          adjective _adjective;
-          adjective_inflection _infl;
-        } _adjective;
-        struct {
-          adverb _adverb;
-          adverb_inflection _infl;
-        } _adverb;
-        struct {
-          preposition _preposition;
-        } _preposition;
-        struct {
-          fillin_type _type;
-        } _fillin;
-        struct {
-          std::string _str;
-        } _string;
-        struct {
-          std::list<token> _utterance;
-        } _utterance;
+          word word_;
+          inflection category_;
+        } word_;
+        std::string literal_;
+        part part_;
+        std::set<std::string> fillin_;
+        std::list<token> utterance_;
       };
+      type type_;
   };
-  
-  std::ostream& operator<<(std::ostream& os, token::type _type);
+
+  std::ostream& operator<<(std::ostream& os, token::type type);
 
 };
 
