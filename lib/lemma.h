@@ -6,6 +6,7 @@
 #include <list>
 #include <map>
 #include "field.h"
+#include "form.h"
 #include "enums.h"
 #include "filter.h"
 
@@ -13,7 +14,6 @@ struct sqlite3_stmt;
 
 namespace verbly {
   
-  class form;
   class database;
   
   class lemma {
@@ -85,6 +85,8 @@ namespace verbly {
       {
         return category_;
       }
+      
+      operator filter() const;
       
     private:
       

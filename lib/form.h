@@ -117,7 +117,9 @@ namespace verbly {
       {
         return category_;
       }
-      
+
+      operator filter() const;
+
     private:
 
       const inflection category_;

@@ -21,6 +21,11 @@ namespace verbly {
     return (lemma::formJoin %= joinCondition) && (lemma::inflectionCategory == check.getCategory());
   }
   
+  lemma::inflection_field::operator filter() const
+  {
+    return (lemma::inflectionCategory == category_);
+  }
+  
   lemma::lemma(const database& db, sqlite3_stmt* row) : db_(&db), valid_(true)
   {
     id_ = sqlite3_column_int(row, 0);

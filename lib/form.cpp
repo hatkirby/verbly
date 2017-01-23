@@ -33,7 +33,12 @@ namespace verbly {
   {
     return (form::lemmaJoin %= (joinCondition && (form::inflectionCategory == check.getCategory())));
   }
-  
+
+  form::inflection_field::operator filter() const
+  {
+    return (form::lemmaJoin %= (form::inflectionCategory == category_));
+  }
+
   const std::vector<pronunciation>& form::getPronunciations() const
   {
     if (!valid_)
