@@ -14,19 +14,19 @@ namespace verbly {
   filter::filter(const filter& other)
   {
     type_ = other.type_;
-    
+
     switch (type_)
     {
       case type::empty:
       {
         break;
       }
-      
+
       case type::singleton:
       {
         new(&singleton_.filterField) field(other.singleton_.filterField);
         singleton_.filterType = other.singleton_.filterType;
-        
+
         switch (singleton_.filterType)
         {
           case comparison::int_equals:
@@ -37,74 +37,74 @@ namespace verbly {
           case comparison::int_is_less_than:
           {
             singleton_.intValue = other.singleton_.intValue;
-            
+
             break;
           }
-          
+
           case comparison::boolean_equals:
           {
             singleton_.boolValue = other.singleton_.boolValue;
-            
+
             break;
           }
-          
+
           case comparison::string_equals:
           case comparison::string_does_not_equal:
           case comparison::string_is_like:
           case comparison::string_is_not_like:
           {
             new(&singleton_.stringValue) std::string(other.singleton_.stringValue);
-            
+
             break;
           }
-          
+
           case comparison::is_null:
           case comparison::is_not_null:
           {
             break;
           }
-          
+
           case comparison::matches:
           case comparison::does_not_match:
           case comparison::hierarchally_matches:
           case comparison::does_not_hierarchally_match:
           {
             new(&singleton_.join) std::unique_ptr<filter>(new filter(*other.singleton_.join));
-            
+
             break;
           }
         }
-        
+
         break;
       }
-      
+
       case type::group:
       {
         new(&group_.children) std::list<filter>(other.group_.children);
         group_.orlogic = other.group_.orlogic;
-        
+
         break;
       }
     }
   }
-  
+
   filter::filter(filter&& other) : filter()
   {
     swap(*this, other);
   }
-  
+
   filter& filter::operator=(filter other)
   {
     swap(*this, other);
-    
+
     return *this;
   }
-  
+
   void swap(filter& first, filter& second)
   {
     using type = filter::type;
     using comparison = filter::comparison;
-    
+
     type tempType = first.type_;
     field tempField;
     comparison tempComparison;
@@ -114,19 +114,19 @@ namespace verbly {
     bool tempBoolValue;
     std::list<filter> tempChildren;
     bool tempOrlogic;
-    
+
     switch (tempType)
     {
       case type::empty:
       {
         break;
       }
-      
+
       case type::singleton:
       {
         tempField = std::move(first.singleton_.filterField);
         tempComparison = first.singleton_.filterType;
-        
+
         switch (tempComparison)
         {
           case comparison::int_equals:
@@ -137,72 +137,72 @@ namespace verbly {
           case comparison::int_is_less_than:
           {
             tempIntValue = first.singleton_.intValue;
-            
+
             break;
           }
-          
+
           case comparison::boolean_equals:
           {
             tempBoolValue = first.singleton_.boolValue;
-            
+
             break;
           }
-          
+
           case comparison::string_equals:
           case comparison::string_does_not_equal:
           case comparison::string_is_like:
           case comparison::string_is_not_like:
           {
             tempStringValue = std::move(first.singleton_.stringValue);
-            
+
             break;
           }
-          
+
           case comparison::is_null:
           case comparison::is_not_null:
           {
             break;
           }
-          
+
           case comparison::matches:
           case comparison::does_not_match:
           case comparison::hierarchally_matches:
           case comparison::does_not_hierarchally_match:
           {
             tempJoin = std::move(first.singleton_.join);
-            
+
             break;
           }
         }
-        
+
         break;
       }
-      
+
       case type::group:
       {
         tempChildren = std::move(first.group_.children);
         tempOrlogic = first.group_.orlogic;
-        
+
         break;
       }
     }
-    
+
     first.~filter();
-    
+
     first.type_ = second.type_;
-    
+
     switch (first.type_)
     {
       case type::empty:
       {
         break;
       }
-      
+
       case type::singleton:
       {
         new(&first.singleton_.filterField) field(std::move(second.singleton_.filterField));
         first.singleton_.filterType = second.singleton_.filterType;
-        
+
         switch (first.singleton_.filterType)
         {
           case comparison::int_equals:
@@ -213,72 +213,72 @@ namespace verbly {
           case comparison::int_is_less_than:
           {
             first.singleton_.intValue = second.singleton_.intValue;
-            
+
             break;
           }
-          
+
           case comparison::boolean_equals:
           {
             first.singleton_.boolValue = second.singleton_.boolValue;
-            
+
             break;
           }
-          
+
           case comparison::string_equals:
           case comparison::string_does_not_equal:
           case comparison::string_is_like:
           case comparison::string_is_not_like:
           {
             new(&first.singleton_.stringValue) std::string(std::move(second.singleton_.stringValue));
-            
+
             break;
           }
-          
+
           case comparison::is_null:
           case comparison::is_not_null:
           {
             break;
           }
-          
+
           case comparison::matches:
           case comparison::does_not_match:
           case comparison::hierarchally_matches:
           case comparison::does_not_hierarchally_match:
           {
             new(&first.singleton_.join) std::unique_ptr<filter>(std::move(second.singleton_.join));
-            
+
             break;
           }
         }
-        
+
         break;
       }
-      
+
       case type::group:
       {
         new(&first.group_.children) std::list<filter>(std::move(second.group_.children));
         first.group_.orlogic = second.group_.orlogic;
-        
+
         break;
       }
     }
-    
+
     second.~filter();
-    
+
     second.type_ = tempType;
-    
+
     switch (second.type_)
     {
       case type::empty:
       {
         break;
       }
-      
+
       case type::singleton:
       {
         new(&second.singleton_.filterField) field(std::move(tempField));
         second.singleton_.filterType = tempComparison;
-        
+
         switch (second.singleton_.filterType)
         {
           case comparison::int_equals:
@@ -289,57 +289,57 @@ namespace verbly {
           case comparison::int_is_less_than:
           {
             second.singleton_.intValue = tempIntValue;
-            
+
             break;
           }
-          
+
           case comparison::boolean_equals:
           {
             second.singleton_.boolValue = tempBoolValue;
-            
+
             break;
           }
-          
+
           case comparison::string_equals:
           case comparison::string_does_not_equal:
           case comparison::string_is_like:
           case comparison::string_is_not_like:
           {
             new(&second.singleton_.stringValue) std::string(std::move(tempStringValue));
-            
+
             break;
           }
-          
+
           case comparison::is_null:
           case comparison::is_not_null:
           {
             break;
           }
-          
+
           case comparison::matches:
           case comparison::does_not_match:
           case comparison::hierarchally_matches:
           case comparison::does_not_hierarchally_match:
           {
             new(&second.singleton_.join) std::unique_ptr<filter>(std::move(tempJoin));
-            
+
             break;
           }
         }
-        
+
         break;
       }
-      
+
       case type::group:
       {
         new(&second.group_.children) std::list<filter>(std::move(tempChildren));
         second.group_.orlogic = tempOrlogic;
-        
+
         break;
       }
     }
   }
-  
+
   filter::~filter()
   {
     switch (type_)
@@ -348,11 +348,11 @@ namespace verbly {
       {
         break;
       }
-      
+
       case type::singleton:
       {
         singleton_.filterField.~field();
-        
+
         switch (singleton_.filterType)
         {
           case comparison::int_equals:
@@ -367,50 +367,50 @@ namespace verbly {
           {
             break;
           }
-          
+
           case comparison::string_equals:
           case comparison::string_does_not_equal:
           case comparison::string_is_like:
           case comparison::string_is_not_like:
           {
             using string_type = std::string;
-            
+
             singleton_.stringValue.~string_type();
-            
+
             break;
           }
-          
+
           case comparison::matches:
           case comparison::does_not_match:
           case comparison::hierarchally_matches:
           case comparison::does_not_hierarchally_match:
           {
             using ptr_type = std::unique_ptr<filter>;
-            
+
             singleton_.join.~ptr_type();
-            
+
             break;
           }
         }
-        
+
         break;
       }
-      
+
       case type::group:
       {
         using list_type = std::list<filter>;
-        
+
         group_.children.~list_type();
-        
+
         break;
       }
     }
   }
-  
+
   filter::filter()
   {
   }
-  
+
   filter::filter(
     field filterField,
     comparison filterType,
@@ -431,10 +431,10 @@ namespace verbly {
           new(&singleton_.filterField) field(std::move(filterField));
           singleton_.filterType = filterType;
           singleton_.intValue = filterValue;
-          
+
           break;
         }
-        
+
         case comparison::boolean_equals:
         case comparison::string_equals:
         case comparison::string_does_not_equal:
@@ -454,7 +454,7 @@ namespace verbly {
       throw std::domain_error("Cannot match a non-integer field against an integer value");
     }
   }
-  
+
   filter::filter(
     field filterField,
     comparison filterType,
@@ -473,10 +473,10 @@ namespace verbly {
           new(&singleton_.filterField) field(std::move(filterField));
           singleton_.filterType = filterType;
           new(&singleton_.stringValue) std::string(std::move(filterValue));
-          
+
           break;
         }
-        
+
         case comparison::int_equals:
         case comparison::int_does_not_equal:
         case comparison::int_is_at_least:
@@ -498,7 +498,7 @@ namespace verbly {
       throw std::domain_error("Cannot match a non-string field against an string value");
     }
   }
-  
+
   filter::filter(
     field filterField,
     comparison filterType,
@@ -514,10 +514,10 @@ namespace verbly {
           new(&singleton_.filterField) field(std::move(filterField));
           singleton_.filterType = filterType;
           singleton_.boolValue = filterValue;
-          
+
           break;
         }
-        
+
         case comparison::string_equals:
         case comparison::string_does_not_equal:
         case comparison::string_is_like:
@@ -542,7 +542,7 @@ namespace verbly {
       throw std::domain_error("Cannot match a non-boolean field against a boolean value");
     }
   }
-  
+
   filter::filter(
     field filterField,
     comparison filterType) :
@@ -557,10 +557,10 @@ namespace verbly {
         {
           new(&singleton_.filterField) field(std::move(filterField));
           singleton_.filterType = filterType;
-      
+
           break;
         }
-    
+
         case comparison::string_equals:
         case comparison::string_does_not_equal:
         case comparison::string_is_like:
@@ -584,7 +584,7 @@ namespace verbly {
       throw std::domain_error("Cannot check nullity/non-nullity of non-nullable field");
     }
   }
-  
+
   filter::filter(
     field joinOn,
     comparison filterType,
@@ -604,10 +604,10 @@ namespace verbly {
             new(&singleton_.filterField) field(std::move(joinOn));
             singleton_.filterType = filterType;
             new(&singleton_.join) std::unique_ptr<filter>(new filter(joinCondition.normalize(singleton_.filterField.getJoinObject())));
-            
+
             break;
           }
-          
+
           case comparison::int_equals:
           case comparison::int_does_not_equal:
           case comparison::int_is_at_least:
@@ -627,10 +627,10 @@ namespace verbly {
             throw std::invalid_argument("Incorrect constructor for given comparison");
           }
         }
-        
+
         break;
       }
-      
+
       case field::type::hierarchal_join:
       {
         switch (filterType)
@@ -641,10 +641,10 @@ namespace verbly {
             new(&singleton_.filterField) field(std::move(joinOn));
             singleton_.filterType = filterType;
             new(&singleton_.join) std::unique_ptr<filter>(new filter(joinCondition.normalize(singleton_.filterField.getObject())));
-            
+
             break;
           }
-          
+
           case comparison::int_equals:
           case comparison::int_does_not_equal:
           case comparison::int_is_at_least:
@@ -664,10 +664,10 @@ namespace verbly {
             throw std::invalid_argument("Incorrect constructor for given comparison");
           }
         }
-        
+
         break;
       }
-      
+
       case field::type::undefined:
       case field::type::string:
       case field::type::integer:
@@ -677,7 +677,7 @@ namespace verbly {
       }
     }
   }
-  
+
   field filter::getField() const
   {
     if (type_ == type::singleton)
@@ -687,7 +687,7 @@ namespace verbly {
       throw std::domain_error("This filter does not have a field");
     }
   }
-  
+
   filter::comparison filter::getComparison() const
   {
     if (type_ == type::singleton)
@@ -697,7 +697,7 @@ namespace verbly {
       throw std::domain_error("This filter does not have a comparison");
     }
   }
-  
+
   filter filter::getJoinCondition() const
   {
     if (type_ == type::singleton)
@@ -711,7 +711,7 @@ namespace verbly {
         {
           return *singleton_.join;
         }
-        
+
         case comparison::string_equals:
         case comparison::string_does_not_equal:
         case comparison::string_is_like:
@@ -733,7 +733,7 @@ namespace verbly {
       throw std::domain_error("This filter does not have a join condition");
     }
   }
-  
+
   std::string filter::getStringArgument() const
   {
     if (type_ == type::singleton)
@@ -747,7 +747,7 @@ namespace verbly {
         {
           return singleton_.stringValue;
         }
-        
+
         case comparison::int_equals:
         case comparison::int_does_not_equal:
         case comparison::int_is_at_least:
@@ -769,7 +769,7 @@ namespace verbly {
       throw std::domain_error("This filter does not have a string argument");
     }
   }
-  
+
   int filter::getIntegerArgument() const
   {
     if (type_ == type::singleton)
@@ -785,7 +785,7 @@ namespace verbly {
         {
           return singleton_.intValue;
         }
-        
+
         case comparison::string_equals:
         case comparison::string_does_not_equal:
         case comparison::string_is_like:
@@ -805,7 +805,7 @@ namespace verbly {
       throw std::domain_error("This filter does not have an integer argument");
     }
   }
-  
+
   bool filter::getBooleanArgument() const
   {
     if ((type_ == type::singleton) && (singleton_.filterType == comparison::boolean_equals))
@@ -815,13 +815,13 @@ namespace verbly {
       throw std::domain_error("This filter does not have a boolean argument");
     }
   }
-  
+
   filter::filter(bool orlogic) : type_(type::group)
   {
     new(&group_.children) std::list<filter>();
     group_.orlogic = orlogic;
   }
-  
+
   bool filter::getOrlogic() const
   {
     if (type_ == type::group)
@@ -831,27 +831,27 @@ namespace verbly {
       throw std::domain_error("This filter is not a group filter");
     }
   }
-  
+
   filter filter::operator+(filter condition) const
   {
     filter result(*this);
     result += std::move(condition);
-    
+
     return result;
   }
-  
+
   filter& filter::operator+=(filter condition)
   {
     if (type_ == type::group)
     {
       group_.children.push_back(std::move(condition));
-      
+
       return *this;
     } else {
       throw std::domain_error("Children can only be added to group filters");
     }
   }
-  
+
   filter::const_iterator filter::begin() const
   {
     if (type_ == type::group)
@@ -861,7 +861,7 @@ namespace verbly {
       throw std::domain_error("This filter has no children");
     }
   }
-  
+
   filter::const_iterator filter::end() const
   {
     if (type_ == type::group)
@@ -880,7 +880,7 @@ namespace verbly {
       {
         return {};
       }
-      
+
       case type::singleton:
       {
         switch (singleton_.filterType)
@@ -889,113 +889,113 @@ namespace verbly {
           {
             return filter(singleton_.filterField, comparison::int_does_not_equal, singleton_.intValue);
           }
-          
+
           case comparison::int_does_not_equal:
           {
             return filter(singleton_.filterField, comparison::int_equals, singleton_.intValue);
           }
-          
+
           case comparison::int_is_at_least:
           {
             return filter(singleton_.filterField, comparison::int_is_less_than, singleton_.intValue);
           }
-          
+
           case comparison::int_is_greater_than:
           {
             return filter(singleton_.filterField, comparison::int_is_at_most, singleton_.intValue);
           }
-          
+
           case comparison::int_is_at_most:
           {
             return filter(singleton_.filterField, comparison::int_is_greater_than, singleton_.intValue);
           }
-          
+
           case comparison::int_is_less_than:
           {
             return filter(singleton_.filterField, comparison::int_is_at_least, singleton_.intValue);
           }
-          
+
           case comparison::boolean_equals:
           {
             return filter(singleton_.filterField, comparison::boolean_equals, !singleton_.boolValue);
           }
-          
+
           case comparison::string_equals:
           {
             return filter(singleton_.filterField, comparison::string_does_not_equal, singleton_.stringValue);
           }
-          
+
           case comparison::string_does_not_equal:
           {
             return filter(singleton_.filterField, comparison::string_equals, singleton_.stringValue);
           }
-          
+
           case comparison::string_is_like:
           {
             return filter(singleton_.filterField, comparison::string_is_not_like, singleton_.stringValue);
           }
-          
+
           case comparison::string_is_not_like:
           {
             return filter(singleton_.filterField, comparison::string_is_like, singleton_.stringValue);
           }
-          
+
           case comparison::is_null:
           {
             return filter(singleton_.filterField, comparison::is_not_null);
           }
-          
+
           case comparison::is_not_null:
           {
             return filter(singleton_.filterField, comparison::is_null);
           }
-          
+
           case comparison::matches:
           {
             return filter(singleton_.filterField, comparison::does_not_match, *singleton_.join);
           }
-          
+
           case comparison::does_not_match:
           {
             return filter(singleton_.filterField, comparison::matches, *singleton_.join);
           }
-          
+
           case comparison::hierarchally_matches:
           {
             return filter(singleton_.filterField, comparison::does_not_hierarchally_match, *singleton_.join);
           }
-          
+
           case comparison::does_not_hierarchally_match:
           {
             return filter(singleton_.filterField, comparison::hierarchally_matches, *singleton_.join);
           }
         }
       }
-      
+
       case type::group:
       {
         filter result(!group_.orlogic);
-        
+
         for (const filter& child : group_.children)
         {
           result += !child;
         }
-        
+
         return result;
       }
     }
   }
-  
+
   filter& filter::operator&=(filter condition)
   {
     return (*this = (*this && std::move(condition)));
   }
-  
+
   filter& filter::operator|=(filter condition)
   {
     return (*this = (*this || std::move(condition)));
   }
-  
+
   filter filter::operator&&(filter condition) const
   {
     switch (type_)
@@ -1004,16 +1004,16 @@ namespace verbly {
       {
         return condition;
       }
-      
+
       case type::singleton:
       {
         filter result(false);
         result.group_.children.push_back(*this);
         result.group_.children.push_back(std::move(condition));
-        
+
         return result;
       }
-      
+
       case type::group:
       {
         if (group_.orlogic)
@@ -1026,13 +1026,13 @@ namespace verbly {
         } else {
           filter result(*this);
           result.group_.children.push_back(std::move(condition));
-          
+
           return result;
         }
       }
     }
   }
-  
+
   filter filter::operator||(filter condition) const
   {
     switch (type_)
@@ -1041,16 +1041,16 @@ namespace verbly {
       {
         return condition;
       }
-      
+
       case type::singleton:
       {
         filter result(true);
         result.group_.children.push_back(*this);
         result.group_.children.push_back(std::move(condition));
-        
+
         return result;
       }
-      
+
       case type::group:
       {
         if (!group_.orlogic)
@@ -1063,13 +1063,13 @@ namespace verbly {
         } else {
           filter result(*this);
           result.group_.children.push_back(std::move(condition));
-          
+
           return result;
         }
       }
     }
   }
-  
+
   filter filter::normalize(object context) const
   {
     {
@@ -1096,7 +1096,7 @@ namespace verbly {
               // recontexualization.
               return *this;
             }
-            
+
             case object::notion:
             {
               switch (singleton_.filterField.getObject())
@@ -1106,7 +1106,7 @@ namespace verbly {
                 {
                   return *this;
                 }
-                
+
                 case object::word:
                 case object::group:
                 case object::frame:
@@ -1118,7 +1118,7 @@ namespace verbly {
                 }
               }
             }
-              
+
             case object::word:
             {
               switch (singleton_.filterField.getObject())
@@ -1127,19 +1127,19 @@ namespace verbly {
                 {
                   return (verbly::word::notion %= *this);
                 }
-                
+
                 case object::undefined:
                 case object::word:
                 {
                   return *this;
                 }
-                
+
                 case object::group:
                 case object::frame:
                 {
                   return (verbly::word::group %= *this);
                 }
-                
+
                 case object::lemma:
                 case object::form:
                 case object::pronunciation:
@@ -1147,7 +1147,7 @@ namespace verbly {
                   return (verbly::word::lemma %= *this);
                 }
               }
-              
+
               case object::group:
               {
                 switch (singleton_.filterField.getObject())
@@ -1157,7 +1157,7 @@ namespace verbly {
                   {
                     return *this;
                   }
-                  
+
                   case object::notion:
                   case object::word:
                   case object::lemma:
@@ -1166,14 +1166,14 @@ namespace verbly {
                   {
                     return (verbly::group::word %= *this);
                   }
-                  
+
                   case object::frame:
                   {
                     return (verbly::group::frame %= *this);
                   }
                 }
               }
-              
+
               case object::frame:
               {
                 switch (singleton_.filterField.getObject())
@@ -1183,7 +1183,7 @@ namespace verbly {
                   {
                     return *this;
                   }
-                
+
                   case object::notion:
                   case object::word:
                   case object::group:
@@ -1195,7 +1195,7 @@ namespace verbly {
                   }
                 }
               }
-              
+
               case object::lemma:
               {
                 switch (singleton_.filterField.getObject())
@@ -1207,7 +1207,7 @@ namespace verbly {
                   {
                     return verbly::lemma::word %= *this;
                   }
-                  
+
                   case object::undefined:
                   case object::lemma:
                   {
@@ -1221,7 +1221,7 @@ namespace verbly {
                   }
                 }
               }
-              
+
               case object::form:
               {
                 switch (singleton_.filterField.getObject())
@@ -1234,7 +1234,7 @@ namespace verbly {
                   {
                     return verbly::form::lemma(inflection::base) %= *this;
                   }
-                  
+
                   case object::undefined:
                   case object::form:
                   {
@@ -1247,7 +1247,7 @@ namespace verbly {
                   }
                 }
               }
-              
+
               case object::pronunciation:
               {
                 switch (singleton_.filterField.getObject())
@@ -1261,7 +1261,7 @@ namespace verbly {
                   {
                     return verbly::pronunciation::form %= *this;
                   }
-                  
+
                   case object::undefined:
                   case object::pronunciation:
                   {
@@ -1276,7 +1276,8 @@ namespace verbly {
         case type::group:
         {
           filter result(group_.orlogic);
-          std::map<field, filter> joins;
+          std::map<field, filter> positiveJoins;
+          std::map<field, filter> negativeJoins;
 
           for (const filter& child : group_.children)
           {
@@ -1291,28 +1292,28 @@ namespace verbly {
                 {
                   case comparison::matches:
                   {
-                    if (!joins.count(normalized.singleton_.filterField))
+                    if (!positiveJoins.count(normalized.singleton_.filterField))
                     {
-                      joins[normalized.getField()] = filter(group_.orlogic);
+                      positiveJoins[normalized.getField()] = filter(group_.orlogic);
                     }
 
-                    joins.at(normalized.getField()) += std::move(*normalized.singleton_.join);
-                    
+                    positiveJoins.at(normalized.getField()) += std::move(*normalized.singleton_.join);
+
                     break;
                   }
-                  
+
                   case comparison::does_not_match:
                   {
-                    if (!joins.count(normalized.singleton_.filterField))
+                    if (!negativeJoins.count(normalized.singleton_.filterField))
                     {
-                      joins[normalized.getField()] = filter(group_.orlogic);
+                      negativeJoins[normalized.getField()] = filter(group_.orlogic);
                     }
 
-                    joins.at(normalized.getField()) += !*normalized.singleton_.join;
-                    
+                    negativeJoins.at(normalized.getField()) += std::move(*normalized.singleton_.join);
+
                     break;
                   }
-                  
+
                   case comparison::int_equals:
                   case comparison::int_does_not_equal:
                   case comparison::int_is_at_least:
@@ -1330,30 +1331,38 @@ namespace verbly {
                   case comparison::does_not_hierarchally_match:
                   {
                     result += std::move(normalized);
-                    
+
                     break;
                   }
                 }
-                
+
                 break;
               }
-              
+
               case type::group:
               case type::empty:
               {
                 result += std::move(normalized);
-                
+
                 break;
               }
             }
           }
 
-          for (auto& mapping : joins)
+          for (auto& mapping : positiveJoins)
           {
             const field& joinOn = mapping.first;
             filter& joinCondition = mapping.second;
 
             result += (joinOn %= joinCondition.normalize(joinOn.getJoinObject()));
+          }
+
+          for (auto& mapping : negativeJoins)
+          {
+            const field& joinOn = mapping.first;
+            filter& joinCondition = mapping.second;
+
+            result += !(joinOn %= joinCondition.normalize(joinOn.getJoinObject()));
           }
 
           return result;
