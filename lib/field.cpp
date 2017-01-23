@@ -70,12 +70,22 @@ namespace verbly {
   
   field::operator filter() const
   {
-    return filter(*this, filter::comparison::is_not_null);
+    if (isJoin())
+    {
+      return filter(*this, filter::comparison::matches, filter());
+    } else {
+      return filter(*this, filter::comparison::is_not_null);
+    }
   }
   
   filter field::operator!() const
   {
-    return filter(*this, filter::comparison::is_null);
+    if (isJoin())
+    {
+      return filter(*this, filter::comparison::does_not_match, filter());
+    } else {
+      return filter(*this, filter::comparison::is_null);
+    }
   }
   
   filter field::operator%=(filter joinCondition) const
