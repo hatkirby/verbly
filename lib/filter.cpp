@@ -1283,7 +1283,9 @@ namespace verbly {
           {
             filter normalized = child.normalize(context);
 
-            // Notably, this does not attempt to merge hierarchal matches.
+            // Notably, this does not attempt to merge hierarchal matches,
+            // UNLESS they are positive matches being OR-d, or negative
+            // matches being ANDed.
             switch (normalized.getType())
             {
               case type::singleton:
@@ -1306,10 +1308,34 @@ namespace verbly {
                   {
                     if (!negativeJoins.count(normalized.singleton_.filterField))
                     {
-                      negativeJoins[normalized.getField()] = filter(group_.orlogic);
+                      negativeJoins[normalized.getField()] = filter(!group_.orlogic);
                     }
 
                     negativeJoins.at(normalized.getField()) += std::move(*normalized.singleton_.join);
+
+                    break;
+                  }
+
+                  case comparison::hierarchally_matches:
+                  {
+                    if (group_.orlogic)
+                    {
+                      positiveJoins[normalized.getField()] |= std::move(*normalized.singleton_.join);
+                    } else {
+                      result += std::move(normalized);
+                    }
+
+                    break;
+                  }
+
+                  case comparison::does_not_hierarchally_match:
+                  {
+                    if (!group_.orlogic)
+                    {
+                      negativeJoins[normalized.getField()] |= std::move(*normalized.singleton_.join);
+                    } else {
+                      result += std::move(normalized);
+                    }
 
                     break;
                   }
@@ -1327,8 +1353,6 @@ namespace verbly {
                   case comparison::string_is_not_like:
                   case comparison::is_null:
                   case comparison::is_not_null:
-                  case comparison::hierarchally_matches:
-                  case comparison::does_not_hierarchally_match:
                   {
                     result += std::move(normalized);
 
