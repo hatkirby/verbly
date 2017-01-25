@@ -24,7 +24,7 @@ namespace verbly {
       // Mutators
 
       void setAdjectivePosition(positioning adjectivePosition);
-      
+
       void setVerbGroup(const group& verbGroup);
 
       // Accessors
@@ -58,7 +58,7 @@ namespace verbly {
       {
         return hasTagCount_;
       }
-      
+
       int getTagCount() const
       {
         // Calling code should always call hasTagCount first.
@@ -71,17 +71,17 @@ namespace verbly {
       {
         return adjectivePosition_;
       }
-      
+
       bool hasVerbGroup() const
       {
         return (verbGroup_ != nullptr);
       }
-      
+
       const group& getVerbGroup() const
       {
         // Calling code should always call hasVerbGroup first.
         assert(verbGroup_ != nullptr);
-        
+
         return *verbGroup_;
       }
 

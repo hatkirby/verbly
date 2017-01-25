@@ -52,7 +52,7 @@ namespace verbly {
       ~database();
 
       // Actions
-      
+
       void runQuery(std::string query);
 
       void insertIntoTable(std::string table, std::list<field> fields);

@@ -40,37 +40,37 @@ namespace verbly {
   {
     sqlite3_close_v2(ppdb_);
   }
-  
+
   query<notion> database::notions(filter where, bool random, int limit) const
   {
     return query<notion>(*this, ppdb_, std::move(where), random, limit);
   }
-  
+
   query<word> database::words(filter where, bool random, int limit) const
   {
     return query<word>(*this, ppdb_, std::move(where), random, limit);
   }
-  
+
   query<group> database::groups(filter where, bool random, int limit) const
   {
     return query<group>(*this, ppdb_, std::move(where), random, limit);
   }
-  
+
   query<frame> database::frames(filter where, bool random, int limit) const
   {
     return query<frame>(*this, ppdb_, std::move(where), random, limit);
   }
-  
+
   query<lemma> database::lemmas(filter where, bool random, int limit) const
   {
     return query<lemma>(*this, ppdb_, std::move(where), random, limit);
   }
-  
+
   query<form> database::forms(filter where, bool random, int limit) const
   {
     return query<form>(*this, ppdb_, std::move(where), random, limit);
   }
-  
+
   query<pronunciation> database::pronunciations(filter where, bool random, int limit) const
   {
     return query<pronunciation>(*this, ppdb_, std::move(where), random, limit);

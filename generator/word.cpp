@@ -37,7 +37,7 @@ namespace verbly {
     {
       adjectivePosition_ = adjectivePosition;
     }
-    
+
     void word::setVerbGroup(const group& verbGroup)
     {
       verbGroup_ = &verbGroup;
@@ -46,7 +46,7 @@ namespace verbly {
     database& operator<<(database& db, const word& arg)
     {
       std::list<field> fields;
-      
+
       fields.emplace_back("word_id", arg.getId());
       fields.emplace_back("notion_id", arg.getNotion().getId());
       fields.emplace_back("lemma_id", arg.getLemma().getId());
@@ -55,13 +55,13 @@ namespace verbly {
       {
         fields.emplace_back("tag_count", arg.getTagCount());
       }
-      
+
       if ((arg.getNotion().getPartOfSpeech() == part_of_speech::adjective)
         && (arg.getAdjectivePosition() != positioning::undefined))
       {
         fields.emplace_back("position", static_cast<int>(arg.getAdjectivePosition()));
       }
-      
+
       if ((arg.getNotion().getPartOfSpeech() == part_of_speech::verb)
         && (arg.hasVerbGroup()))
       {

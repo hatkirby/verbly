@@ -12,9 +12,9 @@ namespace verbly {
         integer,
         string
       };
-      
+
       // Default constructor
-      
+
       binding()
       {
       }
@@ -37,22 +37,22 @@ namespace verbly {
       ~binding();
 
       // Generic accessors
-      
+
       type getType() const
       {
         return type_;
       }
 
       // Integer
-      
+
       binding(int arg);
-      
+
       int getInteger() const;
 
       // String
-      
+
       binding(std::string arg);
-      
+
       std::string getString() const;
 
     private:

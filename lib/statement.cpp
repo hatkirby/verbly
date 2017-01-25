@@ -12,22 +12,22 @@
 #include "pronunciation.h"
 
 namespace verbly {
-  
+
   statement::statement(
     object context,
     filter queryFilter) :
       statement(getTableForContext(context), queryFilter.compact().normalize(context))
   {
   }
-  
+
   std::string statement::getQueryString(std::list<std::string> select, bool random, int limit) const
   {
     std::stringstream queryStream;
-    
+
     if (!withs_.empty())
     {
       queryStream << "WITH RECURSIVE ";
-    
+
       std::list<std::string> ctes;
       for (const with& cte : withs_)
       {
@@ -39,19 +39,19 @@ namespace verbly {
         cteStream << cte.getTableForId(cte.getTopTable());
         cteStream << " AS ";
         cteStream << cte.getTopTable();
-      
+
         for (const join& j : cte.getJoins())
         {
           cteStream << " ";
           cteStream << j;
         }
-      
+
         if (cte.getCondition().getType() != condition::type::empty)
         {
           cteStream << " WHERE ";
           cteStream << cte.getCondition().toSql();
         }
-        
+
         if (cte.isRecursive())
         {
           cteStream << " UNION SELECT l.* FROM ";
@@ -69,59 +69,59 @@ namespace verbly {
           cteStream << " = l.";
           cteStream << cte.getField().getColumn();
         }
-        
+
         cteStream << ")";
 
         ctes.push_back(cteStream.str());
       }
-    
+
       queryStream << implode(std::begin(ctes), std::end(ctes), ", ");
       queryStream << " ";
     }
-    
+
     std::list<std::string> realSelect;
     for (std::string& s : select)
     {
       realSelect.push_back(topTable_ + "." + s);
     }
-  
+
     queryStream << "SELECT ";
     queryStream << implode(std::begin(realSelect), std::end(realSelect), ", ");
     queryStream << " FROM ";
     queryStream << tables_.at(topTable_);
     queryStream << " AS ";
     queryStream << topTable_;
-  
+
     for (const join& j : joins_)
     {
       queryStream << " ";
       queryStream << j;
     }
-  
+
     if (topCondition_.getType() != condition::type::empty)
     {
       queryStream << " WHERE ";
       queryStream << topCondition_.toSql();
     }
-    
+
     if (random)
     {
       queryStream << " ORDER BY RANDOM()";
     }
-    
+
     if (limit > 0)
     {
       queryStream << " LIMIT ";
       queryStream << limit;
     }
-  
+
     return queryStream.str();
   }
-  
+
   std::list<binding> statement::getBindings() const
   {
     std::list<binding> result;
-    
+
     for (const with& w : withs_)
     {
       for (binding value : w.getCondition().flattenBindings())
@@ -129,15 +129,15 @@ namespace verbly {
         result.push_back(std::move(value));
       }
     }
-    
+
     for (binding value : topCondition_.flattenBindings())
     {
       result.push_back(std::move(value));
     }
-    
+
     return result;
   }
-  
+
   statement::statement(
     std::string tableName,
     filter clause,
@@ -149,7 +149,7 @@ namespace verbly {
       topCondition_(parseFilter(std::move(clause)))
   {
   }
-  
+
   /**
    * This function recursively parses the query's filter condition. It is not
    * idempotent. It returns a condition object representing the passed filter,
@@ -165,7 +165,7 @@ namespace verbly {
       {
         return {};
       }
-    
+
       case filter::type::singleton:
       {
         switch (clause.getField().getType())
@@ -174,7 +174,7 @@ namespace verbly {
           {
             return {};
           }
-        
+
           // For primitive type filters, all we need to do is translate the
           // filter object directly into a condition object. No joins are
           // necessary.
@@ -188,67 +188,67 @@ namespace verbly {
               {
                 return condition(topTable_, clause.getField().getColumn(), true);
               }
-              
+
               case filter::comparison::is_not_null:
               {
                 return condition(topTable_, clause.getField().getColumn(), false);
               }
-              
+
               case filter::comparison::int_equals:
               {
                 return condition(topTable_, clause.getField().getColumn(), condition::comparison::equals, clause.getIntegerArgument());
               }
-              
+
               case filter::comparison::int_does_not_equal:
               {
                 return condition(topTable_, clause.getField().getColumn(), condition::comparison::does_not_equal, clause.getIntegerArgument());
               }
-              
+
               case filter::comparison::int_is_at_least:
               {
                 return condition(topTable_, clause.getField().getColumn(), condition::comparison::is_at_least, clause.getIntegerArgument());
               }
-              
+
               case filter::comparison::int_is_greater_than:
               {
                 return condition(topTable_, clause.getField().getColumn(), condition::comparison::is_greater_than, clause.getIntegerArgument());
               }
-              
+
               case filter::comparison::int_is_at_most:
               {
                 return condition(topTable_, clause.getField().getColumn(), condition::comparison::is_at_most, clause.getIntegerArgument());
               }
-              
+
               case filter::comparison::int_is_less_than:
               {
                 return condition(topTable_, clause.getField().getColumn(), condition::comparison::is_less_than, clause.getIntegerArgument());
               }
-              
+
               case filter::comparison::boolean_equals:
               {
                 return condition(topTable_, clause.getField().getColumn(), condition::comparison::equals, clause.getBooleanArgument() ? 1 : 0);
               }
-              
+
               case filter::comparison::string_equals:
               {
                 return condition(topTable_, clause.getField().getColumn(), condition::comparison::equals, clause.getStringArgument());
               }
-              
+
               case filter::comparison::string_does_not_equal:
               {
                 return condition(topTable_, clause.getField().getColumn(), condition::comparison::does_not_equal, clause.getStringArgument());
               }
-              
+
               case filter::comparison::string_is_like:
               {
                 return condition(topTable_, clause.getField().getColumn(), condition::comparison::is_like, clause.getStringArgument());
               }
-              
+
               case filter::comparison::string_is_not_like:
               {
                 return condition(topTable_, clause.getField().getColumn(), condition::comparison::is_not_like, clause.getStringArgument());
               }
-              
+
               case filter::comparison::matches:
               case filter::comparison::does_not_match:
               case filter::comparison::hierarchally_matches:
@@ -258,7 +258,7 @@ namespace verbly {
               }
             }
           }
-        
+
           case field::type::join:
           {
             // First, figure out what table we need to join against.
@@ -278,9 +278,9 @@ namespace verbly {
               clause.getJoinCondition().normalize(clause.getField().getJoinObject()),
               nextTableId_,
               nextWithId_);
-            
+
             std::string joinTable = joinStmt.topTable_;
-            
+
             if (clause.getComparison() == filter::comparison::does_not_match)
             {
               // If the comparison is actually a negative filter, we can't just
@@ -293,7 +293,7 @@ namespace verbly {
               // condition on the join column being NULL as before.
               std::string withName = instantiateWith(clause.getField().getTable());
               std::string withInstName = instantiateTable(withName);
-              
+
               // LEFT JOIN against the CTE.
               joins_.emplace_back(
                 true,
@@ -310,7 +310,7 @@ namespace verbly {
               std::map<std::string, std::string> cteTables = std::move(joinStmt.tables_);
               std::list<join> cteJoins = std::move(joinStmt.joins_);
               condition cteCondition = integrate(std::move(joinStmt), true);
-            
+
               withs_.emplace_back(
                 std::move(withName),
                 clause.getField(),
@@ -319,7 +319,7 @@ namespace verbly {
                 std::move(cteCondition),
                 std::move(cteJoins),
                 false);
-              
+
               // Condition on the join column being NULL, which causes the query
               // to only return results that do not match the subquery.
               return condition(std::move(withInstName), clause.getField().getColumn(), true);
@@ -332,14 +332,14 @@ namespace verbly {
                 clause.getField().getColumn(),
                 std::move(joinTable),
                 clause.getField().getColumn());
-              
+
               // Integrate the subquery's table mappings, joins, and CTEs into
               // this statement, and return the subquery condition as our
               // condition.
               return integrate(std::move(joinStmt));
             }
           }
-        
+
           case field::type::join_through:
           {
             // Recursively parse the subquery, and therefore obtain an
@@ -350,9 +350,9 @@ namespace verbly {
               clause.getJoinCondition().normalize(clause.getField().getJoinObject()),
               nextTableId_,
               nextWithId_);
-              
+
             std::string joinTable = joinStmt.topTable_;
-            
+
             if (clause.getComparison() == filter::comparison::does_not_match)
             {
               // If the comparison is actually a negative filter, we can't just
@@ -366,7 +366,7 @@ namespace verbly {
               // condition on the join column being NULL as before.
               std::string withName = instantiateWith(clause.getField().getTable());
               std::string withInstName = instantiateTable(withName);
-              
+
               // LEFT JOIN against the CTE.
               joins_.emplace_back(
                 true,
@@ -375,7 +375,7 @@ namespace verbly {
                 clause.getField().getColumn(),
                 withInstName,
                 clause.getField().getJoinColumn());
-                
+
               // Modify the substatement such that the through table is the top
               // table, and such that it joins against the previous top table.
               std::string throughTable = joinStmt.instantiateTable(clause.getField().getTable());
@@ -386,7 +386,7 @@ namespace verbly {
                 clause.getField().getForeignJoinColumn(),
                 std::move(joinTable),
                 clause.getField().getForeignColumn());
-                
+
               joinStmt.topTable_ = throughTable;
 
               // All CTEs have to be in the main statement, so integrate any
@@ -396,7 +396,7 @@ namespace verbly {
               std::map<std::string, std::string> cteTables = std::move(joinStmt.tables_);
               std::list<join> cteJoins = std::move(joinStmt.joins_);
               condition cteCondition = integrate(std::move(joinStmt), true);
-            
+
               withs_.emplace_back(
                 std::move(withName),
                 clause.getField(),
@@ -405,14 +405,14 @@ namespace verbly {
                 std::move(cteCondition),
                 std::move(cteJoins),
                 false);
-              
+
               // Condition on the join column being NULL, which causes the query
               // to only return results that do not match the subquery.
               return condition(std::move(withInstName), clause.getField().getJoinColumn(), true);
             } else {
               // Instantiate the through table.
               std::string throughTable = instantiateTable(clause.getField().getTable());
-              
+
               // INNER JOIN against the through table.
               joins_.emplace_back(
                 false,
@@ -421,7 +421,7 @@ namespace verbly {
                 clause.getField().getColumn(),
                 throughTable,
                 clause.getField().getJoinColumn());
-              
+
               // INNER JOIN from the through table to the top table of the subquery.
               joins_.emplace_back(
                 false,
@@ -430,20 +430,20 @@ namespace verbly {
                 clause.getField().getForeignJoinColumn(),
                 std::move(joinTable),
                 clause.getField().getForeignColumn());
-              
+
               // Integrate the subquery's table mappings, joins, and CTEs into
               // this statement, and return the subquery condition as our
               // condition.
               return integrate(std::move(joinStmt));
             }
           }
-        
+
           case field::type::hierarchal_join:
           {
             // Create a recursive CTE that represents the results of the subquery.
             std::string withName = instantiateWith(clause.getField().getTable());
             std::string withInstName = instantiateTable(withName);
-            
+
             // If we are matching against the subquery, we INNER JOIN with the
             // CTE. If we are negatively matching the subquery, we LEFT JOIN
             // with the CTE.
@@ -452,7 +452,7 @@ namespace verbly {
             {
               outer = true;
             }
-            
+
             // Join against the CTE.
             joins_.emplace_back(
               outer,
@@ -461,14 +461,14 @@ namespace verbly {
               clause.getField().getColumn(),
               withInstName,
               clause.getField().getColumn());
-            
+
             // Recursively parse the subquery in order to create the CTE.
             statement withStmt(
               getTableForContext(clause.getField().getObject()),
               clause.getJoinCondition().normalize(clause.getField().getObject()),
               nextTableId_,
               nextWithId_);
-              
+
             // All CTEs have to be in the main statement, so integrate any CTEs
             // that our subquery uses. Also, retrieve the table mapping, joins
             // list, and subquery condition, and use them to create the CTE.
@@ -476,7 +476,7 @@ namespace verbly {
             std::map<std::string, std::string> cteTables = std::move(withStmt.tables_);
             std::list<join> cteJoins = std::move(withStmt.joins_);
             condition cteCondition = integrate(std::move(withStmt), true);
-          
+
             withs_.emplace_back(
               std::move(withName),
               clause.getField(),
@@ -498,11 +498,11 @@ namespace verbly {
           }
         }
       }
-    
+
       case filter::type::group:
       {
         condition grp(clause.getOrlogic());
-      
+
         for (const filter& child : clause)
         {
           condition newChild = parseFilter(child);
@@ -511,30 +511,30 @@ namespace verbly {
             grp += std::move(newChild);
           }
         }
-        
+
         if (grp.getChildren().empty())
         {
           grp = {};
         }
-        
+
         return grp;
       }
     }
   }
-  
+
   std::string statement::instantiateTable(std::string name)
   {
     std::string identifier = name + "_" + std::to_string(nextTableId_++);
     tables_[identifier] = name;
-    
+
     return identifier;
   }
-  
+
   std::string statement::instantiateWith(std::string name)
   {
     return name + "_tree_" + std::to_string(nextWithId_++);
   }
-  
+
   /**
    * This method integrates the parts of a recursively generated statement into
    * this statement. This is used because filters are recursive objects, but
@@ -551,13 +551,13 @@ namespace verbly {
       {
         tables_[mapping.first] = mapping.second;
       }
-        
+
       for (auto& j : subStmt.joins_)
       {
         joins_.push_back(j);
       }
     }
-    
+
     for (auto& w : subStmt.withs_)
     {
       withs_.push_back(w);
@@ -565,10 +565,10 @@ namespace verbly {
 
     nextTableId_ = subStmt.nextTableId_;
     nextWithId_ = subStmt.nextWithId_;
-    
+
     return subStmt.topCondition_;
   }
-  
+
   std::ostream& operator<<(std::ostream& oss, const statement::join& j)
   {
     if (j.isOuterJoin())
@@ -577,7 +577,7 @@ namespace verbly {
     } else {
       oss << "INNER";
     }
-    
+
     return oss
       << " JOIN "
       << j.getForeignTableName()
@@ -592,55 +592,55 @@ namespace verbly {
       << "."
       << j.getJoinColumn();
   }
-  
+
   statement::condition::condition(const condition& other)
   {
     type_ = other.type_;
-    
+
     switch (type_)
     {
       case type::empty:
       {
         break;
       }
-      
+
       case type::singleton:
       {
         new(&singleton_.table_) std::string(other.singleton_.table_);
         new(&singleton_.column_) std::string(other.singleton_.column_);
         singleton_.comparison_ = other.singleton_.comparison_;
         new(&singleton_.value_) binding(other.singleton_.value_);
-        
+
         break;
       }
-      
+
       case type::group:
       {
         new(&group_.children_) std::list<condition>(other.group_.children_);
         group_.orlogic_ = other.group_.orlogic_;
-        
+
         break;
       }
     }
   }
-  
+
   statement::condition::condition(condition&& other) : condition()
   {
     swap(*this, other);
   }
-  
+
   statement::condition& statement::condition::operator=(condition other)
   {
     swap(*this, other);
-    
+
     return *this;
   }
-  
+
   void swap(statement::condition& first, statement::condition& second)
   {
     using type = statement::condition::type;
     using condition = statement::condition;
-    
+
     type tempType = first.type_;
     std::string tempTable;
     std::string tempColumn;
@@ -648,94 +648,94 @@ namespace verbly {
     binding tempBinding;
     std::list<condition> tempChildren;
     bool tempOrlogic;
-    
+
     switch (tempType)
     {
       case type::empty:
       {
         break;
       }
-      
+
       case type::singleton:
       {
         tempTable = std::move(first.singleton_.table_);
         tempColumn = std::move(first.singleton_.column_);
         tempComparison = first.singleton_.comparison_;
         tempBinding = std::move(first.singleton_.value_);
-        
+
         break;
       }
-      
+
       case type::group:
       {
         tempChildren = std::move(first.group_.children_);
         tempOrlogic = first.group_.orlogic_;
-        
+
         break;
       }
     }
-    
+
     first.~condition();
-    
+
     first.type_ = second.type_;
-    
+
     switch (first.type_)
     {
       case type::empty:
       {
         break;
       }
-      
+
       case type::singleton:
       {
         new(&first.singleton_.table_) std::string(std::move(second.singleton_.table_));
         new(&first.singleton_.column_) std::string(std::move(second.singleton_.column_));
         first.singleton_.comparison_ = second.singleton_.comparison_;
         new(&first.singleton_.value_) binding(std::move(second.singleton_.value_));
-        
+
         break;
       }
-      
+
       case type::group:
       {
         new(&first.group_.children_) std::list<condition>(std::move(second.group_.children_));
         first.group_.orlogic_ = second.group_.orlogic_;
-        
+
         break;
       }
     }
-    
+
     second.~condition();
-    
+
     second.type_ = tempType;
-    
+
     switch (second.type_)
     {
       case type::empty:
       {
         break;
       }
-      
+
       case type::singleton:
       {
         new(&second.singleton_.table_) std::string(std::move(tempTable));
         new(&second.singleton_.column_) std::string(std::move(tempColumn));
         second.singleton_.comparison_ = tempComparison;
         new(&second.singleton_.value_) binding(std::move(tempBinding));
-        
+
         break;
       }
-      
+
       case type::group:
       {
         new(&second.group_.children_) std::list<condition>(std::move(tempChildren));
         second.group_.orlogic_ = tempOrlogic;
-        
+
         break;
       }
     }
   }
-  
+
   statement::condition::~condition()
   {
     switch (type_)
@@ -744,33 +744,33 @@ namespace verbly {
       {
         break;
       }
-      
+
       case type::singleton:
       {
         using string_type = std::string;
-        
+
         singleton_.table_.~string_type();
         singleton_.column_.~string_type();
         singleton_.value_.~binding();
 
         break;
       }
-      
+
       case type::group:
       {
         using list_type = std::list<condition>;
-        
+
         group_.children_.~list_type();
-        
+
         break;
       }
     }
   }
-  
+
   statement::condition::condition() : type_(type::empty)
   {
   }
-  
+
   statement::condition::condition(
     std::string table,
     std::string column,
@@ -779,7 +779,7 @@ namespace verbly {
   {
     new(&singleton_.table_) std::string(std::move(table));
     new(&singleton_.column_) std::string(std::move(column));
-    
+
     if (isNull)
     {
       singleton_.comparison_ = comparison::is_null;
@@ -787,7 +787,7 @@ namespace verbly {
       singleton_.comparison_ = comparison::is_not_null;
     }
   }
-  
+
   statement::condition::condition(
     std::string table,
     std::string column,
@@ -800,7 +800,7 @@ namespace verbly {
     singleton_.comparison_ = comp;
     new(&singleton_.value_) binding(std::move(value));
   }
-  
+
   std::string statement::condition::toSql() const
   {
     switch (type_)
@@ -809,7 +809,7 @@ namespace verbly {
       {
         return "";
       }
-      
+
       case type::singleton:
       {
         switch (singleton_.comparison_)
@@ -818,54 +818,54 @@ namespace verbly {
           {
             return singleton_.table_ + "." + singleton_.column_ + " = ?";
           }
-          
+
           case comparison::does_not_equal:
           {
             return singleton_.table_ + "." + singleton_.column_ + " != ?";
           }
-          
+
           case comparison::is_greater_than:
           {
             return singleton_.table_ + "." + singleton_.column_ + " > ?";
           }
-          
+
           case comparison::is_at_most:
           {
             return singleton_.table_ + "." + singleton_.column_ + " <= ?";
           }
-          
+
           case comparison::is_less_than:
           {
             return singleton_.table_ + "." + singleton_.column_ + " < ?";
           }
-          
+
           case comparison::is_at_least:
           {
             return singleton_.table_ + "." + singleton_.column_ + " >= ?";
           }
-          
+
           case comparison::is_like:
           {
             return singleton_.table_ + "." + singleton_.column_ + " LIKE ?";
           }
-          
+
           case comparison::is_not_like:
           {
             return singleton_.table_ + "." + singleton_.column_ + " NOT LIKE ?";
           }
-          
+
           case comparison::is_not_null:
           {
             return singleton_.table_ + "." + singleton_.column_ + " IS NOT NULL";
           }
-          
+
           case comparison::is_null:
           {
             return singleton_.table_ + "." + singleton_.column_ + " IS NULL";
           }
         }
       }
-      
+
       case type::group:
       {
         std::list<std::string> clauses;
@@ -873,12 +873,12 @@ namespace verbly {
         {
           clauses.push_back(cond.toSql());
         }
-        
+
         return implode(std::begin(clauses), std::end(clauses), group_.orlogic_ ? " OR " : " AND ");
       }
     }
   }
-  
+
   std::list<binding> statement::condition::flattenBindings() const
   {
     switch (type_)
@@ -887,7 +887,7 @@ namespace verbly {
       {
         return {};
       }
-      
+
       case type::singleton:
       {
         switch (singleton_.comparison_)
@@ -903,7 +903,7 @@ namespace verbly {
           {
             return {singleton_.value_};
           }
-          
+
           case comparison::is_not_null:
           case comparison::is_null:
           {
@@ -911,7 +911,7 @@ namespace verbly {
           }
         }
       }
-      
+
       case type::group:
       {
         std::list<binding> bindings;
@@ -922,30 +922,30 @@ namespace verbly {
             bindings.push_back(std::move(value));
           }
         }
-        
+
         return bindings;
       }
     }
   }
-  
+
   statement::condition::condition(bool orlogic) : type_(type::group)
   {
     new(&group_.children_) std::list<condition>();
     group_.orlogic_ = orlogic;
   }
-  
+
   statement::condition& statement::condition::operator+=(condition n)
   {
     if (type_ == type::group)
     {
       group_.children_.push_back(std::move(n));
-      
+
       return *this;
     } else {
       throw std::domain_error("Cannot add condition to non-group condition");
     }
   }
-  
+
   statement::condition& statement::condition::operator&=(condition n)
   {
     switch (type_)
@@ -953,32 +953,32 @@ namespace verbly {
       case type::empty:
       {
         *this = std::move(n);
-        
+
         break;
       }
-      
+
       case type::singleton:
       {
         condition grp(false);
         grp += *this;
         grp += std::move(n);
-        
+
         *this = grp;
-        
+
         break;
       }
-      
+
       case type::group:
       {
         *this += std::move(n);
-        
+
         break;
       }
     }
-    
+
     return *this;
   }
-  
+
   const std::list<statement::condition>& statement::condition::getChildren() const
   {
     if (type_ == type::group)
@@ -988,5 +988,5 @@ namespace verbly {
       throw std::domain_error("Cannot get children of non-group condition");
     }
   }
-  
+
 };

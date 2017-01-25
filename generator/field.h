@@ -32,27 +32,27 @@ namespace verbly {
         ~field();
 
         // Generic accessors
-        
+
         type getType() const
         {
           return type_;
         }
-        
+
         std::string getName() const
         {
           return name_;
         }
 
         // Integer
-        
+
         field(std::string name, int arg);
-        
+
         int getInteger() const;
 
         // String
-        
+
         field(std::string name, std::string arg);
-        
+
         std::string getString() const;
 
       private:

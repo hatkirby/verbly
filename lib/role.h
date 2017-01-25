@@ -9,13 +9,13 @@ namespace verbly {
 
   class role {
   public:
-    
+
     // Default constructor
-    
+
     role() = default;
-    
+
     // Constructor
-    
+
     role(
       std::string name,
       selrestr selrestrs = {}) :
@@ -24,35 +24,35 @@ namespace verbly {
         selrestrs_(selrestrs)
     {
     }
-    
+
     // Accessors
-    
+
     const std::string& getName() const
     {
       if (!valid_)
       {
         throw std::domain_error("Bad access to invalid role");
       }
-      
+
       return name_;
     }
-    
+
     const selrestr& getSelrestrs() const
     {
       if (!valid_)
       {
         throw std::domain_error("Bad access to invalid role");
       }
-      
+
       return selrestrs_;
     }
-    
+
   private:
-    
+
     bool valid_ = false;
     std::string name_;
     selrestr selrestrs_;
-    
+
   };
 
 };

@@ -7,7 +7,7 @@
 
 namespace verbly {
   namespace generator {
-    
+
     class part {
     public:
       enum class type {
@@ -19,78 +19,78 @@ namespace verbly {
         adverb = 4,
         literal = 5
       };
-      
+
       // Static factories
-      
+
       static part createNounPhrase(std::string role, selrestr selrestrs, std::set<std::string> synrestrs);
-      
+
       static part createVerb();
-      
+
       static part createPreposition(std::set<std::string> choices, bool literal);
-      
+
       static part createAdjective();
-      
+
       static part createAdverb();
-      
+
       static part createLiteral(std::string value);
-      
+
       // Copy and move constructors
-      
+
       part(const part& other);
-      
+
       part(part&& other);
-      
+
       // Assignment
-      
+
       part& operator=(part other);
-      
+
       // Swap
-      
+
       friend void swap(part& first, part& second);
-      
+
       // Destructor
-      
+
       ~part();
-      
+
       // General accessors
-      
+
       type getType() const
       {
         return type_;
       }
-      
+
       // Noun phrase accessors
-      
+
       std::string getNounRole() const;
-      
+
       selrestr getNounSelrestrs() const;
-      
+
       std::set<std::string> getNounSynrestrs() const;
-      
+
       // Preposition accessors
-      
+
       std::set<std::string> getPrepositionChoices() const;
-      
+
       bool isPrepositionLiteral() const;
-      
+
       // Literal accessors
-      
+
       std::string getLiteralValue() const;
-      
+
     private:
-      
+
       // Private constructors
-      
+
       part()
       {
       }
-      
+
       part(type t) : type_(t)
       {
       }
-      
+
       // Data
-      
+
       union {
         struct {
           std::string role;
@@ -103,11 +103,11 @@ namespace verbly {
         } preposition_;
         std::string literal_;
       };
-      
+
       type type_ = type::invalid;
-      
+
     };
-    
+
   };
 };
 

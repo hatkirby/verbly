@@ -20,7 +20,7 @@ int main(int argc, char** argv)
     try
     {
       verbly::generator::generator app(argv[1], argv[2], argv[3], argv[4], argv[5], argv[6]);
-      
+
       try
       {
         app.run();

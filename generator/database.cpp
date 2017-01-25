@@ -73,19 +73,19 @@ namespace verbly {
     {
       sqlite3_close_v2(ppdb_);
     }
-    
+
     void database::runQuery(std::string query)
     {
       // This can only happen when doing bad things with move semantics.
       assert(ppdb_ != nullptr);
-      
+
       sqlite3_stmt* ppstmt;
 
       if (sqlite3_prepare_v2(ppdb_, query.c_str(), query.length(), &ppstmt, NULL) != SQLITE_OK)
       {
         throw sqlite3_error("Error writing to database", sqlite3_errmsg(ppdb_));
       }
-      
+
       int result = sqlite3_step(ppstmt);
       sqlite3_finalize(ppstmt);
 
@@ -99,10 +99,10 @@ namespace verbly {
     {
       // This can only happen when doing bad things with move semantics.
       assert(ppdb_ != nullptr);
-      
+
       // This shouldn't happen.
       assert(!fields.empty());
-      
+
       std::list<std::string> fieldNames;
       std::list<std::string> qs;
       for (field& f : fields)
@@ -110,7 +110,7 @@ namespace verbly {
         fieldNames.push_back(f.getName());
         qs.push_back("?");
       }
-      
+
       std::ostringstream query;
       query << "INSERT INTO ";
       query << table;
@@ -119,7 +119,7 @@ namespace verbly {
       query << ") VALUES (";
       query << implode(std::begin(qs), std::end(qs), ", ");
       query << ")";
-      
+
       std::string query_str = query.str();
 
       sqlite3_stmt* ppstmt;

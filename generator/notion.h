@@ -23,7 +23,7 @@ namespace verbly {
       // Mutators
 
       void incrementNumOfImages();
-      
+
       void setPrepositionGroups(std::list<std::string> groups);
 
       // Accessors
@@ -37,7 +37,7 @@ namespace verbly {
       {
         return partOfSpeech_;
       }
-      
+
       bool hasWnid() const
       {
         return hasWnid_;
@@ -58,12 +58,12 @@ namespace verbly {
 
         return numOfImages_;
       }
-      
+
       std::list<std::string> getPrepositionGroups() const
       {
         // Calling code should always check that the notion is a preposition first.
         assert(partOfSpeech_ == part_of_speech::preposition);
-        
+
         return prepositionGroups_;
       }
 

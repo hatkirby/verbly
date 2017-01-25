@@ -15,7 +15,7 @@
 struct sqlite3;
 
 namespace verbly {
-  
+
   template <typename Object>
   class query;
 
@@ -43,21 +43,21 @@ namespace verbly {
     // Destructor
 
     ~database();
-    
+
     // Queries
-    
+
     query<notion> notions(filter where, bool random = true, int limit = 1) const;
-    
+
     query<word> words(filter where, bool random = true, int limit = 1) const;
-    
+
     query<group> groups(filter where, bool random = true, int limit = 1) const;
-    
+
     query<frame> frames(filter where, bool random = true, int limit = 1) const;
-    
+
     query<lemma> lemmas(filter where, bool random = true, int limit = 1) const;
-    
+
     query<form> forms(filter where, bool random = true, int limit = 1) const;
-    
+
     query<pronunciation> pronunciations(filter where, bool random = true, int limit = 1) const;
 
   private:
