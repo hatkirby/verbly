@@ -16,7 +16,6 @@ namespace verbly {
   {
     id_ = sqlite3_column_int(row, 0);
 
-    // TODO: Initialize frame data from row.
     std::string partsJsonStr(reinterpret_cast<const char*>(sqlite3_column_blob(row, 1)));
     nlohmann::json partsJson = nlohmann::json::parse(std::move(partsJsonStr));
 

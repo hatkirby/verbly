@@ -66,7 +66,6 @@ namespace verbly {
     if (!pronunciations.empty())
     {
       return std::any_of(std::begin(pronunciations), std::end(pronunciations), [] (const verbly::pronunciation& p) {
-        std::cout << "phonemes: " << implode(std::begin(p.getPhonemes()), std::end(p.getPhonemes()), ",") << std::endl;
         return p.getPhonemes().front().find_first_of("012") != std::string::npos;
       });
     } else {

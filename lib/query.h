@@ -31,8 +31,6 @@ namespace verbly {
       std::string queryString = stmt.getQueryString(Object::select, random, limit);
       std::list<binding> bindings = stmt.getBindings();
 
-      std::cout << queryString << std::endl;
-
       if (sqlite3_prepare_v2(ppdb, queryString.c_str(), queryString.length(), &ppstmt_, NULL) != SQLITE_OK)
       {
         std::string errorMsg = sqlite3_errmsg(ppdb);
