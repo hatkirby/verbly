@@ -97,11 +97,23 @@ namespace verbly {
     
     const lemma& getLemma() const;
     
+    bool hasGroup() const
+    {
+      if (!valid_)
+      {
+        throw std::domain_error("Bad access to uninitialized word");
+      }
+      
+      return hasGroup_;
+    }
+    
+    const group& getGroup() const;
+    
     // Convenience accessors
     
     std::string getBaseForm() const;
   
-    std::list<std::string> getInflections(inflection infl) const;
+    std::vector<std::string> getInflections(inflection infl) const;
     
     // Type info
     

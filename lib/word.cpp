@@ -93,14 +93,34 @@ namespace verbly {
     return lemma_;
   }
   
+  const group& word::getGroup() const
+  {
+    if (!valid_)
+    {
+      throw std::domain_error("Bad access to uninitialized word");
+    }
+    
+    if (!hasGroup_)
+    {
+      throw std::domain_error("Word does not have a group");
+    }
+   
+    if (!group_)
+    {
+      group_ = db_->groups(group::id == groupId_).first();
+    }
+    
+    return group_;
+  }
+  
   std::string word::getBaseForm() const
   {
     return getLemma().getBaseForm().getText();
   }
   
-  std::list<std::string> word::getInflections(inflection category) const
+  std::vector<std::string> word::getInflections(inflection category) const
   {
-    std::list<std::string> result;
+    std::vector<std::string> result;
     for (const form& infl : getLemma().getInflections(category))
     {
       result.push_back(infl.getText());
