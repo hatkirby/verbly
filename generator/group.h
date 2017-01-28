@@ -5,7 +5,7 @@
 #include <set>
 #include <string>
 #include <cassert>
-#include "../lib/role.h"
+#include "role.h"
 
 namespace verbly {
   namespace generator {
@@ -20,13 +20,13 @@ namespace verbly {
 
       group();
 
-      // Mutators
+      explicit group(const group& parent);
 
-      void setParent(const group& parent);
+      // Mutators
 
       void addRole(role r);
 
-      void addFrame(const frame& f);
+      void addFrame(frame f);
 
       // Accessors
 
@@ -35,24 +35,19 @@ namespace verbly {
         return id_;
       }
 
-      bool hasParent() const
+      const std::set<std::string>& getRoles() const
       {
-        return (parent_ != nullptr);
+        return roleNames_;
       }
 
-      const group& getParent() const
-      {
-        // Calling code should always call hasParent first
-        assert(parent_ != nullptr);
-
-        return *parent_;
-      }
-
-      std::set<std::string> getRoles() const;
+      bool hasRole(std::string name) const;
 
       const role& getRole(std::string name) const;
 
-      std::set<const frame*> getFrames() const;
+      const std::list<frame>& getFrames() const
+      {
+        return frames_;
+      }
 
     private:
 
@@ -60,9 +55,8 @@ namespace verbly {
 
       const int id_;
 
-      const group* parent_ = nullptr;
       std::map<std::string, role> roles_;
-      std::set<const frame*> frames_;
+      std::list<frame> frames_;
 
       // Caches
 

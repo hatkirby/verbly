@@ -105,7 +105,7 @@ namespace verbly {
 
       template <typename... Args> word& createWord(Args&&... args);
 
-      group& createGroup(xmlNodePtr top);
+      void createGroup(xmlNodePtr top, const group* parent = nullptr);
 
       selrestr parseSelrestr(xmlNodePtr top);
 
@@ -128,7 +128,6 @@ namespace verbly {
       std::list<lemma> lemmas_;
       std::list<form> forms_;
       std::list<pronunciation> pronunciations_;
-      std::list<frame> frames_;
       std::list<group> groups_;
 
       // Indexes

@@ -5,6 +5,7 @@
 #include "../lib/enums.h"
 
 namespace verbly {
+
   namespace generator {
 
     class notion;

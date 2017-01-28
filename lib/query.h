@@ -9,6 +9,7 @@
 #include <iostream>
 #include "statement.h"
 #include "binding.h"
+#include "order.h"
 
 namespace verbly {
 
@@ -24,11 +25,17 @@ namespace verbly {
   class query {
   public:
 
-    query(const database& db, sqlite3* ppdb, filter queryFilter, bool random, int limit) : db_(&db)
+    query(const database& db, sqlite3* ppdb, filter queryFilter, order sortOrder, int limit) : db_(&db)
     {
+      if ((sortOrder.getType() == order::type::field)
+        && (sortOrder.getSortField().getObject() != Object::objectType))
+      {
+        throw std::invalid_argument("Can only sort query by a field in the result table");
+      }
+
       statement stmt(Object::objectType, std::move(queryFilter));
 
-      std::string queryString = stmt.getQueryString(Object::select, random, limit);
+      std::string queryString = stmt.getQueryString(Object::select, std::move(sortOrder), limit);
       std::list<binding> bindings = stmt.getBindings();
 
       if (sqlite3_prepare_v2(ppdb, queryString.c_str(), queryString.length(), &ppstmt_, NULL) != SQLITE_OK)

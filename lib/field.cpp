@@ -48,6 +48,11 @@ namespace verbly {
     return filter(*this, filter::comparison::int_equals, static_cast<int>(value));
   }
 
+  filter field::operator==(part_type value) const
+  {
+    return filter(*this, filter::comparison::int_equals, static_cast<int>(value));
+  }
+
   filter field::operator==(bool value) const
   {
     return filter(*this, filter::comparison::boolean_equals, value);
@@ -66,6 +71,21 @@ namespace verbly {
   filter field::operator%=(std::string value) const
   {
     return filter(*this, filter::comparison::string_is_like, std::move(value));
+  }
+
+  filter field::operator==(const char* value) const
+  {
+    return filter(*this, filter::comparison::string_equals, std::string(value));
+  }
+
+  filter field::operator!=(const char* value) const
+  {
+    return filter(*this, filter::comparison::string_does_not_equal, std::string(value));
+  }
+
+  filter field::operator%=(const char* value) const
+  {
+    return filter(*this, filter::comparison::string_is_like, std::string(value));
   }
 
   field::operator filter() const

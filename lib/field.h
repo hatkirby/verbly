@@ -17,6 +17,7 @@ namespace verbly {
       integer,
       boolean,
       join,
+      join_where,
       join_through,
       hierarchal_join
     };
@@ -95,6 +96,17 @@ namespace verbly {
       return field(obj, type::join, name, nullable, table);
     }
 
+    static field joinWhere(
+      object obj,
+      const char* name,
+      object joinWith,
+      const field& conditionField,
+      int conditionValue,
+      bool nullable = false)
+    {
+      return field(obj, type::join_where, name, nullable, 0, joinWith, 0, 0, 0, &conditionField, conditionValue);
+    }
+
     static field joinThrough(
       object obj,
       const char* name,
@@ -151,7 +163,10 @@ namespace verbly {
 
     bool isJoin() const
     {
-      return ((type_ == type::join) || (type_ == type::join_through) || (type_ == type::hierarchal_join));
+      return ((type_ == type::join)
+        || (type_ == type::join_where)
+        || (type_ == type::join_through)
+        || (type_ == type::hierarchal_join));
     }
 
     const char* getColumn() const
@@ -180,7 +195,7 @@ namespace verbly {
     {
       return (type_ == type::hierarchal_join)
         ? object_
-        : ((type_ == type::join) || (type_ == type::join_through))
+        : ((type_ == type::join) || (type_ == type::join_where) || (type_ == type::join_through))
         ? joinObject_
         : throw std::domain_error("Non-join fields don't have join objects");
     }
@@ -209,6 +224,22 @@ namespace verbly {
         : throw std::domain_error("Only many-to-many join fields have a foreign join column");
     }
 
+    // Condition joins
+
+    const field& getConditionField() const
+    {
+      return (type_ == type::join_where)
+        ? *conditionField_
+        : throw std::domain_error("Only condition join fields have a condition field");
+    }
+
+    int getConditionValue() const
+    {
+      return (type_ == type::join_where)
+        ? conditionValue_
+        : throw std::domain_error("Only condition join fields have a condition value");
+    }
+
     // Ordering
 
     bool operator<(const field& other) const
@@ -217,20 +248,30 @@ namespace verbly {
       // However, there do exist a number of relationships from an object to
       // itself, such as notion hypernymy/hyponymy. Hypernymy and hyponymy have
       // the same object (notion), the same column (notion_id), and the same
-      // table (hypernymy); however, they have different join columns.
-      return std::tie(object_, column_, table_, joinColumn_) < std::tie(other.object_, other.column_, other.table_, other.joinColumn_);
+      // table (hypernymy); however, they have different join columns. For
+      // condition joins, the condition field and condition value are also
+      // significant.
+      if (conditionField_)
+      {
+        return std::tie(object_, column_, table_, joinColumn_, *conditionField_, conditionValue_)
+          < std::tie(other.object_, other.column_, other.table_, other.joinColumn_, *other.conditionField_, other.conditionValue_);
+      } else {
+        return std::tie(object_, column_, table_, joinColumn_) < std::tie(other.object_, other.column_, other.table_, other.joinColumn_);
+      }
     }
 
     // Equality
 
     bool operator==(const field& other) const
     {
-      // For the most part, (object, column) uniquely identifies fields.
-      // However, there do exist a number of relationships from an object to
-      // itself, such as notion hypernymy/hyponymy. Hypernymy and hyponymy have
-      // the same object (notion), the same column (notion_id), and the same
-      // table (hypernymy); however, they have different join columns.
-      return std::tie(object_, column_, table_, joinColumn_) == std::tie(other.object_, other.column_, other.table_, other.joinColumn_);
+      // See operator<() for documentation.
+      if (conditionField_)
+      {
+        return std::tie(object_, column_, table_, joinColumn_, *conditionField_, conditionValue_)
+          == std::tie(other.object_, other.column_, other.table_, other.joinColumn_, *other.conditionField_, other.conditionValue_);
+      } else {
+        return std::tie(object_, column_, table_, joinColumn_) == std::tie(other.object_, other.column_, other.table_, other.joinColumn_);
+      }
     }
 
     // Filter construction
@@ -245,12 +286,17 @@ namespace verbly {
     filter operator==(part_of_speech value) const; // Part of speech equality
     filter operator==(positioning value) const; // Adjective positioning equality
     filter operator==(inflection value) const; // Inflection category equality
+    filter operator==(part_type value) const; // Verb frame part type equality
 
     filter operator==(bool value) const; // Boolean equality
 
     filter operator==(std::string value) const; // String equality
     filter operator!=(std::string value) const; // String inequality
     filter operator%=(std::string value) const; // String matching
+
+    filter operator==(const char* value) const; // String equality
+    filter operator!=(const char* value) const; // String inequality
+    filter operator%=(const char* value) const; // String matching
 
     operator filter() const; // Non-nullity
     filter operator!() const; // Nullity
@@ -270,7 +316,9 @@ namespace verbly {
       object joinObject = object::undefined,
       const char* foreignColumn = 0,
       const char* joinColumn = 0,
-      const char* foreignJoinColumn = 0) :
+      const char* foreignJoinColumn = 0,
+      const field* conditionField = 0,
+      int conditionValue = 0) :
         object_(obj),
         type_(datatype),
         column_(column),
@@ -279,7 +327,9 @@ namespace verbly {
         joinObject_(joinObject),
         foreignColumn_(foreignColumn),
         joinColumn_(joinColumn),
-        foreignJoinColumn_(foreignJoinColumn)
+        foreignJoinColumn_(foreignJoinColumn),
+        conditionField_(conditionField),
+        conditionValue_(conditionValue)
     {
     }
 
@@ -299,6 +349,10 @@ namespace verbly {
     const char* foreignColumn_ = 0;
     const char* joinColumn_ = 0;
     const char* foreignJoinColumn_ = 0;
+
+    // Condition joins
+    const field* conditionField_ = 0;
+    int conditionValue_ = 0;
 
   };
 

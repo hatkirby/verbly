@@ -13,13 +13,14 @@
 namespace verbly {
 
   class filter;
+  class order;
 
   class statement {
   public:
 
     statement(object context, filter queryFilter);
 
-    std::string getQueryString(std::list<std::string> select, bool random, int limit) const;
+    std::string getQueryString(std::list<std::string> select, order sortOrder, int limit, bool debug = false) const;
 
     std::list<binding> getBindings() const;
 
@@ -153,9 +154,11 @@ namespace verbly {
 
       // Utility
 
-      std::string toSql() const;
+      std::string toSql(bool toplevel, bool debug = false) const;
 
       std::list<binding> flattenBindings() const;
+
+      condition flatten() const;
 
     private:
       union {
@@ -246,8 +249,8 @@ namespace verbly {
     {
       return (context == object::notion) ? "notions"
         : (context == object::word) ? "words"
-        : (context == object::group) ? "groups"
         : (context == object::frame) ? "frames"
+        : (context == object::part) ? "parts"
         : (context == object::lemma) ? "lemmas_forms"
         : (context == object::form) ? "forms"
         : (context == object::pronunciation) ? "pronunciations"

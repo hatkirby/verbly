@@ -4,6 +4,8 @@
 namespace verbly {
   namespace generator {
 
+    int part::nextId_ = 0;
+
     part part::createNounPhrase(std::string role, selrestr selrestrs, std::set<std::string> synrestrs)
     {
       part p(type::noun_phrase);
@@ -49,9 +51,52 @@ namespace verbly {
       return p;
     }
 
+    part part::duplicate(const part& other)
+    {
+      part result(other.type_);
+
+      switch (result.type_)
+      {
+        case type::noun_phrase:
+        {
+          new(&result.noun_phrase_.role) std::string(other.noun_phrase_.role);
+          new(&result.noun_phrase_.selrestrs) selrestr(other.noun_phrase_.selrestrs);
+          new(&result.noun_phrase_.synrestrs) std::set<std::string>(other.noun_phrase_.synrestrs);
+
+          break;
+        }
+
+        case type::preposition:
+        {
+          new(&result.preposition_.choices) std::set<std::string>(other.preposition_.choices);
+          result.preposition_.literal = other.preposition_.literal;
+
+          break;
+        }
+
+        case type::literal:
+        {
+          new(&result.literal_) std::string(other.literal_);
+
+          break;
+        }
+
+        case type::verb:
+        case type::adjective:
+        case type::adverb:
+        case type::invalid:
+        {
+          break;
+        }
+      }
+
+      return result;
+    }
+
     part::part(const part& other)
     {
       type_ = other.type_;
+      id_ = other.id_;
 
       switch (type_)
       {
@@ -106,6 +151,7 @@ namespace verbly {
       using type = part::type;
 
       type tempType = first.type_;
+      int tempId = first.id_;
       std::string tempRole;
       selrestr tempSelrestrs;
       std::set<std::string> tempSynrestrs;
@@ -151,6 +197,7 @@ namespace verbly {
       first.~part();
 
       first.type_ = second.type_;
+      first.id_ = second.id_;
 
       switch (first.type_)
       {
@@ -190,6 +237,7 @@ namespace verbly {
       second.~part();
 
       second.type_ = tempType;
+      second.id_ = tempId;
 
       switch (second.type_)
       {

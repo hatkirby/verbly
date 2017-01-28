@@ -41,39 +41,71 @@ namespace verbly {
     sqlite3_close_v2(ppdb_);
   }
 
-  query<notion> database::notions(filter where, bool random, int limit) const
+  query<notion> database::notions(filter where, order sortOrder, int limit) const
   {
-    return query<notion>(*this, ppdb_, std::move(where), random, limit);
+    return query<notion>(*this, ppdb_, std::move(where), std::move(sortOrder), limit);
   }
 
-  query<word> database::words(filter where, bool random, int limit) const
+  query<word> database::words(filter where, order sortOrder, int limit) const
   {
-    return query<word>(*this, ppdb_, std::move(where), random, limit);
+    return query<word>(*this, ppdb_, std::move(where), std::move(sortOrder), limit);
   }
 
-  query<group> database::groups(filter where, bool random, int limit) const
+  query<frame> database::frames(filter where, order sortOrder, int limit) const
   {
-    return query<group>(*this, ppdb_, std::move(where), random, limit);
+    return query<frame>(*this, ppdb_, std::move(where), std::move(sortOrder), limit);
   }
 
-  query<frame> database::frames(filter where, bool random, int limit) const
+  query<part> database::parts(filter where, order sortOrder, int limit) const
   {
-    return query<frame>(*this, ppdb_, std::move(where), random, limit);
+    return query<part>(*this, ppdb_, std::move(where), std::move(sortOrder), limit);
   }
 
-  query<lemma> database::lemmas(filter where, bool random, int limit) const
+  query<lemma> database::lemmas(filter where, order sortOrder, int limit) const
   {
-    return query<lemma>(*this, ppdb_, std::move(where), random, limit);
+    return query<lemma>(*this, ppdb_, std::move(where), std::move(sortOrder), limit);
   }
 
-  query<form> database::forms(filter where, bool random, int limit) const
+  query<form> database::forms(filter where, order sortOrder, int limit) const
   {
-    return query<form>(*this, ppdb_, std::move(where), random, limit);
+    return query<form>(*this, ppdb_, std::move(where), std::move(sortOrder), limit);
   }
 
-  query<pronunciation> database::pronunciations(filter where, bool random, int limit) const
+  query<pronunciation> database::pronunciations(filter where, order sortOrder, int limit) const
   {
-    return query<pronunciation>(*this, ppdb_, std::move(where), random, limit);
+    return query<pronunciation>(*this, ppdb_, std::move(where), std::move(sortOrder), limit);
+  }
+
+  std::set<std::string> database::synrestrs(int partId) const
+  {
+    std::string queryString = "SELECT synrestr FROM synrestrs WHERE part_id = ?";
+
+    sqlite3_stmt* ppstmt;
+    if (sqlite3_prepare_v2(ppdb_, queryString.c_str(), queryString.length(), &ppstmt, NULL) != SQLITE_OK)
+    {
+      std::string errorMsg = sqlite3_errmsg(ppdb_);
+      sqlite3_finalize(ppstmt);
+
+      throw database_error("Error preparing query", errorMsg);
+    }
+
+    if (sqlite3_bind_int(ppstmt, 1, partId) != SQLITE_OK)
+    {
+      std::string errorMsg = sqlite3_errmsg(ppdb_);
+      sqlite3_finalize(ppstmt);
+
+      throw database_error("Error binding value to query", errorMsg);
+    }
+
+    std::set<std::string> result;
+    while (sqlite3_step(ppstmt) == SQLITE_ROW)
+    {
+      result.insert(reinterpret_cast<const char*>(sqlite3_column_blob(ppstmt, 0)));
+    }
+
+    sqlite3_finalize(ppstmt);
+
+    return result;
   }
 
 };

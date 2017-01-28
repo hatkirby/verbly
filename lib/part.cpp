@@ -1,12 +1,30 @@
 #include "part.h"
 #include <stdexcept>
+#include <sqlite3.h>
 #include "selrestr.h"
+#include "database.h"
 
 namespace verbly {
 
+  const object part::objectType = object::part;
+
+  const std::list<std::string> part::select = {"part_id", "frame_id", "part_index", "type", "role", "selrestrs", "prepositions", "preposition_literality", "literal_value"};
+
+  const field part::index = field::integerField(object::part, "part_index");
+  const field part::type = field::integerField(object::part, "type");
+
+  const field part::role = field::stringField(object::part, "role", true);
+
+  const field part::frame = field::joinField(object::part, "frame_id", object::frame);
+
+  const field part::synrestr_field::synrestrJoin = field::joinField(object::part, "part_id", "synrestrs");
+  const field part::synrestr_field::synrestrField = field::stringField("synrestrs", "synrestr");
+
+  const part::synrestr_field part::synrestr = {};
+
   part part::createNounPhrase(std::string role, selrestr selrestrs, std::set<std::string> synrestrs)
   {
-    part p(type::noun_phrase);
+    part p(part_type::noun_phrase);
 
     new(&p.noun_phrase_.role) std::string(std::move(role));
     new(&p.noun_phrase_.selrestrs) selrestr(std::move(selrestrs));
@@ -17,12 +35,12 @@ namespace verbly {
 
   part part::createVerb()
   {
-    return part(type::verb);
+    return part(part_type::verb);
   }
 
   part part::createPreposition(std::vector<std::string> choices, bool literal)
   {
-    part p(type::preposition);
+    part p(part_type::preposition);
 
     new(&p.preposition_.choices) std::vector<std::string>(std::move(choices));
     p.preposition_.literal = literal;
@@ -32,21 +50,70 @@ namespace verbly {
 
   part part::createAdjective()
   {
-    return part(type::adjective);
+    return part(part_type::adjective);
   }
 
   part part::createAdverb()
   {
-    return part(type::adverb);
+    return part(part_type::adverb);
   }
 
   part part::createLiteral(std::string value)
   {
-    part p(type::literal);
+    part p(part_type::literal);
 
     new(&p.literal_) std::string(std::move(value));
 
     return p;
+  }
+
+  part::part(const database& db, sqlite3_stmt* row)
+  {
+    int id = sqlite3_column_int(row, 0);
+
+    type_ = static_cast<part_type>(sqlite3_column_int(row, 3));
+
+    switch (type_)
+    {
+      case part_type::noun_phrase:
+      {
+        new(&noun_phrase_.role) std::string(reinterpret_cast<const char*>(sqlite3_column_blob(row, 4)));
+        new(&noun_phrase_.selrestrs) selrestr(nlohmann::json::parse(reinterpret_cast<const char*>(sqlite3_column_blob(row, 5))));
+        new(&noun_phrase_.synrestrs) std::set<std::string>(db.synrestrs(id));
+
+        break;
+      }
+
+      case part_type::preposition:
+      {
+        new(&preposition_.choices) std::vector<std::string>();
+        preposition_.literal = (sqlite3_column_int(row, 7) == 1);
+
+        std::string choicesJsonStr(reinterpret_cast<const char*>(sqlite3_column_blob(row, 6)));
+        nlohmann::json choicesJson = nlohmann::json::parse(std::move(choicesJsonStr));
+        for (const nlohmann::json& choiceJson : choicesJson)
+        {
+          preposition_.choices.push_back(choiceJson.get<std::string>());
+        }
+
+        break;
+      }
+
+      case part_type::literal:
+      {
+        new(&literal_) std::string(reinterpret_cast<const char*>(sqlite3_column_blob(row, 8)));
+
+        break;
+      }
+
+      case part_type::verb:
+      case part_type::adjective:
+      case part_type::adverb:
+      case part_type::invalid:
+      {
+        break;
+      }
+    }
   }
 
   part::part(const part& other)
@@ -55,7 +122,7 @@ namespace verbly {
 
     switch (type_)
     {
-      case type::noun_phrase:
+      case part_type::noun_phrase:
       {
         new(&noun_phrase_.role) std::string(other.noun_phrase_.role);
         new(&noun_phrase_.selrestrs) selrestr(other.noun_phrase_.selrestrs);
@@ -64,7 +131,7 @@ namespace verbly {
         break;
       }
 
-      case type::preposition:
+      case part_type::preposition:
       {
         new(&preposition_.choices) std::vector<std::string>(other.preposition_.choices);
         preposition_.literal = other.preposition_.literal;
@@ -72,17 +139,17 @@ namespace verbly {
         break;
       }
 
-      case type::literal:
+      case part_type::literal:
       {
         new(&literal_) std::string(other.literal_);
 
         break;
       }
 
-      case type::verb:
-      case type::adjective:
-      case type::adverb:
-      case type::invalid:
+      case part_type::verb:
+      case part_type::adjective:
+      case part_type::adverb:
+      case part_type::invalid:
       {
         break;
       }
@@ -103,7 +170,7 @@ namespace verbly {
 
   void swap(part& first, part& second)
   {
-    using type = part::type;
+    using type = part_type;
 
     type tempType = first.type_;
     std::string tempRole;
@@ -231,7 +298,7 @@ namespace verbly {
   {
     switch (type_)
     {
-      case type::noun_phrase:
+      case part_type::noun_phrase:
       {
         using string_type = std::string;
         using set_type = std::set<std::string>;
@@ -243,7 +310,7 @@ namespace verbly {
         break;
       }
 
-      case type::preposition:
+      case part_type::preposition:
       {
         using vector_type = std::vector<std::string>;
 
@@ -252,7 +319,7 @@ namespace verbly {
         break;
       }
 
-      case type::literal:
+      case part_type::literal:
       {
         using string_type = std::string;
 
@@ -261,10 +328,10 @@ namespace verbly {
         break;
       }
 
-      case type::verb:
-      case type::adjective:
-      case type::adverb:
-      case type::invalid:
+      case part_type::verb:
+      case part_type::adjective:
+      case part_type::adverb:
+      case part_type::invalid:
       {
         break;
       }
@@ -273,7 +340,7 @@ namespace verbly {
 
   std::string part::getNounRole() const
   {
-    if (type_ == type::noun_phrase)
+    if (type_ == part_type::noun_phrase)
     {
       return noun_phrase_.role;
     } else {
@@ -283,7 +350,7 @@ namespace verbly {
 
   selrestr part::getNounSelrestrs() const
   {
-    if (type_ == type::noun_phrase)
+    if (type_ == part_type::noun_phrase)
     {
       return noun_phrase_.selrestrs;
     } else {
@@ -293,7 +360,7 @@ namespace verbly {
 
   std::set<std::string> part::getNounSynrestrs() const
   {
-    if (type_ == type::noun_phrase)
+    if (type_ == part_type::noun_phrase)
     {
       return noun_phrase_.synrestrs;
     } else {
@@ -303,7 +370,7 @@ namespace verbly {
 
   bool part::nounHasSynrestr(std::string synrestr) const
   {
-    if (type_ != type::noun_phrase)
+    if (type_ != part_type::noun_phrase)
     {
       throw std::domain_error("part::nounHasSynrestr is only valid for noun phrase parts");
     }
@@ -313,7 +380,7 @@ namespace verbly {
 
   std::vector<std::string> part::getPrepositionChoices() const
   {
-    if (type_ == type::preposition)
+    if (type_ == part_type::preposition)
     {
       return preposition_.choices;
     } else {
@@ -323,7 +390,7 @@ namespace verbly {
 
   bool part::isPrepositionLiteral() const
   {
-    if (type_ == type::preposition)
+    if (type_ == part_type::preposition)
     {
       return preposition_.literal;
     } else {
@@ -333,12 +400,17 @@ namespace verbly {
 
   std::string part::getLiteralValue() const
   {
-    if (type_ == type::literal)
+    if (type_ == part_type::literal)
     {
       return literal_;
     } else {
       throw std::domain_error("part::getLiteralValue is only valid for literal parts");
     }
+  }
+
+  filter part::synrestr_field::operator%=(std::string synrestr) const
+  {
+    return (synrestrJoin %= (synrestrField == synrestr));
   }
 
 };

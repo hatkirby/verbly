@@ -3,8 +3,8 @@
 #include <map>
 #include "notion.h"
 #include "word.h"
-#include "group.h"
 #include "frame.h"
+#include "part.h"
 #include "lemma.h"
 #include "form.h"
 #include "pronunciation.h"
@@ -594,6 +594,7 @@ namespace verbly {
     switch (joinOn.getType())
     {
       case field::type::join:
+      case field::type::join_where:
       case field::type::join_through:
       {
         switch (filterType)
@@ -1108,8 +1109,8 @@ namespace verbly {
                 }
 
                 case object::word:
-                case object::group:
                 case object::frame:
+                case object::part:
                 case object::lemma:
                 case object::form:
                 case object::pronunciation:
@@ -1134,10 +1135,10 @@ namespace verbly {
                   return *this;
                 }
 
-                case object::group:
                 case object::frame:
+                case object::part:
                 {
-                  return (verbly::word::group %= *this);
+                  return (verbly::word::frame %= *this);
                 }
 
                 case object::lemma:
@@ -1145,32 +1146,6 @@ namespace verbly {
                 case object::pronunciation:
                 {
                   return (verbly::word::lemma %= *this);
-                }
-              }
-
-              case object::group:
-              {
-                switch (singleton_.filterField.getObject())
-                {
-                  case object::undefined:
-                  case object::group:
-                  {
-                    return *this;
-                  }
-
-                  case object::notion:
-                  case object::word:
-                  case object::lemma:
-                  case object::form:
-                  case object::pronunciation:
-                  {
-                    return (verbly::group::word %= *this);
-                  }
-
-                  case object::frame:
-                  {
-                    return (verbly::group::frame %= *this);
-                  }
                 }
               }
 
@@ -1186,12 +1161,38 @@ namespace verbly {
 
                   case object::notion:
                   case object::word:
-                  case object::group:
                   case object::lemma:
                   case object::form:
                   case object::pronunciation:
                   {
-                    return (verbly::frame::group %= *this);
+                    return (verbly::frame::word %= *this);
+                  }
+
+                  case object::part:
+                  {
+                    return (verbly::frame::part() %= *this);
+                  }
+                }
+              }
+
+              case object::part:
+              {
+                switch (singleton_.filterField.getObject())
+                {
+                  case object::undefined:
+                  case object::part:
+                  {
+                    return *this;
+                  }
+
+                  case object::notion:
+                  case object::word:
+                  case object::frame:
+                  case object::lemma:
+                  case object::form:
+                  case object::pronunciation:
+                  {
+                    return (verbly::part::frame %= *this);
                   }
                 }
               }
@@ -1202,8 +1203,8 @@ namespace verbly {
                 {
                   case object::notion:
                   case object::word:
-                  case object::group:
                   case object::frame:
+                  case object::part:
                   {
                     return verbly::lemma::word %= *this;
                   }
@@ -1228,11 +1229,11 @@ namespace verbly {
                 {
                   case object::notion:
                   case object::word:
-                  case object::group:
                   case object::frame:
+                  case object::part:
                   case object::lemma:
                   {
-                    return verbly::form::lemma(inflection::base) %= *this;
+                    return verbly::form::lemma %= *this;
                   }
 
                   case object::undefined:
@@ -1254,8 +1255,8 @@ namespace verbly {
                 {
                   case object::notion:
                   case object::word:
-                  case object::group:
                   case object::frame:
+                  case object::part:
                   case object::lemma:
                   case object::form:
                   {

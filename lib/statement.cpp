@@ -5,11 +5,12 @@
 #include "util.h"
 #include "notion.h"
 #include "word.h"
-#include "group.h"
 #include "frame.h"
+#include "part.h"
 #include "lemma.h"
 #include "form.h"
 #include "pronunciation.h"
+#include "order.h"
 
 namespace verbly {
 
@@ -20,7 +21,7 @@ namespace verbly {
   {
   }
 
-  std::string statement::getQueryString(std::list<std::string> select, bool random, int limit) const
+  std::string statement::getQueryString(std::list<std::string> select, order sortOrder, int limit, bool debug) const
   {
     std::stringstream queryStream;
 
@@ -49,7 +50,7 @@ namespace verbly {
         if (cte.getCondition().getType() != condition::type::empty)
         {
           cteStream << " WHERE ";
-          cteStream << cte.getCondition().toSql();
+          cteStream << cte.getCondition().flatten().toSql(true, debug);
         }
 
         if (cte.isRecursive())
@@ -101,12 +102,28 @@ namespace verbly {
     if (topCondition_.getType() != condition::type::empty)
     {
       queryStream << " WHERE ";
-      queryStream << topCondition_.toSql();
+      queryStream << topCondition_.flatten().toSql(true, debug);
     }
-
-    if (random)
+    
+    queryStream << " ORDER BY ";
+    
+    switch (sortOrder.getType())
     {
-      queryStream << " ORDER BY RANDOM()";
+      case order::type::random:
+      {
+        queryStream << "RANDOM()";
+        
+        break;
+      }
+      
+      case order::type::field:
+      {
+        queryStream << topTable_;
+        queryStream << ".";
+        queryStream << sortOrder.getSortField().getColumn();
+        
+        break;
+      }
     }
 
     if (limit > 0)
@@ -260,6 +277,7 @@ namespace verbly {
           }
 
           case field::type::join:
+          case field::type::join_where:
           {
             // First, figure out what table we need to join against.
             std::string joinTableName;
@@ -269,13 +287,22 @@ namespace verbly {
             } else {
               joinTableName = getTableForContext(clause.getField().getJoinObject());
             }
+            
+            filter joinCondition = clause.getJoinCondition();
+            
+            // If this is a condition join, we need to add the field join
+            // condition to the clause.
+            if (clause.getField().getType() == field::type::join_where)
+            {
+              joinCondition &= (clause.getField().getConditionField() == clause.getField().getConditionValue());
+            }
 
             // Recursively parse the subquery, and therefore obtain an
             // instantiated table to join against, as well as any joins or CTEs
             // that the subquery may require to function.
             statement joinStmt(
               joinTableName,
-              clause.getJoinCondition().normalize(clause.getField().getJoinObject()),
+              std::move(joinCondition).normalize(clause.getField().getJoinObject()),
               nextTableId_,
               nextWithId_);
 
@@ -801,7 +828,7 @@ namespace verbly {
     new(&singleton_.value_) binding(std::move(value));
   }
 
-  std::string statement::condition::toSql() const
+  std::string statement::condition::toSql(bool toplevel, bool debug) const
   {
     switch (type_)
     {
@@ -816,42 +843,92 @@ namespace verbly {
         {
           case comparison::equals:
           {
-            return singleton_.table_ + "." + singleton_.column_ + " = ?";
+            if (debug)
+            {
+              if (singleton_.value_.getType() == binding::type::string)
+              {
+                return singleton_.table_ + "." + singleton_.column_ + " = \"" + singleton_.value_.getString() + "\"";
+              } else {
+                return singleton_.table_ + "." + singleton_.column_ + " = " + std::to_string(singleton_.value_.getInteger());
+              }
+            } else {
+              return singleton_.table_ + "." + singleton_.column_ + " = ?";
+            }
           }
 
           case comparison::does_not_equal:
           {
-            return singleton_.table_ + "." + singleton_.column_ + " != ?";
+            if (debug)
+            {
+              if (singleton_.value_.getType() == binding::type::string)
+              {
+                return singleton_.table_ + "." + singleton_.column_ + " != \"" + singleton_.value_.getString() + "\"";
+              } else {
+                return singleton_.table_ + "." + singleton_.column_ + " != " + std::to_string(singleton_.value_.getInteger());
+              }
+            } else {
+              return singleton_.table_ + "." + singleton_.column_ + " != ?";
+            }
           }
 
           case comparison::is_greater_than:
           {
-            return singleton_.table_ + "." + singleton_.column_ + " > ?";
+            if (debug)
+            {
+              return singleton_.table_ + "." + singleton_.column_ + " > " + std::to_string(singleton_.value_.getInteger());
+            } else {
+              return singleton_.table_ + "." + singleton_.column_ + " > ?";
+            }
           }
 
           case comparison::is_at_most:
           {
-            return singleton_.table_ + "." + singleton_.column_ + " <= ?";
+            if (debug)
+            {
+              return singleton_.table_ + "." + singleton_.column_ + " <= " + std::to_string(singleton_.value_.getInteger());
+            } else {
+              return singleton_.table_ + "." + singleton_.column_ + " <= ?";
+            }
           }
 
           case comparison::is_less_than:
           {
-            return singleton_.table_ + "." + singleton_.column_ + " < ?";
+            if (debug)
+            {
+              return singleton_.table_ + "." + singleton_.column_ + " < " + std::to_string(singleton_.value_.getInteger());
+            } else {
+              return singleton_.table_ + "." + singleton_.column_ + " < ?";
+            }
           }
 
           case comparison::is_at_least:
           {
-            return singleton_.table_ + "." + singleton_.column_ + " >= ?";
+            if (debug)
+            {
+              return singleton_.table_ + "." + singleton_.column_ + " >= " + std::to_string(singleton_.value_.getInteger());
+            } else {
+              return singleton_.table_ + "." + singleton_.column_ + " >= ?";
+            }
           }
 
           case comparison::is_like:
           {
-            return singleton_.table_ + "." + singleton_.column_ + " LIKE ?";
+            if (debug)
+            {
+              return singleton_.table_ + "." + singleton_.column_ + " LIKE \"" + singleton_.value_.getString() + "\"";
+            } else {
+              return singleton_.table_ + "." + singleton_.column_ + " LIKE ?";
+            }
           }
 
           case comparison::is_not_like:
           {
-            return singleton_.table_ + "." + singleton_.column_ + " NOT LIKE ?";
+            if (debug)
+            {
+              return singleton_.table_ + "." + singleton_.column_ + " NOT LIKE \"" + singleton_.value_.getString() + "\"";
+            } else {
+              return singleton_.table_ + "." + singleton_.column_ + " NOT LIKE ?";
+            }
           }
 
           case comparison::is_not_null:
@@ -871,10 +948,25 @@ namespace verbly {
         std::list<std::string> clauses;
         for (const condition& cond : group_.children_)
         {
-          clauses.push_back(cond.toSql());
+          clauses.push_back(cond.toSql(false, debug));
         }
 
-        return implode(std::begin(clauses), std::end(clauses), group_.orlogic_ ? " OR " : " AND ");
+        if (clauses.empty())
+        {
+          return "";
+        } else if (clauses.size() == 1)
+        {
+          return clauses.front();
+        } else {
+          std::string result = implode(std::begin(clauses), std::end(clauses), group_.orlogic_ ? " OR " : " AND ");
+          
+          if (toplevel)
+          {
+            return result;
+          } else {
+            return "(" + result + ")";
+          }
+        }
       }
     }
   }
@@ -986,6 +1078,40 @@ namespace verbly {
       return group_.children_;
     } else {
       throw std::domain_error("Cannot get children of non-group condition");
+    }
+  }
+  
+  statement::condition statement::condition::flatten() const
+  {
+    switch (type_)
+    {
+      case type::empty:
+      case type::singleton:
+      {
+        return *this;
+      }
+      
+      case type::group:
+      {
+        condition result(group_.orlogic_);
+        
+        for (const condition& child : group_.children_)
+        {
+          condition newChild = child.flatten();
+          
+          if ((newChild.type_ == type::group) && (newChild.group_.orlogic_ == group_.orlogic_))
+          {
+            for (condition subChild : std::move(newChild.group_.children_))
+            {
+              result += std::move(subChild);
+            }
+          } else {
+            result += std::move(newChild);
+          }
+        }
+        
+        return result;
+      }
     }
   }
 

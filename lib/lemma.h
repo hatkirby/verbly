@@ -74,31 +74,7 @@ namespace verbly {
 
     static const field word;
 
-    class inflection_field {
-    public:
-
-      inflection_field(inflection category) : category_(category)
-      {
-      }
-
-      const inflection getCategory() const
-      {
-        return category_;
-      }
-
-      operator filter() const;
-
-    private:
-
-      const inflection category_;
-    };
-
-    static const inflection_field form(inflection category)
-    {
-      return inflection_field(category);
-    }
-
-    friend filter operator%=(lemma::inflection_field check, filter joinCondition);
+    static field form(inflection category);
 
   private:
 
@@ -112,7 +88,6 @@ namespace verbly {
 
     const database* db_;
 
-    static const field formJoin;
     static const field inflectionCategory;
 
   };

@@ -104,33 +104,9 @@ namespace verbly {
 
     // Relationships to other objects
 
+    static const field lemma;
+
     static const field pronunciation;
-
-    class inflection_field {
-    public:
-
-      inflection_field(inflection category) : category_(category)
-      {
-      }
-
-      const inflection getCategory() const
-      {
-        return category_;
-      }
-
-      operator filter() const;
-
-    private:
-
-      const inflection category_;
-    };
-
-    static const inflection_field lemma(inflection category)
-    {
-      return inflection_field(category);
-    }
-
-    friend filter operator%=(form::inflection_field check, filter joinCondition);
 
   private:
     bool valid_ = false;
@@ -144,9 +120,6 @@ namespace verbly {
 
     mutable bool initializedPronunciations_ = false;
     mutable std::vector<class pronunciation> pronunciations_;
-
-    static const field lemmaJoin;
-    static const field inflectionCategory;
 
   };
 

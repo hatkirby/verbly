@@ -8,7 +8,7 @@
 #include "../lib/enums.h"
 #include "progress.h"
 #include "../lib/selrestr.h"
-#include "../lib/role.h"
+#include "role.h"
 #include "part.h"
 #include "field.h"
 #include "../lib/util.h"
@@ -640,22 +640,11 @@ namespace verbly {
       }
 
       {
-        progress ppgs("Writing verb groups...", groups_.size());
+        progress ppgs("Writing verb frames...", groups_.size());
 
         for (group& g : groups_)
         {
           db_ << g;
-
-          ppgs.update();
-        }
-      }
-
-      {
-        progress ppgs("Writing verb frames...", frames_.size());
-
-        for (frame& f : frames_)
-        {
-          db_ << f;
 
           ppgs.update();
         }
@@ -1212,9 +1201,15 @@ namespace verbly {
       return w;
     }
 
-    group& generator::createGroup(xmlNodePtr top)
+    void generator::createGroup(xmlNodePtr top, const group* parent)
     {
-      groups_.emplace_back();
+      if (parent != nullptr)
+      {
+        groups_.emplace_back(*parent);
+      } else {
+        groups_.emplace_back();
+      }
+
       group& grp = groups_.back();
 
       xmlChar* key;
@@ -1229,8 +1224,11 @@ namespace verbly {
             {
               try
               {
-                group& subgrp = createGroup(subclass);
-                subgrp.setParent(grp);
+                // Parsing a subgroup starts by making a copy of everything in
+                // the parent. This is okay to do at this point because in the
+                // VerbNet data, subgroups are always defined after everything
+                // else.
+                createGroup(subclass, &grp);
               } catch (const std::exception& e)
               {
                 key = xmlGetProp(subclass, reinterpret_cast<const xmlChar*>("ID"));
@@ -1323,8 +1321,7 @@ namespace verbly {
           {
             if (!xmlStrcmp(frametopnode->name, reinterpret_cast<const xmlChar*>("FRAME")))
             {
-              frames_.emplace_back();
-              frame& fr = frames_.back();
+              frame fr;
 
               for (xmlNodePtr framenode = frametopnode->xmlChildrenNode; framenode != nullptr; framenode = framenode->next)
               {
@@ -1428,15 +1425,13 @@ namespace verbly {
                     }
                   }
 
-                  grp.addFrame(fr);
+                  grp.addFrame(std::move(fr));
                 }
               }
             }
           }
         }
       }
-
-      return grp;
     }
 
     selrestr generator::parseSelrestr(xmlNodePtr top)

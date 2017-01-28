@@ -17,7 +17,7 @@ namespace verbly {
 
   const field word::notion = field::joinField(object::word, "notion_id", object::notion);
   const field word::lemma = field::joinField(object::word, "lemma_id", object::lemma);
-  const field word::group = field::joinField(object::word, "group_id", object::group, true);
+  const field word::frame = field::joinField(object::word, "group_id", object::frame, true);
 
   const field word::antonyms = field::selfJoin(object::word, "word_id", "antonymy", "antonym_2_id", "antonym_1_id");
 
@@ -93,7 +93,27 @@ namespace verbly {
     return lemma_;
   }
 
-  const group& word::getGroup() const
+  bool word::hasFrames() const
+  {
+    if (!valid_)
+    {
+      throw std::domain_error("Bad access to uninitialized word");
+    }
+
+    if (!hasGroup_)
+    {
+      return false;
+    }
+
+    if (!initializedFrames_)
+    {
+      initializeFrames();
+    }
+
+    return !frames_.empty();
+  }
+
+  const std::vector<frame>& word::getFrames() const
   {
     if (!valid_)
     {
@@ -105,12 +125,12 @@ namespace verbly {
       throw std::domain_error("Word does not have a group");
     }
 
-    if (!group_)
+    if (!initializedFrames_)
     {
-      group_ = db_->groups(group::id == groupId_).first();
+      initializeFrames();
     }
 
-    return group_;
+    return frames_;
   }
 
   std::string word::getBaseForm() const
@@ -127,6 +147,12 @@ namespace verbly {
     }
 
     return result;
+  }
+
+  void word::initializeFrames() const
+  {
+    initializedFrames_ = true;
+    frames_ = db_->frames(*this, {}, -1).all();
   }
 
 };

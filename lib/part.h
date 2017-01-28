@@ -4,21 +4,20 @@
 #include <string>
 #include <vector>
 #include <set>
+#include <list>
 #include "selrestr.h"
+#include "field.h"
+#include "filter.h"
+#include "enums.h"
+
+struct sqlite3_stmt;
 
 namespace verbly {
 
+  class database;
+
   class part {
   public:
-    enum class type {
-      invalid = -1,
-      noun_phrase = 0,
-      verb = 1,
-      preposition = 2,
-      adjective = 3,
-      adverb = 4,
-      literal = 5
-    };
 
     // Static factories
 
@@ -40,6 +39,10 @@ namespace verbly {
     {
     }
 
+    // Construct from database
+
+    part(const database& db, sqlite3_stmt* row);
+
     // Copy and move constructors
 
     part(const part& other);
@@ -60,7 +63,12 @@ namespace verbly {
 
     // General accessors
 
-    type getType() const
+    operator bool() const
+    {
+      return (type_ != part_type::invalid);
+    }
+
+    part_type getType() const
     {
       return type_;
     }
@@ -85,11 +93,43 @@ namespace verbly {
 
     std::string getLiteralValue() const;
 
+    // Type info
+
+    static const object objectType;
+
+    static const std::list<std::string> select;
+
+    // Query fields
+
+    static const field index;
+    static const field type;
+
+    static const field role;
+
+    // Relationships to other objects
+
+    static const field frame;
+
+    // Noun synrestr relationship
+
+    class synrestr_field {
+    public:
+
+      filter operator%=(std::string synrestr) const;
+
+    private:
+
+      static const field synrestrJoin;
+      static const field synrestrField;
+    };
+
+    static const synrestr_field synrestr;
+
   private:
 
     // Private constructors
 
-    part(type t) : type_(t)
+    part(part_type t) : type_(t)
     {
     }
 
@@ -108,7 +148,7 @@ namespace verbly {
       std::string literal_;
     };
 
-    type type_ = type::invalid;
+    part_type type_ = part_type::invalid;
 
   };
 

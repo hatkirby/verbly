@@ -4,21 +4,16 @@
 #include <string>
 #include <set>
 #include "../lib/selrestr.h"
+#include "../lib/enums.h"
 
 namespace verbly {
+
   namespace generator {
 
     class part {
     public:
-      enum class type {
-        invalid = -1,
-        noun_phrase = 0,
-        verb = 1,
-        preposition = 2,
-        adjective = 3,
-        adverb = 4,
-        literal = 5
-      };
+
+      using type = part_type;
 
       // Static factories
 
@@ -33,6 +28,10 @@ namespace verbly {
       static part createAdverb();
 
       static part createLiteral(std::string value);
+
+      // Duplication
+
+      static part duplicate(const part& other);
 
       // Copy and move constructors
 
@@ -53,6 +52,11 @@ namespace verbly {
       ~part();
 
       // General accessors
+
+      int getId() const
+      {
+        return id_;
+      }
 
       type getType() const
       {
@@ -79,13 +83,19 @@ namespace verbly {
 
     private:
 
+      static int nextId_;
+
+      int id_;
+
       // Private constructors
 
       part()
       {
       }
 
-      part(type t) : type_(t)
+      part(type t) :
+        id_(nextId_++),
+        type_(t)
       {
       }
 

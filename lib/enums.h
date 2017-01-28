@@ -33,11 +33,21 @@ namespace verbly {
     undefined = -1,
     notion = 0,
     word = 1,
-    group = 2,
-    frame = 3,
+    frame = 2,
+    part = 3,
     lemma = 4,
     form = 5,
     pronunciation = 6
+  };
+
+  enum class part_type {
+    invalid = -1,
+    noun_phrase = 0,
+    verb = 1,
+    preposition = 2,
+    adjective = 3,
+    adverb = 4,
+    literal = 5
   };
 
 };

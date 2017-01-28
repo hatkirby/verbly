@@ -15,12 +15,15 @@ namespace verbly {
     {
     }
 
-    void group::setParent(const group& parent)
+    group::group(const group& parent) :
+      id_(nextId_++),
+      roles_(parent.roles_),
+      roleNames_(parent.roleNames_)
     {
-      // Adding a group to itself is nonsensical.
-      assert(&parent != this);
-
-      parent_ = &parent;
+      for (const frame& f : parent.frames_)
+      {
+        frames_.push_back(frame::duplicate(f));
+      }
     }
 
     void group::addRole(role r)
@@ -30,87 +33,114 @@ namespace verbly {
       roleNames_.insert(std::move(name));
     }
 
-    void group::addFrame(const frame& f)
+    void group::addFrame(frame f)
     {
-      frames_.insert(&f);
+      frames_.push_back(std::move(f));
     }
 
-    std::set<std::string> group::getRoles() const
+    bool group::hasRole(std::string name) const
     {
-      std::set<std::string> fullRoles = roleNames_;
-
-      if (hasParent())
-      {
-        for (std::string name : getParent().getRoles())
-        {
-          fullRoles.insert(name);
-        }
-      }
-
-      return fullRoles;
+      // Rarely, a noun phrase part may use a role that is not defined in the
+      // group. See confess-37.10 "NP V NP ADJ".
+      return (roles_.count(name) == 1);
     }
 
     const role& group::getRole(std::string name) const
     {
-      if (roles_.count(name))
-      {
-        return roles_.at(name);
-      } else if (hasParent())
-      {
-        return getParent().getRole(name);
-      } else {
-        throw std::invalid_argument("Specified role not found in verb group");
-      }
-    }
-
-    std::set<const frame*> group::getFrames() const
-    {
-      std::set<const frame*> fullFrames = frames_;
-
-      if (hasParent())
-      {
-        for (const frame* f : getParent().getFrames())
-        {
-          fullFrames.insert(f);
-        }
-      }
-
-      return fullFrames;
+      return roles_.at(name);
     }
 
     database& operator<<(database& db, const group& arg)
     {
-      // Serialize the group first
+      // Serialize each frame
+      for (const frame& f : arg.getFrames())
       {
-        std::list<field> fields;
-        fields.emplace_back("group_id", arg.getId());
-
-        nlohmann::json jsonRoles;
-        for (std::string name : arg.getRoles())
+        // First, serialize the group/frame relationship
         {
-          const role& r = arg.getRole(name);
+          std::list<field> fields;
 
-          nlohmann::json jsonRole;
-          jsonRole["type"] = name;
-          jsonRole["selrestrs"] = r.getSelrestrs().toJson();
+          fields.emplace_back("frame_id", f.getId());
+          fields.emplace_back("group_id", arg.getId());
+          fields.emplace_back("length", f.getLength());
 
-          jsonRoles.emplace_back(std::move(jsonRole));
+          db.insertIntoTable("frames", std::move(fields));
         }
 
-        fields.emplace_back("data", jsonRoles.dump());
+        // Then, serialize the frame parts in the context of the group
+        for (int partIndex = 0; partIndex < f.getLength(); partIndex++)
+        {
+          const part& p = f[partIndex];
 
-        db.insertIntoTable("groups", std::move(fields));
-      }
+          std::list<field> fields;
+          fields.emplace_back("part_id", p.getId());
+          fields.emplace_back("frame_id", f.getId());
+          fields.emplace_back("part_index", partIndex);
+          fields.emplace_back("type", static_cast<int>(p.getType()));
 
-      // Then, serialize the group/frame relationship
-      for (const frame* f : arg.getFrames())
-      {
-        std::list<field> fields;
+          switch (p.getType())
+          {
+            case part::type::noun_phrase:
+            {
+              fields.emplace_back("role", p.getNounRole());
 
-        fields.emplace_back("group_id", arg.getId());
-        fields.emplace_back("frame_id", f->getId());
+              selrestr partSelrestr;
+              if (p.getNounSelrestrs().getType() != selrestr::type::empty)
+              {
+                partSelrestr = p.getNounSelrestrs();
+              } else if (arg.hasRole(p.getNounRole()))
+              {
+                partSelrestr = arg.getRole(p.getNounRole()).getSelrestrs();
+              }
 
-        db.insertIntoTable("groups_frames", std::move(fields));
+              fields.emplace_back("selrestrs", partSelrestr.toJson().dump());
+
+              // Short interlude to serialize the synrestrs
+              for (const std::string& s : p.getNounSynrestrs())
+              {
+                std::list<field> synrestrFields;
+
+                synrestrFields.emplace_back("part_id", p.getId());
+                synrestrFields.emplace_back("synrestr", s);
+
+                db.insertIntoTable("synrestrs", std::move(synrestrFields));
+              }
+
+              break;
+            }
+
+            case part::type::preposition:
+            {
+              fields.emplace_back("prepositions", nlohmann::json(p.getPrepositionChoices()).dump());
+              fields.emplace_back("preposition_literality", p.isPrepositionLiteral() ? 1 : 0);
+
+              break;
+            }
+
+            case part::type::literal:
+            {
+              fields.emplace_back("literal_value", p.getLiteralValue());
+
+              break;
+            }
+
+            case part::type::verb:
+            case part::type::adjective:
+            case part::type::adverb:
+            {
+              break;
+            }
+
+            case part::type::invalid:
+            {
+              // Invalid parts should not be serialized.
+              assert(false);
+
+              break;
+            }
+          }
+
+          db.insertIntoTable("parts", std::move(fields));
+        }
       }
 
       return db;

@@ -186,19 +186,32 @@ CREATE TABLE `forms_pronunciations` (
 CREATE INDEX `pronunciation_of` ON `forms_pronunciations`(`form_id`);
 CREATE INDEX `spelling_of` ON `forms_pronunciations`(`pronunciation_id`);
 
-CREATE TABLE `groups` (
-  `group_id` INTEGER PRIMARY KEY,
-  `data` BLOB NOT NULL
-);
-
 CREATE TABLE `frames` (
-  `frame_id` INTEGER PRIMARY KEY,
-  `data` BLOB NOT NULL
-);
-
-CREATE TABLE `groups_frames` (
+  `frame_id` INTEGER NOT NULL,
   `group_id` INTEGER NOT NULL,
-  `frame_id` INTEGER NOT NULL
+  'length' INTEGER NOT NULL
 );
 
-CREATE INDEX `frames_in` ON `groups_frames`(`group_id`);
+CREATE INDEX `frames_in` ON `frames`(`group_id`);
+
+CREATE TABLE `parts` (
+  `part_id` INTEGER PRIMARY KEY,
+  `frame_id` INTEGER NOT NULL,
+  `part_index` INTEGER NOT NULL,
+  `type` INTEGER NOT NULL,
+  `role` VARCHAR(16),
+  `selrestrs` BLOB,
+  `prepositions` BLOB,
+  `preposition_literality` SMALLINT,
+  `literal_value` VARCHAR(64)
+);
+
+CREATE INDEX `parts_of` ON `parts`(`frame_id`);
+CREATE UNIQUE INDEX `part_by_frame_index` ON `parts`(`frame_id`, `part_index`);
+
+CREATE TABLE `synrestrs` (
+  `part_id` INTEGER NOT NULL,
+  `synrestr` VARCHAR(32) NOT NULL
+);
+
+CREATE INDEX `synrestrs_for` ON `synrestrs`(`part_id`);

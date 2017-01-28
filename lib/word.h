@@ -7,7 +7,7 @@
 #include "filter.h"
 #include "notion.h"
 #include "lemma.h"
-#include "group.h"
+#include "frame.h"
 
 struct sqlite3_stmt;
 
@@ -97,17 +97,9 @@ namespace verbly {
 
     const lemma& getLemma() const;
 
-    bool hasGroup() const
-    {
-      if (!valid_)
-      {
-        throw std::domain_error("Bad access to uninitialized word");
-      }
+    bool hasFrames() const;
 
-      return hasGroup_;
-    }
-
-    const group& getGroup() const;
+    const std::vector<frame>& getFrames() const;
 
     // Convenience accessors
 
@@ -136,7 +128,7 @@ namespace verbly {
 
     static const field notion;
     static const field lemma;
-    static const field group;
+    static const field frame;
 
     // Relationships with self
 
@@ -161,6 +153,9 @@ namespace verbly {
     static const field regionalDomains;
 
   private:
+
+    void initializeFrames() const;
+
     bool valid_ = false;
 
     int id_;
@@ -176,7 +171,9 @@ namespace verbly {
 
     mutable class notion notion_;
     mutable class lemma lemma_;
-    mutable class group group_;
+
+    mutable bool initializedFrames_ = false;
+    mutable std::vector<class frame> frames_;
 
   };
 

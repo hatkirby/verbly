@@ -19,6 +19,10 @@ namespace verbly {
       // Constructor
 
       frame();
+      
+      // Duplication
+      
+      static frame duplicate(const frame& other);
 
       // Mutators
 
@@ -30,15 +34,15 @@ namespace verbly {
       {
         return id_;
       }
-
-      const_iterator begin() const
+      
+      int getLength() const
       {
-        return std::begin(parts_);
+        return parts_.size();
       }
-
-      const_iterator end() const
+      
+      const part& operator[](int index) const
       {
-        return std::end(parts_);
+        return parts_.at(index);
       }
 
     private:
@@ -47,11 +51,9 @@ namespace verbly {
 
       const int id_;
 
-      std::list<part> parts_;
+      std::vector<part> parts_;
 
     };
-
-    database& operator<<(database& db, const frame& arg);
 
   };
 };

@@ -41,6 +41,16 @@ namespace verbly {
       return id_;
     }
 
+    int getLength() const
+    {
+      if (!valid_)
+      {
+        throw std::domain_error("Bad access to uninitialized frame");
+      }
+
+      return length_;
+    }
+
     const std::vector<part>& getParts() const
     {
       if (!valid_)
@@ -61,6 +71,8 @@ namespace verbly {
 
     static const field id;
 
+    static const field length;
+
     operator filter() const
     {
       if (!valid_)
@@ -73,13 +85,18 @@ namespace verbly {
 
     // Relationships to other objects
 
-    static const field group;
+    static const field word;
+
+    static field part();
+    static field part(int index);
 
   private:
     bool valid_ = false;
 
     int id_;
-    std::vector<part> parts_;
+    int groupId_;
+    int length_;
+    std::vector<class part> parts_;
 
     const database* db_;
 
