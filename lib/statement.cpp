@@ -318,7 +318,7 @@ namespace verbly {
               // will return zero results. Instead, we create a non-recursive
               // CTE that represents the subquery, then LEFT JOIN against it and
               // condition on the join column being NULL as before.
-              std::string withName = instantiateWith(clause.getField().getTable());
+              std::string withName = instantiateWith(joinTableName);
               std::string withInstName = instantiateTable(withName);
 
               // LEFT JOIN against the CTE.
