@@ -124,7 +124,7 @@ namespace verbly {
     
     // Relationships with other objects
     
-    static const field word;
+    static const field words;
     
     // Relationships with self
     
@@ -179,7 +179,7 @@ namespace verbly {
       static const field groupNameField;
     };
     
-    static const preposition_group_field prepositionGroup;
+    static const preposition_group_field prepositionGroups;
     
   private:
     bool valid_ = false;

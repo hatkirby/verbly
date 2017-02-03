@@ -108,7 +108,7 @@ namespace verbly {
 
     // Relationships to other objects
 
-    static const field frame;
+    static const field frames;
 
     // Noun synrestr relationship
 
@@ -123,7 +123,7 @@ namespace verbly {
       static const field synrestrField;
     };
 
-    static const synrestr_field synrestr;
+    static const synrestr_field synrestrs;
 
   private:
 

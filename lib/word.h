@@ -126,9 +126,9 @@ namespace verbly {
 
     // Relationships with other objects
 
-    static const field notion;
-    static const field lemma;
-    static const field frame;
+    static const field notions;
+    static const field lemmas;
+    static const field frames;
 
     // Relationships with self
 
@@ -169,11 +169,11 @@ namespace verbly {
 
     const database* db_;
 
-    mutable class notion notion_;
-    mutable class lemma lemma_;
+    mutable notion notion_;
+    mutable lemma lemma_;
 
     mutable bool initializedFrames_ = false;
-    mutable std::vector<class frame> frames_;
+    mutable std::vector<frame> frames_;
 
   };
 

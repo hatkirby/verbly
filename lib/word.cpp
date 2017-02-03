@@ -15,9 +15,9 @@ namespace verbly {
   const field word::tagCount = field::integerField(object::word, "tag_count", true);
   const field word::adjectivePosition = field::integerField(object::word, "position", true);
 
-  const field word::notion = field::joinField(object::word, "notion_id", object::notion);
-  const field word::lemma = field::joinField(object::word, "lemma_id", object::lemma);
-  const field word::frame = field::joinField(object::word, "group_id", object::frame, true);
+  const field word::notions = field::joinField(object::word, "notion_id", object::notion);
+  const field word::lemmas = field::joinField(object::word, "lemma_id", object::lemma);
+  const field word::frames = field::joinField(object::word, "group_id", object::frame, true);
 
   const field word::antonyms = field::selfJoin(object::word, "word_id", "antonymy", "antonym_2_id", "antonym_1_id");
 

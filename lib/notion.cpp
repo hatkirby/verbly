@@ -13,7 +13,7 @@ namespace verbly {
   const field notion::wnid = field::integerField(object::notion, "wnid", true);
   const field notion::numOfImages = field::integerField(object::notion, "images", true);
 
-  const field notion::word = field::joinField(object::notion, "word_id", object::word);
+  const field notion::words = field::joinField(object::notion, "word_id", object::word);
 
   const field notion::hypernyms = field::selfJoin(object::notion, "notion_id", "hypernymy", "hyponym_id", "hypernym_id");
   const field notion::hyponyms = field::selfJoin(object::notion, "notion_id", "hypernymy", "hypernym_id", "hyponym_id");
@@ -53,7 +53,7 @@ namespace verbly {
   const field notion::causes = field::selfJoin(object::notion, "notion_id", "causality", "effect_id", "cause_id");
   const field notion::effects = field::selfJoin(object::notion, "notion_id", "causality", "cause_id", "effect_id");
 
-  const notion::preposition_group_field notion::prepositionGroup = {};
+  const notion::preposition_group_field notion::prepositionGroups = {};
 
   const field notion::preposition_group_field::isA = field::joinField(object::notion, "notion_id", "is_a");
   const field notion::preposition_group_field::groupNameField = field::stringField("is_a", "groupname");

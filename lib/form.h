@@ -104,9 +104,9 @@ namespace verbly {
 
     // Relationships to other objects
 
-    static const field lemma;
+    static const field lemmas;
 
-    static const field pronunciation;
+    static const field pronunciations;
 
   private:
     bool valid_ = false;
@@ -119,7 +119,7 @@ namespace verbly {
     const database* db_;
 
     mutable bool initializedPronunciations_ = false;
-    mutable std::vector<class pronunciation> pronunciations_;
+    mutable std::vector<pronunciation> pronunciations_;
 
   };
 

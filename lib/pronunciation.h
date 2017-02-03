@@ -138,7 +138,7 @@ namespace verbly {
     
     // Relationships to other objects
     
-    static const field form;
+    static const field forms;
     
   private:
     bool valid_ = false;

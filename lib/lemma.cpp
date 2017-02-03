@@ -12,9 +12,9 @@ namespace verbly {
   const field lemma::id = field::integerField(object::lemma, "lemma_id");
   const field lemma::inflectionCategory = field::integerField(object::lemma, "category");
 
-  const field lemma::word = field::joinField(object::lemma, "lemma_id", object::word);
+  const field lemma::words = field::joinField(object::lemma, "lemma_id", object::word);
 
-  field lemma::form(inflection category)
+  field lemma::forms(inflection category)
   {
     return field::joinWhere(object::lemma, "form_id", object::form, inflectionCategory, static_cast<int>(category));
   }
@@ -61,7 +61,7 @@ namespace verbly {
 
   void lemma::initializeForm(inflection infl) const
   {
-    forms_[infl] = db_->forms(form::lemma %= ((inflectionCategory == infl) && *this), verbly::form::id, -1).all();
+    forms_[infl] = db_->forms(form::lemmas %= ((inflectionCategory == infl) && *this), verbly::form::id, -1).all();
   }
 
 };

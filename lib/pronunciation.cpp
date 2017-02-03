@@ -15,7 +15,7 @@ namespace verbly {
   const field pronunciation::numOfSyllables = field::integerField(object::pronunciation, "syllables");
   const field pronunciation::stress = field::stringField(object::pronunciation, "stress");
 
-  const field pronunciation::form = field::joinThrough(object::pronunciation, "pronunciation_id", object::form, "forms_pronunciations", "form_id");
+  const field pronunciation::forms = field::joinThrough(object::pronunciation, "pronunciation_id", object::form, "forms_pronunciations", "form_id");
 
   const field pronunciation::prerhyme = field::stringField(object::pronunciation, "prerhyme", true);
   const field pronunciation::rhyme = field::stringField(object::pronunciation, "rhyme", true);

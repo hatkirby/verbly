@@ -16,8 +16,8 @@ namespace verbly {
   const field form::complexity = field::integerField(object::form, "complexity");
   const field form::proper = field::booleanField(object::form, "proper");
 
-  const field form::lemma = field::joinField(object::form, "form_id", object::lemma);
-  const field form::pronunciation = field::joinThrough(object::form, "form_id", object::pronunciation, "forms_pronunciations", "pronunciation_id");
+  const field form::lemmas = field::joinField(object::form, "form_id", object::lemma);
+  const field form::pronunciations = field::joinThrough(object::form, "form_id", object::pronunciation, "forms_pronunciations", "pronunciation_id");
 
   form::form(const database& db, sqlite3_stmt* row) : db_(&db), valid_(true)
   {
@@ -36,7 +36,7 @@ namespace verbly {
 
     if (!initializedPronunciations_)
     {
-      pronunciations_ = db_->pronunciations(pronunciation::form %= *this, verbly::pronunciation::id, -1).all();
+      pronunciations_ = db_->pronunciations(pronunciation::forms %= *this, pronunciation::id, -1).all();
       initializedPronunciations_ = true;
     }
 
@@ -50,10 +50,10 @@ namespace verbly {
       throw std::domain_error("Bad access to uninitialized form");
     }
 
-    const std::vector<verbly::pronunciation>& pronunciations = getPronunciations();
+    const std::vector<pronunciation>& pronunciations = getPronunciations();
     if (!pronunciations.empty())
     {
-      return std::any_of(std::begin(pronunciations), std::end(pronunciations), [] (const verbly::pronunciation& p) {
+      return std::any_of(std::begin(pronunciations), std::end(pronunciations), [] (const pronunciation& p) {
         return p.getPhonemes().front().find_first_of("012") != std::string::npos;
       });
     } else {

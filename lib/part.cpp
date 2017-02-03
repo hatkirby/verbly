@@ -15,12 +15,12 @@ namespace verbly {
 
   const field part::role = field::stringField(object::part, "role", true);
 
-  const field part::frame = field::joinField(object::part, "frame_id", object::frame);
+  const field part::frames = field::joinField(object::part, "frame_id", object::frame);
 
   const field part::synrestr_field::synrestrJoin = field::joinField(object::part, "part_id", "synrestrs");
   const field part::synrestr_field::synrestrField = field::stringField("synrestrs", "synrestr");
 
-  const part::synrestr_field part::synrestr = {};
+  const part::synrestr_field part::synrestrs = {};
 
   part part::createNounPhrase(std::string role, selrestr selrestrs, std::set<std::string> synrestrs)
   {

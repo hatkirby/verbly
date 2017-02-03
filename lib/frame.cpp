@@ -12,14 +12,14 @@ namespace verbly {
   const field frame::id = field::integerField(object::frame, "frame_id");
   const field frame::length = field::integerField(object::frame, "length");
 
-  const field frame::word = field::joinField(object::frame, "group_id", object::word);
+  const field frame::words = field::joinField(object::frame, "group_id", object::word);
 
-  field frame::part()
+  field frame::parts()
   {
     return field::joinField(object::frame, "frame_id", object::part);
   }
 
-  field frame::part(int index)
+  field frame::parts(int index)
   {
     return field::joinWhere(object::frame, "frame_id", object::part, part::index, index);
   }

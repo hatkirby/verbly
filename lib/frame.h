@@ -85,10 +85,10 @@ namespace verbly {
 
     // Relationships to other objects
 
-    static const field word;
+    static const field words;
 
-    static field part();
-    static field part(int index);
+    static field parts();
+    static field parts(int index);
 
   private:
     bool valid_ = false;
@@ -96,7 +96,7 @@ namespace verbly {
     int id_;
     int groupId_;
     int length_;
-    std::vector<class part> parts_;
+    std::vector<part> parts_;
 
     const database* db_;
 

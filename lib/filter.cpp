@@ -1115,7 +1115,7 @@ namespace verbly {
                 case object::form:
                 case object::pronunciation:
                 {
-                  return (verbly::notion::word %= *this);
+                  return (verbly::notion::words %= *this);
                 }
               }
             }
@@ -1126,7 +1126,7 @@ namespace verbly {
               {
                 case object::notion:
                 {
-                  return (verbly::word::notion %= *this);
+                  return (verbly::word::notions %= *this);
                 }
 
                 case object::undefined:
@@ -1138,14 +1138,14 @@ namespace verbly {
                 case object::frame:
                 case object::part:
                 {
-                  return (verbly::word::frame %= *this);
+                  return (verbly::word::frames %= *this);
                 }
 
                 case object::lemma:
                 case object::form:
                 case object::pronunciation:
                 {
-                  return (verbly::word::lemma %= *this);
+                  return (verbly::word::lemmas %= *this);
                 }
               }
 
@@ -1165,12 +1165,12 @@ namespace verbly {
                   case object::form:
                   case object::pronunciation:
                   {
-                    return (verbly::frame::word %= *this);
+                    return (verbly::frame::words %= *this);
                   }
 
                   case object::part:
                   {
-                    return (verbly::frame::part() %= *this);
+                    return (verbly::frame::parts() %= *this);
                   }
                 }
               }
@@ -1192,7 +1192,7 @@ namespace verbly {
                   case object::form:
                   case object::pronunciation:
                   {
-                    return (verbly::part::frame %= *this);
+                    return (verbly::part::frames %= *this);
                   }
                 }
               }
@@ -1206,7 +1206,7 @@ namespace verbly {
                   case object::frame:
                   case object::part:
                   {
-                    return verbly::lemma::word %= *this;
+                    return verbly::lemma::words %= *this;
                   }
 
                   case object::undefined:
@@ -1218,7 +1218,7 @@ namespace verbly {
                   case object::form:
                   case object::pronunciation:
                   {
-                    return (verbly::lemma::form(inflection::base) %= *this);
+                    return (verbly::lemma::forms(inflection::base) %= *this);
                   }
                 }
               }
@@ -1233,7 +1233,7 @@ namespace verbly {
                   case object::part:
                   case object::lemma:
                   {
-                    return verbly::form::lemma %= *this;
+                    return verbly::form::lemmas %= *this;
                   }
 
                   case object::undefined:
@@ -1244,7 +1244,7 @@ namespace verbly {
 
                   case object::pronunciation:
                   {
-                    return (verbly::form::pronunciation %= *this);
+                    return (verbly::form::pronunciations %= *this);
                   }
                 }
               }
@@ -1260,7 +1260,7 @@ namespace verbly {
                   case object::lemma:
                   case object::form:
                   {
-                    return verbly::pronunciation::form %= *this;
+                    return verbly::pronunciation::forms %= *this;
                   }
 
                   case object::undefined:

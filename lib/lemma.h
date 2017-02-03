@@ -72,9 +72,9 @@ namespace verbly {
 
     // Relationships to other objects
 
-    static const field word;
+    static const field words;
 
-    static field form(inflection category);
+    static field forms(inflection category);
 
   private:
 
@@ -84,7 +84,7 @@ namespace verbly {
 
     int id_;
 
-    mutable std::map<inflection, std::vector<class form>> forms_;
+    mutable std::map<inflection, std::vector<form>> forms_;
 
     const database* db_;
 
