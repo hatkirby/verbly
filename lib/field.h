@@ -288,6 +288,11 @@ namespace verbly {
     filter operator==(inflection value) const; // Inflection category equality
     filter operator==(part_type value) const; // Verb frame part type equality
 
+    filter operator!=(part_of_speech value) const; // Part of speech inequality
+    filter operator!=(positioning value) const; // Adjective positioning inequality
+    filter operator!=(inflection value) const; // Inflection category inequality
+    filter operator!=(part_type value) const; // Verb frame part type inequality
+
     filter operator==(bool value) const; // Boolean equality
 
     filter operator==(std::string value) const; // String equality

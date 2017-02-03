@@ -53,6 +53,26 @@ namespace verbly {
     return filter(*this, filter::comparison::int_equals, static_cast<int>(value));
   }
 
+  filter field::operator!=(part_of_speech value) const
+  {
+    return filter(*this, filter::comparison::int_does_not_equal, static_cast<int>(value));
+  }
+
+  filter field::operator!=(positioning value) const
+  {
+    return filter(*this, filter::comparison::int_does_not_equal, static_cast<int>(value));
+  }
+
+  filter field::operator!=(inflection value) const
+  {
+    return filter(*this, filter::comparison::int_does_not_equal, static_cast<int>(value));
+  }
+
+  filter field::operator!=(part_type value) const
+  {
+    return filter(*this, filter::comparison::int_does_not_equal, static_cast<int>(value));
+  }
+
   filter field::operator==(bool value) const
   {
     return filter(*this, filter::comparison::boolean_equals, value);
