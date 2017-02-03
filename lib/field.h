@@ -228,9 +228,12 @@ namespace verbly {
 
     const field& getConditionField() const
     {
-      return (type_ == type::join_where)
-        ? *conditionField_
-        : throw std::domain_error("Only condition join fields have a condition field");
+      if (type_ == type::join_where)
+      {
+        return *conditionField_;
+      } else {
+        throw std::domain_error("Only condition join fields have a condition field");
+      }
     }
 
     int getConditionValue() const
