@@ -1,5 +1,6 @@
 #include "token.h"
 #include <stdexcept>
+#include <algorithm>
 #include "util.h"
 
 namespace verbly {

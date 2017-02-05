@@ -1,5 +1,6 @@
 #include "form.h"
 #include <sqlite3.h>
+#include <algorithm>
 #include "filter.h"
 #include "database.h"
 #include "query.h"
