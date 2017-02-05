@@ -7,7 +7,6 @@
 #include <fstream>
 #include "../lib/enums.h"
 #include "progress.h"
-#include "../lib/selrestr.h"
 #include "role.h"
 #include "part.h"
 #include "field.h"
@@ -1303,12 +1302,20 @@ namespace verbly {
               std::string roleName = reinterpret_cast<const char*>(key);
               xmlFree(key);
 
-              selrestr roleSelrestrs;
+              std::set<std::string> roleSelrestrs;
               for (xmlNodePtr rolenode = roletopnode->xmlChildrenNode; rolenode != nullptr; rolenode = rolenode->next)
               {
                 if (!xmlStrcmp(rolenode->name, reinterpret_cast<const xmlChar*>("SELRESTRS")))
                 {
-                  roleSelrestrs = parseSelrestr(rolenode);
+                  for (xmlNodePtr selrestrnode = rolenode->xmlChildrenNode; selrestrnode != nullptr; selrestrnode = selrestrnode->next)
+                  {
+                    if (!xmlStrcmp(selrestrnode->name, reinterpret_cast<const xmlChar*>("SELRESTR")))
+                    {
+                      key = xmlGetProp(selrestrnode, reinterpret_cast<const xmlChar*>("type"));
+                      roleSelrestrs.insert(std::string(reinterpret_cast<const char*>(key)));
+                      xmlFree(key);
+                    }
+                  }
                 }
               }
 
@@ -1335,7 +1342,7 @@ namespace verbly {
                       std::string partRole = reinterpret_cast<const char*>(key);
                       xmlFree(key);
 
-                      selrestr partSelrestrs;
+                      std::set<std::string> partSelrestrs;
                       std::set<std::string> partSynrestrs;
 
                       for (xmlNodePtr npnode = syntaxnode->xmlChildrenNode; npnode != nullptr; npnode = npnode->next)
@@ -1351,11 +1358,17 @@ namespace verbly {
                               xmlFree(key);
                             }
                           }
-                        }
-
-                        if (!xmlStrcmp(npnode->name, reinterpret_cast<const xmlChar*>("SELRESTRS")))
+                        } else if (!xmlStrcmp(npnode->name, reinterpret_cast<const xmlChar*>("SELRESTRS")))
                         {
-                          partSelrestrs = parseSelrestr(npnode);
+                          for (xmlNodePtr selrestrnode = npnode->xmlChildrenNode; selrestrnode != nullptr; selrestrnode = selrestrnode->next)
+                          {
+                            if (!xmlStrcmp(selrestrnode->name, reinterpret_cast<const xmlChar*>("SELRESTR")))
+                            {
+                              key = xmlGetProp(selrestrnode, reinterpret_cast<const xmlChar*>("type"));
+                              partSelrestrs.insert(std::string(reinterpret_cast<const char*>(key)));
+                              xmlFree(key);
+                            }
+                          }
                         }
                       }
 
@@ -1431,59 +1444,6 @@ namespace verbly {
             }
           }
         }
-      }
-    }
-
-    selrestr generator::parseSelrestr(xmlNodePtr top)
-    {
-      xmlChar* key;
-
-      if (!xmlStrcmp(top->name, reinterpret_cast<const xmlChar*>("SELRESTRS")))
-      {
-        if (xmlChildElementCount(top) == 0)
-        {
-          return {};
-        } else if (xmlChildElementCount(top) == 1)
-        {
-          return parseSelrestr(xmlFirstElementChild(top));
-        } else {
-          bool orlogic = false;
-          if (xmlHasProp(top, reinterpret_cast<const xmlChar*>("logic")))
-          {
-            key = xmlGetProp(top, reinterpret_cast<const xmlChar*>("logic"));
-            if (!xmlStrcmp(key, reinterpret_cast<const xmlChar*>("or")))
-            {
-              orlogic = true;
-            }
-
-            xmlFree(key);
-          }
-
-          std::list<selrestr> children;
-          for (xmlNodePtr selrestr = top->xmlChildrenNode; selrestr != nullptr; selrestr = selrestr->next)
-          {
-            if (!xmlStrcmp(selrestr->name, reinterpret_cast<const xmlChar*>("SELRESTRS"))
-              || !xmlStrcmp(selrestr->name, reinterpret_cast<const xmlChar*>("SELRESTR")))
-            {
-              children.push_back(parseSelrestr(selrestr));
-            }
-          }
-
-          return selrestr(children, orlogic);
-        }
-      } else if (!xmlStrcmp(top->name, reinterpret_cast<const xmlChar*>("SELRESTR")))
-      {
-        key = xmlGetProp(top, reinterpret_cast<const xmlChar*>("Value"));
-        bool selPos = (std::string(reinterpret_cast<const char*>(key)) == "+");
-        xmlFree(key);
-
-        key = xmlGetProp(top, reinterpret_cast<const xmlChar*>("type"));
-        std::string selRestriction = reinterpret_cast<const char*>(key);
-        xmlFree(key);
-
-        return selrestr(selRestriction, selPos);
-      } else {
-        throw std::logic_error("Badly formatted selrestr");
       }
     }
 

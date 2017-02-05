@@ -76,6 +76,38 @@ namespace verbly {
     return query<pronunciation>(*this, ppdb_, std::move(where), std::move(sortOrder), limit);
   }
 
+  std::set<std::string> database::selrestrs(int partId) const
+  {
+    std::string queryString = "SELECT selrestr FROM selrestrs WHERE part_id = ?";
+
+    sqlite3_stmt* ppstmt;
+    if (sqlite3_prepare_v2(ppdb_, queryString.c_str(), queryString.length(), &ppstmt, NULL) != SQLITE_OK)
+    {
+      std::string errorMsg = sqlite3_errmsg(ppdb_);
+      sqlite3_finalize(ppstmt);
+
+      throw database_error("Error preparing query", errorMsg);
+    }
+
+    if (sqlite3_bind_int(ppstmt, 1, partId) != SQLITE_OK)
+    {
+      std::string errorMsg = sqlite3_errmsg(ppdb_);
+      sqlite3_finalize(ppstmt);
+
+      throw database_error("Error binding value to query", errorMsg);
+    }
+
+    std::set<std::string> result;
+    while (sqlite3_step(ppstmt) == SQLITE_ROW)
+    {
+      result.insert(reinterpret_cast<const char*>(sqlite3_column_blob(ppstmt, 0)));
+    }
+
+    sqlite3_finalize(ppstmt);
+
+    return result;
+  }
+
   std::set<std::string> database::synrestrs(int partId) const
   {
     std::string queryString = "SELECT synrestr FROM synrestrs WHERE part_id = ?";

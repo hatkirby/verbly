@@ -15,6 +15,5 @@
 #include "form.h"
 #include "pronunciation.h"
 #include "token.h"
-#include "selrestr.h"
 
 #endif /* end of include guard: VERBLY_H_5B39CE50 */

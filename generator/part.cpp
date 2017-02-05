@@ -6,12 +6,12 @@ namespace verbly {
 
     int part::nextId_ = 0;
 
-    part part::createNounPhrase(std::string role, selrestr selrestrs, std::set<std::string> synrestrs)
+    part part::createNounPhrase(std::string role, std::set<std::string> selrestrs, std::set<std::string> synrestrs)
     {
       part p(type::noun_phrase);
 
       new(&p.noun_phrase_.role) std::string(std::move(role));
-      new(&p.noun_phrase_.selrestrs) selrestr(std::move(selrestrs));
+      new(&p.noun_phrase_.selrestrs) std::set<std::string>(std::move(selrestrs));
       new(&p.noun_phrase_.synrestrs) std::set<std::string>(std::move(synrestrs));
 
       return p;
@@ -60,7 +60,7 @@ namespace verbly {
         case type::noun_phrase:
         {
           new(&result.noun_phrase_.role) std::string(other.noun_phrase_.role);
-          new(&result.noun_phrase_.selrestrs) selrestr(other.noun_phrase_.selrestrs);
+          new(&result.noun_phrase_.selrestrs) std::set<std::string>(other.noun_phrase_.selrestrs);
           new(&result.noun_phrase_.synrestrs) std::set<std::string>(other.noun_phrase_.synrestrs);
 
           break;
@@ -103,7 +103,7 @@ namespace verbly {
         case type::noun_phrase:
         {
           new(&noun_phrase_.role) std::string(other.noun_phrase_.role);
-          new(&noun_phrase_.selrestrs) selrestr(other.noun_phrase_.selrestrs);
+          new(&noun_phrase_.selrestrs) std::set<std::string>(other.noun_phrase_.selrestrs);
           new(&noun_phrase_.synrestrs) std::set<std::string>(other.noun_phrase_.synrestrs);
 
           break;
@@ -153,7 +153,7 @@ namespace verbly {
       type tempType = first.type_;
       int tempId = first.id_;
       std::string tempRole;
-      selrestr tempSelrestrs;
+      std::set<std::string> tempSelrestrs;
       std::set<std::string> tempSynrestrs;
       std::set<std::string> tempChoices;
       bool tempPrepLiteral;
@@ -204,7 +204,7 @@ namespace verbly {
         case type::noun_phrase:
         {
           new(&first.noun_phrase_.role) std::string(std::move(second.noun_phrase_.role));
-          new(&first.noun_phrase_.selrestrs) selrestr(std::move(second.noun_phrase_.selrestrs));
+          new(&first.noun_phrase_.selrestrs) std::set<std::string>(std::move(second.noun_phrase_.selrestrs));
           new(&first.noun_phrase_.synrestrs) std::set<std::string>(std::move(second.noun_phrase_.synrestrs));
 
           break;
@@ -244,7 +244,7 @@ namespace verbly {
         case type::noun_phrase:
         {
           new(&second.noun_phrase_.role) std::string(std::move(tempRole));
-          new(&second.noun_phrase_.selrestrs) selrestr(std::move(tempSelrestrs));
+          new(&second.noun_phrase_.selrestrs) std::set<std::string>(std::move(tempSelrestrs));
           new(&second.noun_phrase_.synrestrs) std::set<std::string>(std::move(tempSynrestrs));
 
           break;
@@ -285,7 +285,7 @@ namespace verbly {
           using set_type = std::set<std::string>;
 
           noun_phrase_.role.~string_type();
-          noun_phrase_.selrestrs.~selrestr();
+          noun_phrase_.selrestrs.~set_type();
           noun_phrase_.synrestrs.~set_type();
 
           break;
@@ -329,7 +329,7 @@ namespace verbly {
       }
     }
 
-    selrestr part::getNounSelrestrs() const
+    std::set<std::string> part::getNounSelrestrs() const
     {
       if (type_ == type::noun_phrase)
       {

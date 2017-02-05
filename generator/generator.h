@@ -18,7 +18,6 @@
 namespace verbly {
 
   enum class part_of_speech;
-  class selrestr;
 
   namespace generator {
 
@@ -106,8 +105,6 @@ namespace verbly {
       template <typename... Args> word& createWord(Args&&... args);
 
       void createGroup(xmlNodePtr top, const group* parent = nullptr);
-
-      selrestr parseSelrestr(xmlNodePtr top);
 
       // Input
 

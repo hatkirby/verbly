@@ -5,7 +5,6 @@
 #include <vector>
 #include <set>
 #include <list>
-#include "selrestr.h"
 #include "field.h"
 #include "filter.h"
 #include "enums.h"
@@ -21,7 +20,7 @@ namespace verbly {
 
     // Static factories
 
-    static part createNounPhrase(std::string role, selrestr selrestrs, std::set<std::string> synrestrs);
+    static part createNounPhrase(std::string role, std::set<std::string> selrestrs, std::set<std::string> synrestrs);
 
     static part createVerb();
 
@@ -77,7 +76,7 @@ namespace verbly {
 
     std::string getNounRole() const;
 
-    selrestr getNounSelrestrs() const;
+    std::set<std::string> getNounSelrestrs() const;
 
     std::set<std::string> getNounSynrestrs() const;
 
@@ -110,8 +109,21 @@ namespace verbly {
 
     static const field frames;
 
-    // Noun synrestr relationship
+    // Noun selrestr and synrestr relationships
 
+    class selrestr_field {
+    public:
+
+      filter operator%=(std::string selrestr) const;
+
+    private:
+
+      static const field selrestrJoin;
+      static const field selrestrField;
+    };
+
+    static const selrestr_field selrestrs;
+    
     class synrestr_field {
     public:
 
@@ -138,7 +150,7 @@ namespace verbly {
     union {
       struct {
         std::string role;
-        selrestr selrestrs;
+        std::set<std::string> selrestrs;
         std::set<std::string> synrestrs;
       } noun_phrase_;
       struct {

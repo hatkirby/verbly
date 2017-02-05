@@ -3,7 +3,7 @@
 
 #include <stdexcept>
 #include <string>
-#include "../lib/selrestr.h"
+#include <set>
 
 namespace verbly {
 
@@ -18,7 +18,7 @@ namespace verbly {
 
     role(
       std::string name,
-      selrestr selrestrs = {}) :
+      std::set<std::string> selrestrs = {}) :
         valid_(true),
         name_(name),
         selrestrs_(selrestrs)
@@ -37,7 +37,7 @@ namespace verbly {
       return name_;
     }
 
-    const selrestr& getSelrestrs() const
+    const std::set<std::string>& getSelrestrs() const
     {
       if (!valid_)
       {
@@ -51,7 +51,7 @@ namespace verbly {
 
     bool valid_ = false;
     std::string name_;
-    selrestr selrestrs_;
+    std::set<std::string> selrestrs_;
 
   };
 

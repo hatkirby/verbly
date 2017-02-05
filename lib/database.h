@@ -62,6 +62,8 @@ namespace verbly {
 
     query<pronunciation> pronunciations(filter where, order sortOrder = {}, int limit = 1) const;
 
+    std::set<std::string> selrestrs(int partId) const;
+
     std::set<std::string> synrestrs(int partId) const;
 
   private:

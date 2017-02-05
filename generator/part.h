@@ -3,7 +3,6 @@
 
 #include <string>
 #include <set>
-#include "../lib/selrestr.h"
 #include "../lib/enums.h"
 
 namespace verbly {
@@ -17,7 +16,7 @@ namespace verbly {
 
       // Static factories
 
-      static part createNounPhrase(std::string role, selrestr selrestrs, std::set<std::string> synrestrs);
+      static part createNounPhrase(std::string role, std::set<std::string> selrestrs, std::set<std::string> synrestrs);
 
       static part createVerb();
 
@@ -67,7 +66,7 @@ namespace verbly {
 
       std::string getNounRole() const;
 
-      selrestr getNounSelrestrs() const;
+      std::set<std::string> getNounSelrestrs() const;
 
       std::set<std::string> getNounSynrestrs() const;
 
@@ -104,7 +103,7 @@ namespace verbly {
       union {
         struct {
           std::string role;
-          selrestr selrestrs;
+          std::set<std::string> selrestrs;
           std::set<std::string> synrestrs;
         } noun_phrase_;
         struct {

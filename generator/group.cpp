@@ -1,10 +1,10 @@
 #include "group.h"
 #include <stdexcept>
 #include <list>
-#include <json.hpp>
 #include "database.h"
 #include "field.h"
 #include "frame.h"
+#include "../lib/util.h"
 
 namespace verbly {
   namespace generator {
@@ -83,16 +83,22 @@ namespace verbly {
             {
               fields.emplace_back("role", p.getNounRole());
 
-              selrestr partSelrestr;
-              if (p.getNounSelrestrs().getType() != selrestr::type::empty)
+              // Short interlude to serialize the selrestrs
+              std::set<std::string> partSelrestrs = p.getNounSelrestrs();
+              if (partSelrestrs.empty() && arg.hasRole(p.getNounRole()))
               {
-                partSelrestr = p.getNounSelrestrs();
-              } else if (arg.hasRole(p.getNounRole()))
-              {
-                partSelrestr = arg.getRole(p.getNounRole()).getSelrestrs();
+                partSelrestrs = arg.getRole(p.getNounRole()).getSelrestrs();
               }
 
-              fields.emplace_back("selrestrs", partSelrestr.toJson().dump());
+              for (const std::string& s : partSelrestrs)
+              {
+                std::list<field> selrestrFields;
+
+                selrestrFields.emplace_back("part_id", p.getId());
+                selrestrFields.emplace_back("selrestr", s);
+
+                db.insertIntoTable("selrestrs", std::move(selrestrFields));
+              }
 
               // Short interlude to serialize the synrestrs
               for (const std::string& s : p.getNounSynrestrs())
@@ -110,7 +116,10 @@ namespace verbly {
 
             case part::type::preposition:
             {
-              fields.emplace_back("prepositions", nlohmann::json(p.getPrepositionChoices()).dump());
+              std::set<std::string> setChoices = p.getPrepositionChoices();
+              std::string serializedChoices = implode(std::begin(setChoices), std::end(setChoices), ",");
+
+              fields.emplace_back("prepositions", std::move(serializedChoices));
               fields.emplace_back("preposition_literality", p.isPrepositionLiteral() ? 1 : 0);
 
               break;

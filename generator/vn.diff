@@ -1,8 +1,11 @@
 diff /Users/hatkirby/Downloads/new_vn 2/admit-65.xml datadir/vn/admit-65.xml
-104c104
+104,106c104,105
 <                     <SELRESTRS logic="or">
+<                         <SELRESTR Value="+" type="location"/>
+<                         <SELRESTR Value="-" type="region"/>
 ---
 >                     <SELRESTRS>
+>                         <SELRESTR Value="+" type="non_region_location"/>
 diff /Users/hatkirby/Downloads/new_vn 2/amuse-31.1.xml datadir/vn/amuse-31.1.xml
 270a271,273
 >         <THEMROLE type="Cause">
@@ -30,6 +33,18 @@ diff /Users/hatkirby/Downloads/new_vn 2/animal_sounds-38.xml datadir/vn/animal_s
 diff /Users/hatkirby/Downloads/new_vn 2/assessment-34.1.xml datadir/vn/assessment-34.1.xml
 103d102
 <                 <LEX value="'s"/>
+diff /Users/hatkirby/Downloads/new_vn 2/assuming_position-50.xml datadir/vn/assuming_position-50.xml
+41,42c41
+<                 <SELRESTR Value="+" type="location"/>
+<                 <SELRESTR Value="-" type="region"/>
+---
+>                 <SELRESTR Value="+" type="non_region_location"/>
+diff /Users/hatkirby/Downloads/new_vn 2/banish-10.2.xml datadir/vn/banish-10.2.xml
+35,36c35
+<                 <SELRESTR Value="+" type="location"/>
+<                 <SELRESTR Value="-" type="region"/>
+---
+>                 <SELRESTR Value="+" type="non_region_location"/>
 diff /Users/hatkirby/Downloads/new_vn 2/battle-36.4.xml datadir/vn/battle-36.4.xml
 96c96
 <                         <SYNRESTR Value="+" type="what_extract"/>
@@ -85,6 +100,20 @@ diff /Users/hatkirby/Downloads/new_vn 2/break-45.1.xml datadir/vn/break-45.1.xml
 >                   <SYNRESTRS>
 >                     <SYNRESTR Value="+" type="adjp"/>
 >                   </SYNRESTRS>
+diff /Users/hatkirby/Downloads/new_vn 2/bring-11.3.xml datadir/vn/bring-11.3.xml
+27,30c27
+<                 <SELRESTRS>
+<                     <SELRESTR Value="+" type="location"/>
+<                     <SELRESTR Value="-" type="region"/>
+<                 </SELRESTRS>
+---
+>                 <SELRESTR Value="+" type="non_region_location"/>
+diff /Users/hatkirby/Downloads/new_vn 2/butter-9.9.xml datadir/vn/butter-9.9.xml
+155,156c155
+<                 <SELRESTR Value="+" type="location"/>
+<                 <SELRESTR Value="-" type="region"/>
+---
+>                 <SELRESTR Value="+" type="non_region_location"/>
 diff /Users/hatkirby/Downloads/new_vn 2/characterize-29.2.xml datadir/vn/characterize-29.2.xml
 107c107
 <                 <LEX value="as"/>
@@ -104,6 +133,31 @@ diff /Users/hatkirby/Downloads/new_vn 2/characterize-29.2.xml datadir/vn/charact
 >                                     <SYNRESTR Value="+" type="adjp"/>
 >                                   </SYNRESTRS>
 >                                 </NP>
+diff /Users/hatkirby/Downloads/new_vn 2/cheat-10.6.xml datadir/vn/cheat-10.6.xml
+56,59c56
+<                 <SELRESTRS>
+<                     <SELRESTR Value="+" type="location"/>
+<                     <SELRESTR Value="-" type="region"/>
+<                 </SELRESTRS>
+---
+>                 <SELRESTR Value="+" type="non_region_location"/>
+diff /Users/hatkirby/Downloads/new_vn 2/chew-39.2.xml datadir/vn/chew-39.2.xml
+37,38c37
+<                         <SELRESTR Value="+" type="comestible"/>
+<                         <SELRESTR Value="+" type="solid"/>
+---
+>                         <SELRESTR Value="+" type="solid_food"/>
+155,156c154
+<                         <SELRESTR Value="+" type="comestible"/>
+<                         <SELRESTR Value="-" type="solid"/>
+---
+>                         <SELRESTR Value="+" type="non_solid_food"/>
+diff /Users/hatkirby/Downloads/new_vn 2/coil-9.6.xml datadir/vn/coil-9.6.xml
+22,23c22
+<                 <SELRESTR Value="+" type="nonrigid"/>
+<                 <SELRESTR Value="+" type="elongated"/>
+---
+>                 <SELRESTR Value="+" type="slinky"/>
 diff /Users/hatkirby/Downloads/new_vn 2/coloring-24.xml datadir/vn/coloring-24.xml
 89c89,91
 <                     <SYNRESTRS/>
@@ -118,6 +172,11 @@ diff /Users/hatkirby/Downloads/new_vn 2/confess-37.10.xml datadir/vn/confess-37.
 >                     <SYNRESTR Value="+" type="adjp"/>
 >                   </SYNRESTRS>
 >                 </NP>
+diff /Users/hatkirby/Downloads/new_vn 2/confine-92.xml datadir/vn/confine-92.xml
+18c18
+<             <SELRESTRS>
+---
+>             <SELRESTRS logic="or">
 diff /Users/hatkirby/Downloads/new_vn 2/consider-29.9.xml datadir/vn/consider-29.9.xml
 191,193c191,193
 <                                             <SYNRESTRS>
@@ -195,6 +254,47 @@ diff /Users/hatkirby/Downloads/new_vn 2/declare-29.4.xml datadir/vn/declare-29.4
 >                           <SYNRESTRS>
 >                             <SYNRESTR Value="+" type="adjp"/>
 >                           </SYNRESTRS>
+diff /Users/hatkirby/Downloads/new_vn 2/devour-39.4.xml datadir/vn/devour-39.4.xml
+26,27c26
+<                         <SELRESTR Value="+" type="comestible"/>
+<                         <SELRESTR Value="+" type="solid"/>
+---
+>                         <SELRESTR Value="+" type="solid_food"/>
+67,68c66
+<                         <SELRESTR Value="+" type="comestible"/>
+<                         <SELRESTR Value="-" type="solid"/>
+---
+>                         <SELRESTR Value="+" type="non_solid_food"/>
+diff /Users/hatkirby/Downloads/new_vn 2/drive-11.5.xml datadir/vn/drive-11.5.xml
+37,40c37
+<                 <SELRESTRS>
+<                     <SELRESTR Value="+" type="location"/>
+<                     <SELRESTR Value="-" type="region"/>
+<                 </SELRESTRS>
+---
+>                 <SELRESTR Value="+" type="non_region_location"/>
+diff /Users/hatkirby/Downloads/new_vn 2/eat-39.1.xml datadir/vn/eat-39.1.xml
+24,25c24
+<                         <SELRESTR Value="+" type="comestible"/>
+<                         <SELRESTR Value="+" type="solid"/>
+---
+>                         <SELRESTR Value="+" type="solid_food"/>
+148,149c147
+<                         <SELRESTR Value="+" type="comestible"/>
+<                         <SELRESTR Value="-" type="solid"/>
+---
+>                         <SELRESTR Value="+" type="non_solid_food"/>
+diff /Users/hatkirby/Downloads/new_vn 2/enforce-63.xml datadir/vn/enforce-63.xml
+11c11
+<             <SELRESTRS>
+---
+>             <SELRESTRS logic="or">
+diff /Users/hatkirby/Downloads/new_vn 2/entity_specific_modes_being-47.2.xml datadir/vn/entity_specific_modes_being-47.2.xml
+35,36c35
+<                 <SELRESTR Value="+" type="location"/>
+<                 <SELRESTR Value="-" type="region"/>
+---
+>                 <SELRESTR Value="+" type="non_region_location"/>
 diff /Users/hatkirby/Downloads/new_vn 2/estimate-34.2.xml datadir/vn/estimate-34.2.xml
 123a124
 >                 <LEX value="to be"/>
@@ -206,12 +306,53 @@ diff /Users/hatkirby/Downloads/new_vn 2/estimate-34.2.xml datadir/vn/estimate-34
 >                   <SYNRESTRS>
 >                     <SYNRESTR Value="+" type="adjp"/>
 >                   </SYNRESTRS>
+diff /Users/hatkirby/Downloads/new_vn 2/exchange-13.6.xml datadir/vn/exchange-13.6.xml
+329,330c329
+<                         <SELRESTR Value="+" type="location"/>
+<                         <SELRESTR Value="-" type="region"/>
+---
+>                         <SELRESTR Value="+" type="non_region_location"/>
+diff /Users/hatkirby/Downloads/new_vn 2/exist-47.1.xml datadir/vn/exist-47.1.xml
+13,14c13
+<                 <SELRESTR Value="+" type="location"/>
+<                 <SELRESTR Value="-" type="region"/>
+---
+>                 <SELRESTR Value="+" type="non_region_location"/>
+diff /Users/hatkirby/Downloads/new_vn 2/fill-9.8.xml datadir/vn/fill-9.8.xml
+132,133c132
+<                 <SELRESTR Value="+" type="location"/>
+<                 <SELRESTR Value="-" type="region"/>
+---
+>                 <SELRESTR Value="+" type="non_region_location"/>
+diff /Users/hatkirby/Downloads/new_vn 2/funnel-9.3.xml datadir/vn/funnel-9.3.xml
+30,31c30
+<                 <SELRESTR Value="+" type="location"/>
+<                 <SELRESTR Value="-" type="region"/>
+---
+>                 <SELRESTR Value="+" type="non_region_location"/>
 diff /Users/hatkirby/Downloads/new_vn 2/get-13.5.1.xml datadir/vn/get-13.5.1.xml
 55,56c55
 <                 <SELRESTR Value="-" type="location"/>
 <                 <SELRESTR Value="-" type="region"/>
 ---
 >                 <SELRESTR Value="+" type="currency"/>
+diff /Users/hatkirby/Downloads/new_vn 2/gobble-39.3.xml datadir/vn/gobble-39.3.xml
+23,24c23
+<                         <SELRESTR Value="+" type="comestible"/>
+<                         <SELRESTR Value="+" type="solid"/>
+---
+>                         <SELRESTR Value="+" type="solid_food"/>
+118,119c117
+<                         <SELRESTR Value="+" type="comestible"/>
+<                         <SELRESTR Value="-" type="solid"/>
+---
+>                         <SELRESTR Value="+" type="non_solid_food"/>
+diff /Users/hatkirby/Downloads/new_vn 2/herd-47.5.2.xml datadir/vn/herd-47.5.2.xml
+29,30c29
+<                 <SELRESTR Value="+" type="concrete"/>
+<                 <SELRESTR Value="+" type="plural"/>
+---
+>                 <SELRESTR Value="+" type="group"/>
 diff /Users/hatkirby/Downloads/new_vn 2/hit-18.1.xml datadir/vn/hit-18.1.xml
 234c234,236
 <                     <SYNRESTRS/>
@@ -257,6 +398,23 @@ diff /Users/hatkirby/Downloads/new_vn 2/judgment-33.xml datadir/vn/judgment-33.x
 <                     </SYNRESTRS>
 ---
 >                     <SYNRESTRS/>
+diff /Users/hatkirby/Downloads/new_vn 2/keep-15.2.xml datadir/vn/keep-15.2.xml
+24,25c24
+<                 <SELRESTR Value="+" type="location"/>
+<                 <SELRESTR Value="-" type="region"/>
+---
+>                 <SELRESTR Value="+" type="non_region_location"/>
+diff /Users/hatkirby/Downloads/new_vn 2/leave-51.2.xml datadir/vn/leave-51.2.xml
+16,17c16
+<                 <SELRESTR Value="+" type="location"/>
+<                 <SELRESTR Value="-" type="region"/>
+---
+>                 <SELRESTR Value="+" type="non_region_location"/>
+diff /Users/hatkirby/Downloads/new_vn 2/light_emission-43.1.xml datadir/vn/light_emission-43.1.xml
+31c31
+<                 <SELRESTR Value="-" type="animate"/>
+---
+>                 <SELRESTR Value="+" type="inanimate"/>
 diff /Users/hatkirby/Downloads/new_vn 2/manner_speaking-37.3.xml datadir/vn/manner_speaking-37.3.xml
 264c264,266
 <                     <SYNRESTRS/>
@@ -270,6 +428,17 @@ diff /Users/hatkirby/Downloads/new_vn 2/manner_speaking-37.3.xml datadir/vn/mann
 >                   <SYNRESTRS>
 >                       <SYNRESTR Value="+" type="quotation"/>
 >                   </SYNRESTRS>
+diff /Users/hatkirby/Downloads/new_vn 2/matter-91.xml datadir/vn/matter-91.xml
+10c10
+<             <SELRESTRS>
+---
+>             <SELRESTRS logic="or">
+diff /Users/hatkirby/Downloads/new_vn 2/modes_of_being_with_motion-47.3.xml datadir/vn/modes_of_being_with_motion-47.3.xml
+64,65c64
+<                 <SELRESTR Value="+" type="location"/>
+<                 <SELRESTR Value="-" type="region"/>
+---
+>                 <SELRESTR Value="+" type="non_region_location"/>
 diff /Users/hatkirby/Downloads/new_vn 2/other_cos-45.4.xml datadir/vn/other_cos-45.4.xml
 534c534,536
 < 			<SYNRESTRS/>
@@ -277,6 +446,11 @@ diff /Users/hatkirby/Downloads/new_vn 2/other_cos-45.4.xml datadir/vn/other_cos-
 >           <SYNRESTRS>
 >             <SYNRESTR Value="+" type="adjp"/>
 >           </SYNRESTRS>
+diff /Users/hatkirby/Downloads/new_vn 2/pay-68.xml datadir/vn/pay-68.xml
+13c13
+<             <SELRESTRS>
+---
+>             <SELRESTRS logic="or">
 diff /Users/hatkirby/Downloads/new_vn 2/pocket-9.10.xml datadir/vn/pocket-9.10.xml
 256c256,258
 <                             <SYNRESTRS/>
@@ -292,7 +466,24 @@ diff /Users/hatkirby/Downloads/new_vn 2/poison-42.2.xml datadir/vn/poison-42.2.x
 >                     <SYNRESTR Value="+" type="adjp"/>
 >                   </SYNRESTRS>
 diff /Users/hatkirby/Downloads/new_vn 2/pour-9.5.xml datadir/vn/pour-9.5.xml
-59,61c59,62
+24,27c24
+<                 <SELRESTRS>
+<                     <SELRESTR Value="+" type="concrete"/>
+<                     <SELRESTR Value="+" type="plural"/>
+<                 </SELRESTRS>
+---
+>                 <SELRESTR Value="+" type="group"/>
+32,33c29
+<                 <SELRESTR Value="+" type="location"/>
+<                 <SELRESTR Value="-" type="region"/>
+---
+>                 <SELRESTR Value="+" type="non_region_location"/>
+39,40c35
+<                 <SELRESTR Value="+" type="location"/>
+<                 <SELRESTR Value="-" type="region"/>
+---
+>                 <SELRESTR Value="+" type="non_region_location"/>
+59,61c54,57
 <                     <SELRESTRS>
 <                         <SELRESTR Value="+" type="path"/>
 <                         <SELRESTR Value="-" type="dest_dir"/>
@@ -301,7 +492,7 @@ diff /Users/hatkirby/Downloads/new_vn 2/pour-9.5.xml datadir/vn/pour-9.5.xml
 >                         <SELRESTR Value="+" type="dir"/>
 >                         <SELRESTR Value="+" type="src"/>
 >                         <SELRESTR Value="+" type="dest_conf"/>
-157,160c158,162
+157,160c153,157
 <                     <SELRESTRS>
 <                         <SELRESTR Value="+" type="path"/>
 <                         <SELRESTR Value="-" type="dest_dir"/>
@@ -319,6 +510,31 @@ diff /Users/hatkirby/Downloads/new_vn 2/push-12.xml datadir/vn/push-12.xml
 >                           <SYNRESTRS>
 >                             <SYNRESTR Value="+" type="adjp"/>
 >                           </SYNRESTRS>
+diff /Users/hatkirby/Downloads/new_vn 2/put-9.1.xml datadir/vn/put-9.1.xml
+35,36c35
+<                 <SELRESTR Value="+" type="location"/>
+<                 <SELRESTR Value="-" type="region"/>
+---
+>                 <SELRESTR Value="+" type="non_region_location"/>
+diff /Users/hatkirby/Downloads/new_vn 2/put_direction-9.4.xml datadir/vn/put_direction-9.4.xml
+30,31c30
+<                 <SELRESTR Value="+" type="location"/>
+<                 <SELRESTR Value="-" type="region"/>
+---
+>                 <SELRESTR Value="+" type="non_region_location"/>
+diff /Users/hatkirby/Downloads/new_vn 2/put_spatial-9.2.xml datadir/vn/put_spatial-9.2.xml
+25,26c25
+<                 <SELRESTR Value="+" type="location"/>
+<                 <SELRESTR Value="-" type="region"/>
+---
+>                 <SELRESTR Value="+" type="non_region_location"/>
+diff /Users/hatkirby/Downloads/new_vn 2/reach-51.8.xml datadir/vn/reach-51.8.xml
+12,13c12,13
+<             <SELRESTRS>
+<                 <SELRESTR Value="+" type="concrete"/>
+---
+>             <SELRESTRS logic="or">
+>                 <SELRESTR Value="+" type="animate"/>
 diff /Users/hatkirby/Downloads/new_vn 2/roll-51.3.1.xml datadir/vn/roll-51.3.1.xml
 190c190,192
 <                     <SYNRESTRS/>
@@ -357,8 +573,23 @@ diff /Users/hatkirby/Downloads/new_vn 2/seem-109.xml datadir/vn/seem-109.xml
 >                    <SYNRESTRS>
 >                      <SYNRESTR Value="+" type="adjp"/>
 >                    </SYNRESTRS>
+diff /Users/hatkirby/Downloads/new_vn 2/send-11.1.xml datadir/vn/send-11.1.xml
+41,44c41
+<                 <SELRESTRS>
+<                     <SELRESTR Value="+" type="location"/>
+<                     <SELRESTR Value="-" type="region"/>
+<                 </SELRESTRS>
+---
+>                 <SELRESTR Value="+" type="non_region_location"/>
 diff /Users/hatkirby/Downloads/new_vn 2/slide-11.2.xml datadir/vn/slide-11.2.xml
-69,72c69,73
+27,30c27
+<                 <SELRESTRS>
+<                     <SELRESTR Value="+" type="location"/>
+<                     <SELRESTR Value="-" type="region"/>
+<                 </SELRESTRS>
+---
+>                 <SELRESTR Value="+" type="non_region_location"/>
+69,72c66,70
 <                     <SELRESTRS>
 <                         <SELRESTR Value="+" type="path"/>
 <                         <SELRESTR Value="-" type="dest_dir"/>
@@ -369,7 +600,7 @@ diff /Users/hatkirby/Downloads/new_vn 2/slide-11.2.xml datadir/vn/slide-11.2.xml
 >                       <SELRESTR Value="+" type="src"/>
 >                       <SELRESTR Value="+" type="dest_conf"/>
 >                   </SELRESTRS>
-218,221c219,223
+218,221c216,220
 <                     <SELRESTRS>
 <                         <SELRESTR Value="+" type="path"/>
 <                         <SELRESTR Value="-" type="dest_dir"/>
@@ -380,6 +611,22 @@ diff /Users/hatkirby/Downloads/new_vn 2/slide-11.2.xml datadir/vn/slide-11.2.xml
 >                       <SELRESTR Value="+" type="src"/>
 >                       <SELRESTR Value="+" type="dest_conf"/>
 >                   </SELRESTRS>
+diff /Users/hatkirby/Downloads/new_vn 2/smell_emission-43.3.xml datadir/vn/smell_emission-43.3.xml
+12c12
+<                 <SELRESTR Value="-" type="animate"/>
+---
+>                 <SELRESTR Value="+" type="inanimate"/>
+diff /Users/hatkirby/Downloads/new_vn 2/sound_emission-43.2.xml datadir/vn/sound_emission-43.2.xml
+138c138
+<                 <SELRESTR Value="-" type="animate"/>
+---
+>                 <SELRESTR Value="+" type="inanimate"/>
+diff /Users/hatkirby/Downloads/new_vn 2/sound_existence-47.4.xml datadir/vn/sound_existence-47.4.xml
+21,22c21
+<                 <SELRESTR Value="+" type="location"/>
+<                 <SELRESTR Value="-" type="region"/>
+---
+>                 <SELRESTR Value="+" type="non_region_location"/>
 diff /Users/hatkirby/Downloads/new_vn 2/spank-18.3.xml datadir/vn/spank-18.3.xml
 69a70,72
 >         <THEMROLE type="Recipient">
@@ -405,6 +652,12 @@ diff /Users/hatkirby/Downloads/new_vn 2/spank-18.3.xml datadir/vn/spank-18.3.xml
 >                   <SYNRESTRS>
 >                     <SYNRESTR Value="+" type="body_part"/>
 >                   </SYNRESTRS>
+diff /Users/hatkirby/Downloads/new_vn 2/spatial_configuration-47.6.xml datadir/vn/spatial_configuration-47.6.xml
+66,67c66
+<                 <SELRESTR Value="+" type="location"/>
+<                 <SELRESTR Value="-" type="region"/>
+---
+>                 <SELRESTR Value="+" type="non_region_location"/>
 diff /Users/hatkirby/Downloads/new_vn 2/split-23.2.xml datadir/vn/split-23.2.xml
 59c59
 <                 <PREP value="off off of from">
@@ -418,6 +671,41 @@ diff /Users/hatkirby/Downloads/new_vn 2/split-23.2.xml datadir/vn/split-23.2.xml
 <                 <PREP value="off off of from">
 ---
 >                 <PREP value="off off_of from">
+diff /Users/hatkirby/Downloads/new_vn 2/spray-9.7.xml datadir/vn/spray-9.7.xml
+19,20c19
+<                 <SELRESTR Value="+" type="location"/>
+<                 <SELRESTR Value="-" type="region"/>
+---
+>                 <SELRESTR Value="+" type="non_region_location"/>
+254,255c253
+<                             <SELRESTR Value="+" type="concrete"/>
+<                             <SELRESTR Value="+" type="plural"/>
+---
+>                             <SELRESTR Value="+" type="group"/>
+diff /Users/hatkirby/Downloads/new_vn 2/steal-10.5.xml datadir/vn/steal-10.5.xml
+55,58c55
+<                 <SELRESTRS>
+<                     <SELRESTR Value="+" type="location"/>
+<                     <SELRESTR Value="-" type="region"/>
+<                 </SELRESTRS>
+---
+>                 <SELRESTR Value="+" type="non_region_location"/>
+diff /Users/hatkirby/Downloads/new_vn 2/substance_emission-43.4.xml datadir/vn/substance_emission-43.4.xml
+40c40
+<                 <SELRESTR Value="-" type="animate"/>
+---
+>                 <SELRESTR Value="+" type="inanimate"/>
+diff /Users/hatkirby/Downloads/new_vn 2/swarm-47.5.1.xml datadir/vn/swarm-47.5.1.xml
+8,9c8
+<                 <SELRESTR Value="+" type="concrete"/>
+<                 <SELRESTR Value="+" type="plural"/>
+---
+>                 <SELRESTR Value="+" type="group"/>
+14,15c13
+<                 <SELRESTR Value="+" type="location"/>
+<                 <SELRESTR Value="-" type="region"/>
+---
+>                 <SELRESTR Value="+" type="non_region_location"/>
 diff /Users/hatkirby/Downloads/new_vn 2/swat-18.2.xml datadir/vn/swat-18.2.xml
 264c264,266
 <                     <SYNRESTRS/>
@@ -432,12 +720,25 @@ diff /Users/hatkirby/Downloads/new_vn 2/swat-18.2.xml datadir/vn/swat-18.2.xml
 >                     <SYNRESTR Value="+" type="adjp"/>
 >                   </SYNRESTRS>
 diff /Users/hatkirby/Downloads/new_vn 2/tape-22.4.xml datadir/vn/tape-22.4.xml
-364c364,366
+93,94c93
+<                 <SELRESTR Value="+" type="concrete"/>
+<                 <SELRESTR Value="-" type="animate"/>
+---
+>                 <SELRESTR Value="+" type="concrete_inanimate"/>
+364c363,365
 <                     <SYNRESTRS/>
 ---
 >                   <SYNRESTRS>
 >                     <SYNRESTR Value="+" type="adjp"/>
 >                   </SYNRESTRS>
+diff /Users/hatkirby/Downloads/new_vn 2/throw-17.1.xml datadir/vn/throw-17.1.xml
+27,30c27
+<                 <SELRESTRS>
+<                     <SELRESTR Value="+" type="location"/>
+<                     <SELRESTR Value="-" type="region"/>
+<                 </SELRESTRS>
+---
+>                 <SELRESTR Value="+" type="non_region_location"/>
 diff /Users/hatkirby/Downloads/new_vn 2/vehicle-51.4.1.xml datadir/vn/vehicle-51.4.1.xml
 227c227,229
 <                     <SYNRESTRS/>
@@ -468,18 +769,32 @@ diff /Users/hatkirby/Downloads/new_vn 2/want-32.1.xml datadir/vn/want-32.1.xml
 >                                     <SYNRESTR Value="+" type="adjp"/>
 >                                   </SYNRESTRS>
 diff /Users/hatkirby/Downloads/new_vn 2/wipe_instr-10.4.2.xml datadir/vn/wipe_instr-10.4.2.xml
-178c178,180
+26,27c26
+<                 <SELRESTR Value="+" type="concrete"/>
+<                 <SELRESTR Value="-" type="animate"/>
+---
+>                 <SELRESTR Value="+" type="concrete_inanimate"/>
+37,38c36
+<                 <SELRESTR Value="+" type="concrete"/>
+<                 <SELRESTR Value="-" type="animate"/>
+---
+>                 <SELRESTR Value="+" type="concrete_inanimate"/>
+178c176,178
 <                     <SYNRESTRS/>
 ---
 >                   <SYNRESTRS>
 >                     <SYNRESTR Value="+" type="adjp"/>
 >                   </SYNRESTRS>
 diff /Users/hatkirby/Downloads/new_vn 2/wipe_manner-10.4.1.xml datadir/vn/wipe_manner-10.4.1.xml
-198c198,199
+37,38c37
+<                 <SELRESTR Value="+" type="concrete"/>
+<                 <SELRESTR Value="-" type="animate"/>
+---
+>                 <SELRESTR Value="+" type="concrete_inanimate"/>
+198c197
 <                         <SELRESTR Value="-" type="region"/>
 ---
->                       <SELRESTR Value="+" type="location"/>
->                       <SELRESTR Value="-" type="region"/>
+>                       <SELRESTR Value="+" type="non_region_location"/>
 diff /Users/hatkirby/Downloads/new_vn 2/wish-62.xml datadir/vn/wish-62.xml
 91a92
 >                 <LEX value="to be"/>
@@ -493,3 +808,8 @@ diff /Users/hatkirby/Downloads/new_vn 2/wish-62.xml datadir/vn/wish-62.xml
 >                   </SYNRESTRS>
 122a124
 >                 <ADJ/>
+diff /Users/hatkirby/Downloads/new_vn 2/withdraw-82.xml datadir/vn/withdraw-82.xml
+7c7
+<             <SELRESTRS>
+---
+>             <SELRESTRS logic="or">

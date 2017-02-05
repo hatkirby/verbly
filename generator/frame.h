@@ -2,6 +2,7 @@
 #define FRAME_H_26770FF1
 
 #include <list>
+#include <vector>
 #include "part.h"
 
 namespace verbly {

@@ -200,7 +200,6 @@ CREATE TABLE `parts` (
   `part_index` INTEGER NOT NULL,
   `type` INTEGER NOT NULL,
   `role` VARCHAR(16),
-  `selrestrs` BLOB,
   `prepositions` BLOB,
   `preposition_literality` SMALLINT,
   `literal_value` VARCHAR(64)
@@ -215,3 +214,10 @@ CREATE TABLE `synrestrs` (
 );
 
 CREATE INDEX `synrestrs_for` ON `synrestrs`(`part_id`);
+
+CREATE TABLE `selrestrs` (
+  `part_id` INTEGER NOT NULL,
+  `selrestr` VARCHAR(32) NOT NULL
+);
+
+CREATE INDEX `selrestrs_for` ON `selrestrs`(`part_id`);

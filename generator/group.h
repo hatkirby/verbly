@@ -5,6 +5,7 @@
 #include <set>
 #include <string>
 #include <cassert>
+#include <list>
 #include "role.h"
 
 namespace verbly {
