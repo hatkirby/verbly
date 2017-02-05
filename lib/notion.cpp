@@ -13,7 +13,7 @@ namespace verbly {
   const field notion::wnid = field::integerField(object::notion, "wnid", true);
   const field notion::numOfImages = field::integerField(object::notion, "images", true);
 
-  const field notion::words = field::joinField(object::notion, "word_id", object::word);
+  const field notion::words = field::joinField(object::notion, "notion_id", object::word);
 
   const field notion::hypernyms = field::selfJoin(object::notion, "notion_id", "hypernymy", "hyponym_id", "hypernym_id");
   const field notion::hyponyms = field::selfJoin(object::notion, "notion_id", "hypernymy", "hypernym_id", "hyponym_id");
