@@ -12,7 +12,6 @@ struct sqlite3_stmt;
 namespace verbly {
   
   class form;
-  class lemma;
   class word;
   class database;
   
@@ -131,14 +130,26 @@ namespace verbly {
       return (id == id_);
     }
     
-    static filter rhymesWith(const pronunciation& arg);
-    static filter rhymesWith(const class form& arg);
-    static filter rhymesWith(const lemma& arg);
-    static filter rhymesWith(const word& arg);
-    
     // Relationships to other objects
     
     static const field forms;
+
+    // Rhyming relationship
+
+    class rhymes_field {
+    public:
+
+      filter operator%=(filter joinCondition) const;
+
+      operator filter() const;
+
+    private:
+
+      static const field rhymeJoin;
+
+    };
+
+    static const rhymes_field rhymes;
     
   private:
     bool valid_ = false;

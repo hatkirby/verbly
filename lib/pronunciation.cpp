@@ -1,7 +1,6 @@
 #include "pronunciation.h"
 #include <sqlite3.h>
 #include "form.h"
-#include "lemma.h"
 #include "word.h"
 #include "util.h"
 
@@ -19,6 +18,9 @@ namespace verbly {
 
   const field pronunciation::prerhyme = field::stringField(object::pronunciation, "prerhyme", true);
   const field pronunciation::rhyme = field::stringField(object::pronunciation, "rhyme", true);
+
+  const field pronunciation::rhymes_field::rhymeJoin = field::joinField(object::pronunciation, "rhyme", object::pronunciation);
+  const pronunciation::rhymes_field pronunciation::rhymes = {};
 
   pronunciation::pronunciation(const database& db, sqlite3_stmt* row) : db_(&db), valid_(true)
   {
@@ -39,31 +41,22 @@ namespace verbly {
     }
   }
 
-  filter pronunciation::rhymesWith(const pronunciation& arg)
+  filter pronunciation::rhymes_field::operator%=(filter joinCondition) const
   {
-    return (prerhyme != arg.getPrerhyme()) && (rhyme == arg.getRhyme());
+    return (rhymeJoin %= (
+      joinCondition
+      && filter(
+        verbly::pronunciation::prerhyme,
+        filter::comparison::field_does_not_equal,
+        verbly::pronunciation::prerhyme)));
   }
 
-  /*filter pronunciation::rhymesWith(const class form& arg)
+  pronunciation::rhymes_field::operator filter() const
   {
-    filter result;
-
-    for (const pronunciation& p : arg.getPronunciations())
-    {
-      result |= rhymesWith(p);
-    }
-
-    return result;
+    return (rhymeJoin %= filter(
+      verbly::pronunciation::prerhyme,
+      filter::comparison::field_does_not_equal,
+      verbly::pronunciation::prerhyme));
   }
-
-  filter pronunciation::rhymesWith(const lemma& arg)
-  {
-    return rhymesWith(arg.getBaseForm());
-  }
-
-  filter pronunciation::rhymesWith(const word& arg)
-  {
-    return rhymesWith(arg.getLemma());
-  }*/
 
 };

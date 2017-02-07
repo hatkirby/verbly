@@ -6,8 +6,8 @@
 #include "field.h"
 #include "filter.h"
 #include "notion.h"
-#include "lemma.h"
 #include "frame.h"
+#include "form.h"
 
 struct sqlite3_stmt;
 
@@ -95,17 +95,17 @@ namespace verbly {
 
     const notion& getNotion() const;
 
-    const lemma& getLemma() const;
-
     bool hasFrames() const;
 
     const std::vector<frame>& getFrames() const;
 
-    // Convenience accessors
+    const form& getBaseForm() const;
 
-    std::string getBaseForm() const;
+    bool hasInflection(inflection category) const;
 
-    std::vector<std::string> getInflections(inflection infl) const;
+    const std::vector<form>& getInflections(inflection category) const;
+
+
 
     // Type info
 
@@ -127,8 +127,9 @@ namespace verbly {
     // Relationships with other objects
 
     static const field notions;
-    static const field lemmas;
     static const field frames;
+
+    static field forms(inflection category);
 
     // Relationships with self
 
@@ -154,6 +155,7 @@ namespace verbly {
 
   private:
 
+    void initializeForm(inflection category) const;
     void initializeFrames() const;
 
     bool valid_ = false;
@@ -170,10 +172,9 @@ namespace verbly {
     const database* db_;
 
     mutable notion notion_;
-    mutable lemma lemma_;
-
     mutable bool initializedFrames_ = false;
     mutable std::vector<frame> frames_;
+    mutable std::map<inflection, std::vector<form>> forms_;
 
   };
 

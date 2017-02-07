@@ -81,6 +81,11 @@ namespace verbly {
           {
             throw std::logic_error("Cannot use invalid bindings");
           }
+
+          case binding::type::field:
+          {
+            throw std::logic_error("Compare field binding made it past statement generation");
+          }
         }
 
         i++;

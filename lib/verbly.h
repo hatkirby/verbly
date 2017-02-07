@@ -11,7 +11,6 @@
 #include "word.h"
 #include "frame.h"
 #include "part.h"
-#include "lemma.h"
 #include "form.h"
 #include "pronunciation.h"
 #include "token.h"

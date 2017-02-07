@@ -34,7 +34,9 @@ namespace verbly {
       matches,
       does_not_match,
       hierarchally_matches,
-      does_not_hierarchally_match
+      does_not_hierarchally_match,
+      field_equals,
+      field_does_not_equal
     };
 
     // Copy and move constructors
@@ -72,6 +74,7 @@ namespace verbly {
     filter(field filterField, comparison filterType, bool filterValue);
     filter(field filterField, comparison filterType);
     filter(field joinOn, comparison filterType, filter joinCondition);
+    filter(field filterField, comparison filterType, field compareField);
 
     field getField() const;
 
@@ -84,6 +87,8 @@ namespace verbly {
     int getIntegerArgument() const;
 
     bool getBooleanArgument() const;
+
+    field getCompareField() const;
 
     // Group
 
@@ -129,6 +134,7 @@ namespace verbly {
           std::string stringValue;
           int intValue;
           bool boolValue;
+          field compareField;
         };
       } singleton_;
       struct {

@@ -21,7 +21,7 @@ namespace verbly {
 
   field frame::parts(int index)
   {
-    return field::joinWhere(object::frame, "frame_id", object::part, part::index, index);
+    return field::joinWhere(object::frame, "frame_id", object::part, "part_index", index);
   }
 
   frame::frame(const database& db, sqlite3_stmt* row) : db_(&db), valid_(true)

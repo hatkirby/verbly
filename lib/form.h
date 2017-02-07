@@ -104,7 +104,7 @@ namespace verbly {
 
     // Relationships to other objects
 
-    static const field lemmas;
+    static field words(inflection category);
 
     static const field pronunciations;
 

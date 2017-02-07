@@ -10,7 +10,8 @@ namespace verbly {
       enum class type {
         invalid,
         integer,
-        string
+        string,
+        field
       };
 
       // Default constructor
@@ -55,11 +56,22 @@ namespace verbly {
 
       std::string getString() const;
 
+      // Field
+
+      binding(std::string table, std::string column);
+
+      std::string getTable() const;
+      std::string getColumn() const;
+
     private:
 
       union {
         int integer_;
         std::string string_;
+        struct {
+          std::string table_;
+          std::string column_;
+        } field_;
       };
 
       type type_ = type::invalid;

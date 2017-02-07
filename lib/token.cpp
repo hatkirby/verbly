@@ -261,7 +261,7 @@ namespace verbly {
   {
     switch (type_)
     {
-      case type::word: return word_.word_.getInflections(word_.category_).front();
+      case type::word: return word_.word_.getInflections(word_.category_).front().getText();
       case type::literal: return literal_;
       case type::part: throw std::domain_error("Cannot compile incomplete token");
       case type::fillin: throw std::domain_error("Cannot compile incomplete token");

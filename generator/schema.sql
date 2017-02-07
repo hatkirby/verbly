@@ -178,6 +178,8 @@ CREATE TABLE `pronunciations` (
   `stress` VARCHAR(64) NOT NULL
 );
 
+CREATE INDEX `rhymes_with` ON `pronunciations`(`rhyme`);
+
 CREATE TABLE `forms_pronunciations` (
   `form_id` INTEGER NOT NULL,
   `pronunciation_id` INTEGER NOT NULL

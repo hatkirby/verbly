@@ -5,7 +5,6 @@
 #include "word.h"
 #include "frame.h"
 #include "part.h"
-#include "lemma.h"
 #include "form.h"
 #include "pronunciation.h"
 
@@ -73,6 +72,14 @@ namespace verbly {
 
             break;
           }
+
+          case comparison::field_equals:
+          case comparison::field_does_not_equal:
+          {
+            new(&singleton_.compareField) field(other.singleton_.compareField);
+
+            break;
+          }
         }
 
         break;
@@ -112,6 +119,7 @@ namespace verbly {
     std::string tempStringValue;
     int tempIntValue;
     bool tempBoolValue;
+    field tempCompareField;
     std::list<filter> tempChildren;
     bool tempOrlogic;
 
@@ -170,6 +178,14 @@ namespace verbly {
           case comparison::does_not_hierarchally_match:
           {
             tempJoin = std::move(first.singleton_.join);
+
+            break;
+          }
+
+          case comparison::field_equals:
+          case comparison::field_does_not_equal:
+          {
+            tempCompareField = std::move(first.singleton_.compareField);
 
             break;
           }
@@ -249,6 +265,14 @@ namespace verbly {
 
             break;
           }
+
+          case comparison::field_equals:
+          case comparison::field_does_not_equal:
+          {
+            new(&first.singleton_.compareField) field(std::move(second.singleton_.compareField));
+
+            break;
+          }
         }
 
         break;
@@ -325,6 +349,14 @@ namespace verbly {
 
             break;
           }
+
+          case comparison::field_equals:
+          case comparison::field_does_not_equal:
+          {
+            new(&second.singleton_.compareField) field(std::move(tempCompareField));
+
+            break;
+          }
         }
 
         break;
@@ -391,6 +423,14 @@ namespace verbly {
 
             break;
           }
+
+          case comparison::field_equals:
+          case comparison::field_does_not_equal:
+          {
+            singleton_.compareField.~field();
+
+            break;
+          }
         }
 
         break;
@@ -446,6 +486,8 @@ namespace verbly {
         case comparison::does_not_match:
         case comparison::hierarchally_matches:
         case comparison::does_not_hierarchally_match:
+        case comparison::field_equals:
+        case comparison::field_does_not_equal:
         {
           throw std::invalid_argument("Invalid comparison for integer field");
         }
@@ -490,6 +532,8 @@ namespace verbly {
         case comparison::does_not_match:
         case comparison::hierarchally_matches:
         case comparison::does_not_hierarchally_match:
+        case comparison::field_equals:
+        case comparison::field_does_not_equal:
         {
           throw std::invalid_argument("Invalid comparison for string field");
         }
@@ -534,6 +578,8 @@ namespace verbly {
         case comparison::does_not_match:
         case comparison::hierarchally_matches:
         case comparison::does_not_hierarchally_match:
+        case comparison::field_equals:
+        case comparison::field_does_not_equal:
         {
           throw std::invalid_argument("Invalid comparison for boolean field");
         }
@@ -576,6 +622,8 @@ namespace verbly {
         case comparison::does_not_match:
         case comparison::hierarchally_matches:
         case comparison::does_not_hierarchally_match:
+        case comparison::field_equals:
+        case comparison::field_does_not_equal:
         {
           throw std::invalid_argument("Incorrect constructor for given comparison");
         }
@@ -596,6 +644,7 @@ namespace verbly {
       case field::type::join:
       case field::type::join_where:
       case field::type::join_through:
+      case field::type::join_through_where:
       {
         switch (filterType)
         {
@@ -624,6 +673,8 @@ namespace verbly {
           case comparison::is_not_null:
           case comparison::hierarchally_matches:
           case comparison::does_not_hierarchally_match:
+          case comparison::field_equals:
+          case comparison::field_does_not_equal:
           {
             throw std::invalid_argument("Incorrect constructor for given comparison");
           }
@@ -661,6 +712,8 @@ namespace verbly {
           case comparison::is_not_null:
           case comparison::matches:
           case comparison::does_not_match:
+          case comparison::field_equals:
+          case comparison::field_does_not_equal:
           {
             throw std::invalid_argument("Incorrect constructor for given comparison");
           }
@@ -675,6 +728,57 @@ namespace verbly {
       case field::type::boolean:
       {
         throw std::domain_error("Matching field must be a join field");
+      }
+    }
+  }
+
+  filter::filter(
+    field filterField,
+    comparison filterType,
+    field compareField) :
+      type_(type::singleton)
+  {
+    switch (filterType)
+    {
+      case comparison::field_equals:
+      case comparison::field_does_not_equal:
+      {
+        if (filterField.getType() != compareField.getType())
+        {
+          throw std::invalid_argument("Cannot compare two fields of different types");
+        }
+
+        if (filterField.isJoin())
+        {
+          throw std::domain_error("Cannot compare join fields");
+        }
+
+        new(&singleton_.filterField) field(std::move(filterField));
+        singleton_.filterType = filterType;
+        new(&singleton_.compareField) field(std::move(compareField));
+
+        break;
+      }
+
+      case comparison::int_equals:
+      case comparison::int_does_not_equal:
+      case comparison::int_is_at_least:
+      case comparison::int_is_greater_than:
+      case comparison::int_is_at_most:
+      case comparison::int_is_less_than:
+      case comparison::boolean_equals:
+      case comparison::string_equals:
+      case comparison::string_does_not_equal:
+      case comparison::string_is_like:
+      case comparison::string_is_not_like:
+      case comparison::is_null:
+      case comparison::is_not_null:
+      case comparison::matches:
+      case comparison::does_not_match:
+      case comparison::hierarchally_matches:
+      case comparison::does_not_hierarchally_match:
+      {
+        throw std::domain_error("Incorrect constructor for given comparison");
       }
     }
   }
@@ -726,6 +830,8 @@ namespace verbly {
         case comparison::boolean_equals:
         case comparison::is_null:
         case comparison::is_not_null:
+        case comparison::field_equals:
+        case comparison::field_does_not_equal:
         {
           throw std::domain_error("This filter does not have a join condition");
         }
@@ -762,6 +868,8 @@ namespace verbly {
         case comparison::does_not_match:
         case comparison::hierarchally_matches:
         case comparison::does_not_hierarchally_match:
+        case comparison::field_equals:
+        case comparison::field_does_not_equal:
         {
           throw std::domain_error("This filter does not have a string argument");
         }
@@ -798,6 +906,8 @@ namespace verbly {
         case comparison::does_not_match:
         case comparison::hierarchally_matches:
         case comparison::does_not_hierarchally_match:
+        case comparison::field_equals:
+        case comparison::field_does_not_equal:
         {
           throw std::domain_error("This filter does not have an integer argument");
         }
@@ -815,6 +925,47 @@ namespace verbly {
     } else {
       throw std::domain_error("This filter does not have a boolean argument");
     }
+  }
+
+  field filter::getCompareField() const
+  {
+    if (type_ != type::singleton)
+    {
+      throw std::domain_error("This filter does not have a compare field");
+    }
+
+    switch (singleton_.filterType)
+    {
+      case comparison::field_equals:
+      case comparison::field_does_not_equal:
+      {
+        return singleton_.compareField;
+
+        break;
+      }
+
+      case comparison::int_equals:
+      case comparison::int_does_not_equal:
+      case comparison::int_is_at_least:
+      case comparison::int_is_greater_than:
+      case comparison::int_is_at_most:
+      case comparison::int_is_less_than:
+      case comparison::boolean_equals:
+      case comparison::string_equals:
+      case comparison::string_does_not_equal:
+      case comparison::string_is_like:
+      case comparison::string_is_not_like:
+      case comparison::is_null:
+      case comparison::is_not_null:
+      case comparison::matches:
+      case comparison::does_not_match:
+      case comparison::hierarchally_matches:
+      case comparison::does_not_hierarchally_match:
+      {
+        throw std::domain_error("This filter doesn't have a compare field");
+      }
+    }
+
   }
 
   filter::filter(bool orlogic) : type_(type::group)
@@ -970,6 +1121,16 @@ namespace verbly {
           {
             return filter(singleton_.filterField, comparison::hierarchally_matches, *singleton_.join);
           }
+
+          case comparison::field_equals:
+          {
+            return filter(singleton_.filterField, comparison::field_does_not_equal, singleton_.compareField);
+          }
+
+          case comparison::field_does_not_equal:
+          {
+            return filter(singleton_.filterField, comparison::field_equals, singleton_.compareField);
+          }
         }
       }
 
@@ -1111,7 +1272,6 @@ namespace verbly {
                 case object::word:
                 case object::frame:
                 case object::part:
-                case object::lemma:
                 case object::form:
                 case object::pronunciation:
                 {
@@ -1141,11 +1301,10 @@ namespace verbly {
                   return (verbly::word::frames %= *this);
                 }
 
-                case object::lemma:
                 case object::form:
                 case object::pronunciation:
                 {
-                  return (verbly::word::lemmas %= *this);
+                  return (verbly::word::forms(inflection::base) %= *this);
                 }
               }
 
@@ -1161,7 +1320,6 @@ namespace verbly {
 
                   case object::notion:
                   case object::word:
-                  case object::lemma:
                   case object::form:
                   case object::pronunciation:
                   {
@@ -1188,37 +1346,10 @@ namespace verbly {
                   case object::notion:
                   case object::word:
                   case object::frame:
-                  case object::lemma:
                   case object::form:
                   case object::pronunciation:
                   {
                     return (verbly::part::frames %= *this);
-                  }
-                }
-              }
-
-              case object::lemma:
-              {
-                switch (singleton_.filterField.getObject())
-                {
-                  case object::notion:
-                  case object::word:
-                  case object::frame:
-                  case object::part:
-                  {
-                    return verbly::lemma::words %= *this;
-                  }
-
-                  case object::undefined:
-                  case object::lemma:
-                  {
-                    return *this;
-                  }
-
-                  case object::form:
-                  case object::pronunciation:
-                  {
-                    return (verbly::lemma::forms(inflection::base) %= *this);
                   }
                 }
               }
@@ -1231,9 +1362,8 @@ namespace verbly {
                   case object::word:
                   case object::frame:
                   case object::part:
-                  case object::lemma:
                   {
-                    return verbly::form::lemmas %= *this;
+                    return verbly::form::words(inflection::base) %= *this;
                   }
 
                   case object::undefined:
@@ -1257,7 +1387,6 @@ namespace verbly {
                   case object::word:
                   case object::frame:
                   case object::part:
-                  case object::lemma:
                   case object::form:
                   {
                     return verbly::pronunciation::forms %= *this;
@@ -1354,6 +1483,8 @@ namespace verbly {
                   case comparison::string_is_not_like:
                   case comparison::is_null:
                   case comparison::is_not_null:
+                  case comparison::field_equals:
+                  case comparison::field_does_not_equal:
                   {
                     result += std::move(normalized);
 

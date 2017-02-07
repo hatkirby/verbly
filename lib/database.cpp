@@ -61,11 +61,6 @@ namespace verbly {
     return query<part>(*this, ppdb_, std::move(where), std::move(sortOrder), limit);
   }
 
-  query<lemma> database::lemmas(filter where, order sortOrder, int limit) const
-  {
-    return query<lemma>(*this, ppdb_, std::move(where), std::move(sortOrder), limit);
-  }
-
   query<form> database::forms(filter where, order sortOrder, int limit) const
   {
     return query<form>(*this, ppdb_, std::move(where), std::move(sortOrder), limit);

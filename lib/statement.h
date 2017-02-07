@@ -140,7 +140,7 @@ namespace verbly {
 
       condition(std::string table, std::string column, bool isNull);
 
-      condition(std::string table, std::string column, comparison comp, binding value);
+      condition(std::string table, std::string column, comparison comp, binding value, object parentObject = object::undefined);
 
       // Group
 
@@ -160,6 +160,8 @@ namespace verbly {
 
       condition flatten() const;
 
+      condition resolveCompareFields(object context, std::string tableName) const;
+
     private:
       union {
         struct {
@@ -167,6 +169,7 @@ namespace verbly {
           std::string column_;
           comparison comparison_;
           binding value_;
+          object parentObject_;
         } singleton_;
         struct {
           std::list<condition> children_;
@@ -251,7 +254,6 @@ namespace verbly {
         : (context == object::word) ? "words"
         : (context == object::frame) ? "frames"
         : (context == object::part) ? "parts"
-        : (context == object::lemma) ? "lemmas_forms"
         : (context == object::form) ? "forms"
         : (context == object::pronunciation) ? "pronunciations"
         : throw std::domain_error("Provided context has no associated table");
@@ -259,7 +261,7 @@ namespace verbly {
 
     static const std::list<field> getSelectForContext(object context);
 
-    statement(std::string tableName, filter clause, int nextTableId = 0, int nextWithId = 0);
+    statement(object context, std::string tableName, filter clause, int nextTableId = 0, int nextWithId = 0);
 
     condition parseFilter(filter queryFilter);
 
@@ -272,6 +274,7 @@ namespace verbly {
     int nextTableId_;
     int nextWithId_;
 
+    object context_;
     std::map<std::string, std::string> tables_;
     std::string topTable_;
     std::list<join> joins_;

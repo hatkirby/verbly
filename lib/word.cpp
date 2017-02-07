@@ -16,7 +16,6 @@ namespace verbly {
   const field word::adjectivePosition = field::integerField(object::word, "position", true);
 
   const field word::notions = field::joinField(object::word, "notion_id", object::notion);
-  const field word::lemmas = field::joinField(object::word, "lemma_id", object::lemma);
   const field word::frames = field::joinField(object::word, "group_id", object::frame, true);
 
   const field word::antonyms = field::selfJoin(object::word, "word_id", "antonymy", "antonym_2_id", "antonym_1_id");
@@ -38,6 +37,11 @@ namespace verbly {
 
   const field word::regionalTerms = field::selfJoin(object::word, "word_id", "regionality", "domain_id", "term_id");
   const field word::regionalDomains = field::selfJoin(object::word, "word_id", "regionality", "term_id", "domain_id");
+
+  field word::forms(inflection category)
+  {
+    return field::joinThroughWhere(object::word, "lemma_id", object::form, "lemmas_forms", "form_id", "category", static_cast<int>(category));
+  }
 
   word::word(const database& db, sqlite3_stmt* row) : db_(&db), valid_(true)
   {
@@ -76,21 +80,6 @@ namespace verbly {
     }
 
     return notion_;
-  }
-
-  const lemma& word::getLemma() const
-  {
-    if (!valid_)
-    {
-      throw std::domain_error("Bad access to uninitialized word");
-    }
-
-    if (!lemma_)
-    {
-      lemma_ = db_->lemmas(lemma::id == lemmaId_).first();
-    }
-
-    return lemma_;
   }
 
   bool word::hasFrames() const
@@ -133,26 +122,50 @@ namespace verbly {
     return frames_;
   }
 
-  std::string word::getBaseForm() const
-  {
-    return getLemma().getBaseForm().getText();
-  }
-
-  std::vector<std::string> word::getInflections(inflection category) const
-  {
-    std::vector<std::string> result;
-    for (const form& infl : getLemma().getInflections(category))
-    {
-      result.push_back(infl.getText());
-    }
-
-    return result;
-  }
-
   void word::initializeFrames() const
   {
     initializedFrames_ = true;
     frames_ = db_->frames(*this, {}, -1).all();
+  }
+
+  const form& word::getBaseForm() const
+  {
+    if (!valid_)
+    {
+      throw std::domain_error("Bad access to uninitialized word");
+    }
+
+    if (!forms_.count(inflection::base))
+    {
+      initializeForm(inflection::base);
+    }
+
+    return forms_.at(inflection::base).front();
+  }
+
+  bool word::hasInflection(inflection category) const
+  {
+    return !getInflections(category).empty();
+  }
+
+  const std::vector<form>& word::getInflections(inflection category) const
+  {
+    if (!valid_)
+    {
+      throw std::domain_error("Bad access to uninitialized word");
+    }
+
+    if (!forms_.count(category))
+    {
+      initializeForm(category);
+    }
+
+    return forms_.at(category);
+  }
+
+  void word::initializeForm(inflection infl) const
+  {
+    forms_[infl] = db_->forms(form::words(infl) %= *this, verbly::form::id, -1).all();
   }
 
 };

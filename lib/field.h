@@ -19,6 +19,7 @@ namespace verbly {
       join,
       join_where,
       join_through,
+      join_through_where,
       hierarchal_join
     };
 
@@ -100,11 +101,11 @@ namespace verbly {
       object obj,
       const char* name,
       object joinWith,
-      const field& conditionField,
+      const char* conditionColumn,
       int conditionValue,
       bool nullable = false)
     {
-      return field(obj, type::join_where, name, nullable, 0, joinWith, 0, 0, 0, &conditionField, conditionValue);
+      return field(obj, type::join_where, name, nullable, 0, joinWith, 0, 0, 0, conditionColumn, conditionValue);
     }
 
     static field joinThrough(
@@ -127,6 +128,19 @@ namespace verbly {
       const char* foreignJoinColumn)
     {
       return field(obj, type::join_through, name, true, joinTable, joinWith, foreignColumn, joinColumn, foreignJoinColumn);
+    }
+
+    static field joinThroughWhere(
+      object obj,
+      const char* name,
+      object joinWith,
+      const char* joinTable,
+      const char* foreignColumn,
+      const char* conditionColumn,
+      int conditionValue,
+      bool nullable = false)
+    {
+      return field(obj, type::join_through_where, name, nullable, joinTable, joinWith, foreignColumn, name, foreignColumn, conditionColumn, conditionValue);
     }
 
     static field selfJoin(
@@ -166,6 +180,7 @@ namespace verbly {
       return ((type_ == type::join)
         || (type_ == type::join_where)
         || (type_ == type::join_through)
+        || (type_ == type::join_through_where)
         || (type_ == type::hierarchal_join));
     }
 
@@ -195,7 +210,7 @@ namespace verbly {
     {
       return (type_ == type::hierarchal_join)
         ? object_
-        : ((type_ == type::join) || (type_ == type::join_where) || (type_ == type::join_through))
+        : ((type_ == type::join) || (type_ == type::join_where) || (type_ == type::join_through) || (type_ == type::join_through_where))
         ? joinObject_
         : throw std::domain_error("Non-join fields don't have join objects");
     }
@@ -205,40 +220,40 @@ namespace verbly {
     const char* getForeignColumn() const
     {
       // We ignore hierarchal joins because they are always self joins.
-      return (type_ == type::join_through)
+      return ((type_ == type::join_through) || (type_ == type::join_through_where))
         ? foreignColumn_
         : throw std::domain_error("Only many-to-many join fields have a foreign column");
     }
 
     const char* getJoinColumn() const
     {
-      return ((type_ == type::join_through) || (type_ == type::hierarchal_join))
+      return ((type_ == type::join_through) || (type_ == type::join_through_where) || (type_ == type::hierarchal_join))
         ? joinColumn_
         : throw std::domain_error("Only many-to-many join fields have a join column");
     }
 
     const char* getForeignJoinColumn() const
     {
-      return ((type_ == type::join_through) || (type_ == type::hierarchal_join))
+      return ((type_ == type::join_through) || (type_ == type::join_through_where) || (type_ == type::hierarchal_join))
         ? foreignJoinColumn_
         : throw std::domain_error("Only many-to-many join fields have a foreign join column");
     }
 
     // Condition joins
 
-    const field& getConditionField() const
+    const char* getConditionColumn() const
     {
-      if (type_ == type::join_where)
+      if ((type_ == type::join_where) || (type_ == type::join_through_where))
       {
-        return *conditionField_;
+        return conditionColumn_;
       } else {
-        throw std::domain_error("Only condition join fields have a condition field");
+        throw std::domain_error("Only condition join fields have a condition column");
       }
     }
 
     int getConditionValue() const
     {
-      return (type_ == type::join_where)
+      return ((type_ == type::join_where) || (type_ == type::join_through_where))
         ? conditionValue_
         : throw std::domain_error("Only condition join fields have a condition value");
     }
@@ -254,13 +269,8 @@ namespace verbly {
       // table (hypernymy); however, they have different join columns. For
       // condition joins, the condition field and condition value are also
       // significant.
-      if (conditionField_)
-      {
-        return std::tie(object_, column_, table_, joinColumn_, *conditionField_, conditionValue_)
-          < std::tie(other.object_, other.column_, other.table_, other.joinColumn_, *other.conditionField_, other.conditionValue_);
-      } else {
-        return std::tie(object_, column_, table_, joinColumn_) < std::tie(other.object_, other.column_, other.table_, other.joinColumn_);
-      }
+      return std::tie(object_, column_, table_, joinColumn_, conditionColumn_, conditionValue_)
+        < std::tie(other.object_, other.column_, other.table_, other.joinColumn_, other.conditionColumn_, other.conditionValue_);
     }
 
     // Equality
@@ -268,13 +278,8 @@ namespace verbly {
     bool operator==(const field& other) const
     {
       // See operator<() for documentation.
-      if (conditionField_)
-      {
-        return std::tie(object_, column_, table_, joinColumn_, *conditionField_, conditionValue_)
-          == std::tie(other.object_, other.column_, other.table_, other.joinColumn_, *other.conditionField_, other.conditionValue_);
-      } else {
-        return std::tie(object_, column_, table_, joinColumn_) == std::tie(other.object_, other.column_, other.table_, other.joinColumn_);
-      }
+      return std::tie(object_, column_, table_, joinColumn_, conditionColumn_, conditionValue_)
+        == std::tie(other.object_, other.column_, other.table_, other.joinColumn_, other.conditionColumn_, other.conditionValue_);
     }
 
     // Filter construction
@@ -325,7 +330,7 @@ namespace verbly {
       const char* foreignColumn = 0,
       const char* joinColumn = 0,
       const char* foreignJoinColumn = 0,
-      const field* conditionField = 0,
+      const char* conditionColumn = 0,
       int conditionValue = 0) :
         object_(obj),
         type_(datatype),
@@ -336,7 +341,7 @@ namespace verbly {
         foreignColumn_(foreignColumn),
         joinColumn_(joinColumn),
         foreignJoinColumn_(foreignJoinColumn),
-        conditionField_(conditionField),
+        conditionColumn_(conditionColumn),
         conditionValue_(conditionValue)
     {
     }
@@ -359,7 +364,7 @@ namespace verbly {
     const char* foreignJoinColumn_ = 0;
 
     // Condition joins
-    const field* conditionField_ = 0;
+    const char* conditionColumn_ = 0;
     int conditionValue_ = 0;
 
   };

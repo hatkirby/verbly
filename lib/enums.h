@@ -35,9 +35,8 @@ namespace verbly {
     word = 1,
     frame = 2,
     part = 3,
-    lemma = 4,
-    form = 5,
-    pronunciation = 6
+    form = 4,
+    pronunciation = 5
   };
 
   enum class part_type {

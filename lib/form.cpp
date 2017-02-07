@@ -17,8 +17,12 @@ namespace verbly {
   const field form::complexity = field::integerField(object::form, "complexity");
   const field form::proper = field::booleanField(object::form, "proper");
 
-  const field form::lemmas = field::joinField(object::form, "form_id", object::lemma);
   const field form::pronunciations = field::joinThrough(object::form, "form_id", object::pronunciation, "forms_pronunciations", "pronunciation_id");
+
+  field form::words(inflection category)
+  {
+    return field::joinThroughWhere(object::form, "form_id", object::word, "lemmas_forms", "lemma_id", "category", static_cast<int>(category));
+  }
 
   form::form(const database& db, sqlite3_stmt* row) : db_(&db), valid_(true)
   {

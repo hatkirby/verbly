@@ -9,7 +9,6 @@
 #include "word.h"
 #include "frame.h"
 #include "part.h"
-#include "lemma.h"
 #include "form.h"
 #include "pronunciation.h"
 #include "order.h"
@@ -55,8 +54,6 @@ namespace verbly {
     query<frame> frames(filter where, order sortOrder = {}, int limit = 1) const;
 
     query<part> parts(filter where, order sortOrder = {}, int limit = 1) const;
-
-    query<lemma> lemmas(filter where, order sortOrder = {}, int limit = 1) const;
 
     query<form> forms(filter where, order sortOrder = {}, int limit = 1) const;
 
