@@ -62,7 +62,7 @@ namespace verbly {
 
     // General accessors
 
-    operator bool() const
+    bool isValid() const
     {
       return (type_ != part_type::invalid);
     }

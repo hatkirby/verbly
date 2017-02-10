@@ -26,7 +26,7 @@ namespace verbly {
 
     // Accessors
 
-    operator bool() const
+    bool isValid() const
     {
       return valid_;
     }

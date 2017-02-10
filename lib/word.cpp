@@ -74,7 +74,7 @@ namespace verbly {
       throw std::domain_error("Bad access to uninitialized word");
     }
 
-    if (!notion_)
+    if (!notion_.isValid())
     {
       notion_ = db_->notions(notion::id == notionId_).first();
     }
