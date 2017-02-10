@@ -119,9 +119,24 @@ namespace verbly {
     
     operator filter() const
     {
+      if (!valid_)
+      {
+        throw std::domain_error("Bad access to uninitialized notion");
+      }
+
       return (id == id_);
     }
     
+    filter operator!() const
+    {
+      if (!valid_)
+      {
+        throw std::domain_error("Bad access to uninitialized notion");
+      }
+
+      return (id != id_);
+    }
+
     // Relationships with other objects
     
     static const field words;

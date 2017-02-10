@@ -105,8 +105,6 @@ namespace verbly {
 
     const std::vector<form>& getInflections(inflection category) const;
 
-
-
     // Type info
 
     static const object objectType;
@@ -121,7 +119,22 @@ namespace verbly {
 
     operator filter() const
     {
+      if (!valid_)
+      {
+        throw std::domain_error("Bad access to uninitialized word");
+      }
+
       return (id == id_);
+    }
+
+    filter operator!() const
+    {
+      if (!valid_)
+      {
+        throw std::domain_error("Bad access to uninitialized word");
+      }
+
+      return (id != id_);
     }
 
     // Relationships with other objects

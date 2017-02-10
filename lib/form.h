@@ -102,6 +102,16 @@ namespace verbly {
       return (id == id_);
     }
 
+    filter operator!() const
+    {
+      if (!valid_)
+      {
+        throw std::domain_error("Bad access to uninitialized form");
+      }
+
+      return (id != id_);
+    }
+
     // Relationships to other objects
 
     static field words(inflection category);
