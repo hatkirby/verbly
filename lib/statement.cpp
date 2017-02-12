@@ -309,6 +309,11 @@ namespace verbly {
               joinCondition &= (field::integerField(joinTableName.c_str(), clause.getField().getConditionColumn()) == clause.getField().getConditionValue());
             }
 
+            // Instantiate a CTE in case we need one. This is necessary because
+            // the nextWithId is propagated in the instantiation of the joinStmt
+            // below.
+            std::string withName = instantiateWith(joinTableName);
+
             // Recursively parse the subquery, and therefore obtain an
             // instantiated table to join against, as well as any joins or CTEs
             // that the subquery may require to function.
@@ -331,7 +336,6 @@ namespace verbly {
               // will return zero results. Instead, we create a non-recursive
               // CTE that represents the subquery, then LEFT JOIN against it and
               // condition on the join column being NULL as before.
-              std::string withName = instantiateWith(joinTableName);
               std::string withInstName = instantiateTable(withName);
 
               // LEFT JOIN against the CTE.
@@ -383,6 +387,11 @@ namespace verbly {
           case field::type::join_through:
           case field::type::join_through_where:
           {
+            // Instantiate a CTE in case we need one. This is necessary because
+            // the nextWithId is propagated in the instantiation of the joinStmt
+            // below.
+            std::string withName = instantiateWith(clause.getField().getTable());
+
             // Recursively parse the subquery, and therefore obtain an
             // instantiated table to join against, as well as any joins or CTEs
             // that the subquery may require to function.
@@ -406,7 +415,6 @@ namespace verbly {
               // create a non-recursive CTE that represents the through table
               // joined against the subquery, then LEFT JOIN against it and
               // condition on the join column being NULL as before.
-              std::string withName = instantiateWith(clause.getField().getTable());
               std::string withInstName = instantiateTable(withName);
 
               // LEFT JOIN against the CTE.
