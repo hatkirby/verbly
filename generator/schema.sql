@@ -12,55 +12,55 @@ CREATE TABLE `hypernymy` (
   `hyponym_id` INTEGER NOT NULL
 );
 
-CREATE INDEX `hyponym_of` ON `hypernymy`(`hypernym_id`);
-CREATE INDEX `hypernym_of` ON `hypernymy`(`hyponym_id`);
+CREATE INDEX `hyponym_of` ON `hypernymy`(`hypernym_id`,`hyponym_id`);
+CREATE INDEX `hypernym_of` ON `hypernymy`(`hyponym_id`,`hypernym_id`);
 
 CREATE TABLE `instantiation` (
   `class_id` INTEGER NOT NULL,
   `instance_id` INTEGER NOT NULL
 );
 
-CREATE INDEX `instance_of` ON `instantiation`(`class_id`);
-CREATE INDEX `class_of` ON `instantiation`(`instance_id`);
+CREATE INDEX `instance_of` ON `instantiation`(`class_id`,`instance_id`);
+CREATE INDEX `class_of` ON `instantiation`(`instance_id`,`class_id`);
 
 CREATE TABLE `member_meronymy` (
   `meronym_id` INTEGER NOT NULL,
   `holonym_id` INTEGER NOT NULL
 );
 
-CREATE INDEX `member_holonym_of` ON `member_meronymy`(`meronym_id`);
-CREATE INDEX `member_meronym_of` ON `member_meronymy`(`holonym_id`);
+CREATE INDEX `member_holonym_of` ON `member_meronymy`(`meronym_id`,`holonym_id`);
+CREATE INDEX `member_meronym_of` ON `member_meronymy`(`holonym_id`,`meronym_id`);
 
 CREATE TABLE `part_meronymy` (
   `meronym_id` INTEGER NOT NULL,
   `holonym_id` INTEGER NOT NULL
 );
 
-CREATE INDEX `part_holonym_of` ON `part_meronymy`(`meronym_id`);
-CREATE INDEX `part_meronym_of` ON `part_meronymy`(`holonym_id`);
+CREATE INDEX `part_holonym_of` ON `part_meronymy`(`meronym_id`,`holonym_id`);
+CREATE INDEX `part_meronym_of` ON `part_meronymy`(`holonym_id`,`meronym_id`);
 
 CREATE TABLE `substance_meronymy` (
   `meronym_id` INTEGER NOT NULL,
   `holonym_id` INTEGER NOT NULL
 );
 
-CREATE INDEX `substance_holonym_of` ON `substance_meronymy`(`meronym_id`);
-CREATE INDEX `substance_meronym_of` ON `substance_meronymy`(`holonym_id`);
+CREATE INDEX `substance_holonym_of` ON `substance_meronymy`(`meronym_id`,`holonym_id`);
+CREATE INDEX `substance_meronym_of` ON `substance_meronymy`(`holonym_id`,`meronym_id`);
 
 CREATE TABLE `variation` (
   `noun_id` INTEGER NOT NULL,
   `adjective_id` INTEGER NOT NULL
 );
 
-CREATE INDEX `variant_of` ON `variation`(`noun_id`);
-CREATE INDEX `attribute_of` ON `variation`(`adjective_id`);
+CREATE INDEX `variant_of` ON `variation`(`noun_id`,`adjective_id`);
+CREATE INDEX `attribute_of` ON `variation`(`adjective_id`,`noun_id`);
 
 CREATE TABLE `similarity` (
   `adjective_1_id` INTEGER NOT NULL,
   `adjective_2_id` INTEGER NOT NULL
 );
 
-CREATE INDEX `similar_to` ON `similarity`(`adjective_1_id`);
+CREATE INDEX `similar_to` ON `similarity`(`adjective_1_id`,`adjective_2_id`);
 
 CREATE TABLE `is_a` (
   `notion_id` INTEGER NOT NULL,
@@ -72,16 +72,16 @@ CREATE TABLE `entailment` (
   `entailment_id` INTEGER NOT NULL
 );
 
-CREATE INDEX `entailment_of` ON `entailment`(`given_id`);
-CREATE INDEX `entailed_by` ON `entailment`(`entailment_id`);
+CREATE INDEX `entailment_of` ON `entailment`(`given_id`,`entailment_id`);
+CREATE INDEX `entailed_by` ON `entailment`(`entailment_id`,`given_id`);
 
 CREATE TABLE `causality` (
   `cause_id` INTEGER NOT NULL,
   `effect_id` INTEGER NOT NULL
 );
 
-CREATE INDEX `effect_of` ON `causality`(`cause_id`);
-CREATE INDEX `cause_of` ON `causality`(`effect_id`);
+CREATE INDEX `effect_of` ON `causality`(`cause_id`,`effect_id`);
+CREATE INDEX `cause_of` ON `causality`(`effect_id`,`cause_id`);
 
 CREATE TABLE `words` (
   `word_id` INTEGER PRIMARY KEY,
@@ -101,55 +101,55 @@ CREATE TABLE `antonymy` (
   `antonym_2_id` INTEGER NOT NULL
 );
 
-CREATE INDEX `antonym_of` ON `antonymy`(`antonym_1_id`);
+CREATE INDEX `antonym_of` ON `antonymy`(`antonym_1_id`,`antonym_2_id`);
 
 CREATE TABLE `specification` (
   `general_id` INTEGER NOT NULL,
   `specific_id` INTEGER NOT NULL
 );
 
-CREATE INDEX `specification_of` ON `specification`(`general_id`);
-CREATE INDEX `generalization_of` ON `specification`(`specific_id`);
+CREATE INDEX `specification_of` ON `specification`(`general_id`,`specific_id`);
+CREATE INDEX `generalization_of` ON `specification`(`specific_id`,`general_id`);
 
 CREATE TABLE `pertainymy` (
   `noun_id` INTEGER NOT NULL,
   `pertainym_id` INTEGER NOT NULL
 );
 
-CREATE INDEX `pertainym_of` ON `pertainymy`(`noun_id`);
-CREATE INDEX `anti_pertainym_of` ON `pertainymy`(`pertainym_id`);
+CREATE INDEX `pertainym_of` ON `pertainymy`(`noun_id`,`pertainym_id`);
+CREATE INDEX `anti_pertainym_of` ON `pertainymy`(`pertainym_id`,`noun_id`);
 
 CREATE TABLE `mannernymy` (
   `adjective_id` INTEGER NOT NULL,
   `mannernym_id` INTEGER NOT NULL
 );
 
-CREATE INDEX `mannernym_of` ON `mannernymy`(`adjective_id`);
-CREATE INDEX `anti_mannernym_of` ON `mannernymy`(`mannernym_id`);
+CREATE INDEX `mannernym_of` ON `mannernymy`(`adjective_id`,`mannernym_id`);
+CREATE INDEX `anti_mannernym_of` ON `mannernymy`(`mannernym_id`,`adjective_id`);
 
 CREATE TABLE `usage` (
   `domain_id` INTEGER NOT NULL,
   `term_id` INTEGER NOT NULL
 );
 
-CREATE INDEX `usage_term_of` ON `usage`(`domain_id`);
-CREATE INDEX `usage_domain_of` ON `usage`(`term_id`);
+CREATE INDEX `usage_term_of` ON `usage`(`domain_id`,`term_id`);
+CREATE INDEX `usage_domain_of` ON `usage`(`term_id`,`domain_id`);
 
 CREATE TABLE `topicality` (
   `domain_id` INTEGER NOT NULL,
   `term_id` INTEGER NOT NULL
 );
 
-CREATE INDEX `topical_term_of` ON `topicality`(`domain_id`);
-CREATE INDEX `topical_domain_of` ON `topicality`(`term_id`);
+CREATE INDEX `topical_term_of` ON `topicality`(`domain_id`,`term_id`);
+CREATE INDEX `topical_domain_of` ON `topicality`(`term_id`,`domain_id`);
 
 CREATE TABLE `regionality` (
   `domain_id` INTEGER NOT NULL,
   `term_id` INTEGER NOT NULL
 );
 
-CREATE INDEX `regional_term_of` ON `regionality`(`domain_id`);
-CREATE INDEX `regional_domain_of` ON `regionality`(`term_id`);
+CREATE INDEX `regional_term_of` ON `regionality`(`domain_id`,`term_id`);
+CREATE INDEX `regional_domain_of` ON `regionality`(`term_id`,`domain_id`);
 
 CREATE TABLE `forms` (
   `form_id` INTEGER PRIMARY KEY,
@@ -166,8 +166,8 @@ CREATE TABLE `lemmas_forms` (
   `category` SMALLINT NOT NULL
 );
 
-CREATE INDEX `form_of` ON `lemmas_forms`(`lemma_id`);
-CREATE INDEX `lemma_of` ON `lemmas_forms`(`form_id`);
+CREATE INDEX `form_of` ON `lemmas_forms`(`lemma_id`,`category`,`form_id`);
+CREATE INDEX `lemma_of` ON `lemmas_forms`(`form_id`,`category`,`lemma_id`);
 
 CREATE TABLE `pronunciations` (
   `pronunciation_id` INTEGER PRIMARY KEY,
@@ -185,8 +185,8 @@ CREATE TABLE `forms_pronunciations` (
   `pronunciation_id` INTEGER NOT NULL
 );
 
-CREATE INDEX `pronunciation_of` ON `forms_pronunciations`(`form_id`);
-CREATE INDEX `spelling_of` ON `forms_pronunciations`(`pronunciation_id`);
+CREATE INDEX `pronunciation_of` ON `forms_pronunciations`(`form_id`,`pronunciation_id`);
+CREATE INDEX `spelling_of` ON `forms_pronunciations`(`pronunciation_id`,`form_id`);
 
 CREATE TABLE `frames` (
   `frame_id` INTEGER NOT NULL,
