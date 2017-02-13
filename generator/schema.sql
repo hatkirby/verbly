@@ -92,8 +92,8 @@ CREATE TABLE `words` (
   `group_id` INTEGER
 );
 
-CREATE INDEX `notion_words` ON `words`(`notion_id`);
-CREATE INDEX `lemma_words` ON `words`(`lemma_id`);
+CREATE INDEX `notions_lemmas` ON `words`(`notion_id`,`lemma_id`);
+CREATE INDEX `lemmas_notions` ON `words`(`lemma_id`,`notion_id`);
 CREATE INDEX `group_words` ON `words`(`group_id`);
 
 CREATE TABLE `antonymy` (
@@ -178,7 +178,7 @@ CREATE TABLE `pronunciations` (
   `stress` VARCHAR(64) NOT NULL
 );
 
-CREATE INDEX `rhymes_with` ON `pronunciations`(`rhyme`);
+CREATE INDEX `rhymes_with` ON `pronunciations`(`rhyme`,`prerhyme`);
 
 CREATE TABLE `forms_pronunciations` (
   `form_id` INTEGER NOT NULL,
