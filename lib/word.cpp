@@ -38,6 +38,8 @@ namespace verbly {
   const field word::regionalTerms = field::selfJoin(object::word, "word_id", "regionality", "domain_id", "term_id");
   const field word::regionalDomains = field::selfJoin(object::word, "word_id", "regionality", "term_id", "domain_id");
 
+  const word::synonyms_field word::synonyms = {};
+
   field word::forms(inflection category)
   {
     return field::joinThroughWhere(object::word, "lemma_id", object::form, "lemmas_forms", "form_id", "category", static_cast<int>(category));
@@ -166,6 +168,24 @@ namespace verbly {
   void word::initializeForm(inflection infl) const
   {
     forms_[infl] = db_->forms(form::words(infl) %= *this, verbly::form::id, -1).all();
+  }
+
+  filter word::synonyms_field::operator%=(filter joinCondition) const
+  {
+    return (verbly::notion::words %= (
+      std::move(joinCondition)
+      && (filter(
+        verbly::word::id,
+        filter::comparison::field_does_not_equal,
+        verbly::word::id))));
+  }
+
+  word::synonyms_field::operator filter() const
+  {
+    return (verbly::notion::words %= filter(
+      verbly::word::id,
+      filter::comparison::field_does_not_equal,
+      verbly::word::id));
   }
 
 };

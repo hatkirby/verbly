@@ -166,6 +166,18 @@ namespace verbly {
     static const field regionalTerms;
     static const field regionalDomains;
 
+    // Synonymy relationship
+
+    class synonyms_field {
+    public:
+
+      filter operator%=(filter joinCondition) const;
+
+      operator filter() const;
+    };
+
+    static const synonyms_field synonyms;
+
   private:
 
     void initializeForm(inflection category) const;
