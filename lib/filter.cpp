@@ -653,7 +653,7 @@ namespace verbly {
           {
             new(&singleton_.filterField) field(std::move(joinOn));
             singleton_.filterType = filterType;
-            new(&singleton_.join) std::unique_ptr<filter>(new filter(joinCondition.normalize(singleton_.filterField.getJoinObject())));
+            new(&singleton_.join) std::unique_ptr<filter>(new filter(std::move(joinCondition)));
 
             break;
           }
@@ -692,7 +692,7 @@ namespace verbly {
           {
             new(&singleton_.filterField) field(std::move(joinOn));
             singleton_.filterType = filterType;
-            new(&singleton_.join) std::unique_ptr<filter>(new filter(joinCondition.normalize(singleton_.filterField.getObject())));
+            new(&singleton_.join) std::unique_ptr<filter>(new filter(std::move(joinCondition)));
 
             break;
           }
@@ -1275,7 +1275,7 @@ namespace verbly {
                 case object::form:
                 case object::pronunciation:
                 {
-                  return (verbly::notion::words %= *this);
+                  return (verbly::notion::words %= normalize(object::word));
                 }
               }
             }
@@ -1286,7 +1286,7 @@ namespace verbly {
               {
                 case object::notion:
                 {
-                  return (verbly::word::notions %= *this);
+                  return (verbly::word::notions %= normalize(object::notion));
                 }
 
                 case object::undefined:
@@ -1298,13 +1298,13 @@ namespace verbly {
                 case object::frame:
                 case object::part:
                 {
-                  return (verbly::word::frames %= *this);
+                  return (verbly::word::frames %= normalize(object::frame));
                 }
 
                 case object::form:
                 case object::pronunciation:
                 {
-                  return (verbly::word::forms(inflection::base) %= *this);
+                  return (verbly::word::forms(inflection::base) %= normalize(object::form));
                 }
               }
 
@@ -1323,12 +1323,12 @@ namespace verbly {
                   case object::form:
                   case object::pronunciation:
                   {
-                    return (verbly::frame::words %= *this);
+                    return (verbly::frame::words %= normalize(object::word));
                   }
 
                   case object::part:
                   {
-                    return (verbly::frame::parts() %= *this);
+                    return (verbly::frame::parts() %= normalize(object::part));
                   }
                 }
               }
@@ -1349,7 +1349,7 @@ namespace verbly {
                   case object::form:
                   case object::pronunciation:
                   {
-                    return (verbly::part::frames %= *this);
+                    return (verbly::part::frames %= normalize(object::frame));
                   }
                 }
               }
@@ -1363,7 +1363,7 @@ namespace verbly {
                   case object::frame:
                   case object::part:
                   {
-                    return verbly::form::words(inflection::base) %= *this;
+                    return (verbly::form::words(inflection::base) %= normalize(object::word));
                   }
 
                   case object::undefined:
@@ -1374,7 +1374,7 @@ namespace verbly {
 
                   case object::pronunciation:
                   {
-                    return (verbly::form::pronunciations %= *this);
+                    return (verbly::form::pronunciations %= normalize(object::pronunciation));
                   }
                 }
               }
@@ -1389,7 +1389,7 @@ namespace verbly {
                   case object::part:
                   case object::form:
                   {
-                    return verbly::pronunciation::forms %= *this;
+                    return verbly::pronunciation::forms %= normalize(object::form);
                   }
 
                   case object::undefined:
@@ -1549,7 +1549,7 @@ namespace verbly {
           }
         }
 
-        if (group_.children.empty())
+        if (result.group_.children.empty())
         {
           result = {};
         }
