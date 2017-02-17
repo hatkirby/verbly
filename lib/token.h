@@ -18,7 +18,8 @@ namespace verbly {
         literal,
         part,
         fillin,
-        utterance
+        utterance,
+        transform
       };
 
       // Copy & move constructors
@@ -87,6 +88,7 @@ namespace verbly {
 
       token();
       token(std::vector<part> parts);
+      token(std::initializer_list<token> pieces);
 
       iterator begin();
       const_iterator begin() const;
@@ -96,7 +98,35 @@ namespace verbly {
 
       token& operator<<(token arg);
 
+      // Transform
+
+      static token separator(std::string param, token inner);
+      static token punctuation(std::string param, token inner);
+      static token definiteArticle(token inner);
+      static token capitalize(token inner);
+
+      token& getInnerToken();
+      const token& getInnerToken() const;
+
     private:
+
+      std::string compileHelper(
+        std::string separator,
+        bool definiteArticle,
+        bool capitalize) const;
+
+      enum class transform_type {
+        separator,
+        punctuation,
+        definite_article,
+        capitalize
+      };
+
+      token(
+        transform_type type,
+        std::string param,
+        token inner);
+
       union {
         struct {
           word word_;
@@ -106,6 +136,11 @@ namespace verbly {
         part part_;
         std::set<std::string> fillin_;
         std::list<token> utterance_;
+        struct {
+          transform_type type_;
+          std::string param_;
+          std::unique_ptr<token> inner_;
+        } transform_;
       };
       type type_;
   };

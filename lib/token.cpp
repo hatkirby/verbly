@@ -46,6 +46,15 @@ namespace verbly {
 
         break;
       }
+
+      case type::transform:
+      {
+        transform_.type_ = other.transform_.type_;
+        new(&transform_.param_) std::string(other.transform_.param_);
+        new(&transform_.inner_) std::unique_ptr<token>(new token(*other.transform_.inner_));
+
+        break;
+      }
     }
   }
 
@@ -64,6 +73,7 @@ namespace verbly {
   void swap(token& first, token& second)
   {
     using type = token::type;
+    using transform_type = token::transform_type;
 
     type tempType = first.type_;
     word tempWord;
@@ -72,6 +82,9 @@ namespace verbly {
     part tempPart;
     std::set<std::string> tempFillin;
     std::list<token> tempUtterance;
+    transform_type tempTransformType;
+    std::string tempTransformParam;
+    std::unique_ptr<token> tempTransformInner;
 
     switch (tempType)
     {
@@ -107,6 +120,15 @@ namespace verbly {
       case type::utterance:
       {
         tempUtterance = std::move(first.utterance_);
+
+        break;
+      }
+
+      case type::transform:
+      {
+        tempTransformType = first.transform_.type_;
+        tempTransformParam = std::move(first.transform_.param_);
+        tempTransformInner = std::move(first.transform_.inner_);
 
         break;
       }
@@ -153,6 +175,15 @@ namespace verbly {
 
         break;
       }
+
+      case type::transform:
+      {
+        first.transform_.type_ = second.transform_.type_;
+        new(&first.transform_.param_) std::string(std::move(second.transform_.param_));
+        new(&first.transform_.inner_) std::unique_ptr<token>(std::move(second.transform_.inner_));
+
+        break;
+      }
     }
 
     second.~token();
@@ -193,6 +224,15 @@ namespace verbly {
       case type::utterance:
       {
         new(&second.utterance_) std::list<token>(std::move(tempUtterance));
+
+        break;
+      }
+
+      case type::transform:
+      {
+        second.transform_.type_ = tempTransformType;
+        new(&second.transform_.param_) std::string(std::move(tempTransformParam));
+        new(&second.transform_.inner_) std::unique_ptr<token>(std::move(tempTransformInner));
 
         break;
       }
@@ -240,6 +280,17 @@ namespace verbly {
 
         break;
       }
+
+      case type::transform:
+      {
+        using string_type = std::string;
+        using ptr_type = std::unique_ptr<token>;
+
+        transform_.param_.~string_type();
+        transform_.inner_.~ptr_type();
+
+        break;
+      }
     }
   }
 
@@ -254,27 +305,123 @@ namespace verbly {
       case type::utterance: return std::all_of(std::begin(utterance_), std::end(utterance_), [] (const token& tkn) {
         return tkn.isComplete();
       });
+      case type::transform: return transform_.inner_->isComplete();
     }
   }
 
   std::string token::compile() const
   {
+    return compileHelper(" ", false, false);
+  }
+
+  std::string token::compileHelper(
+    std::string separator,
+    bool definiteArticle,
+    bool capitalize) const
+  {
     switch (type_)
     {
-      case type::word: return word_.word_.getInflections(word_.category_).front().getText();
-      case type::literal: return literal_;
+      case type::word:
+      {
+        const form& wordForm = word_.word_.getInflections(word_.category_)
+          .front();
+
+        std::string result = wordForm.getText();
+
+        if (definiteArticle)
+        {
+          if (wordForm.startsWithVowelSound())
+          {
+            result = "an " + result;
+          } else {
+            result = "a " + result;
+          }
+        }
+
+        if (capitalize)
+        {
+          if (std::isalpha(result[0]))
+          {
+            result[0] = std::toupper(result[0]);
+          }
+        }
+
+        return result;
+      }
+
+      case type::literal:
+      {
+        std::string result = literal_;
+
+        if (definiteArticle && std::isalpha(result[0]))
+        {
+          char canon = std::tolower(result[0]);
+          if ((canon == 'a') || (canon == 'e') || (canon == 'i')
+            || (canon == 'o') || (canon == 'u'))
+          {
+            result = "an " + result;
+          } else {
+            result = "a " + result;
+          }
+        }
+
+        if (capitalize)
+        {
+          if (std::isalpha(result[0]))
+          {
+            result[0] = std::toupper(result[0]);
+          }
+        }
+
+        return result;
+      }
+
       case type::part: throw std::domain_error("Cannot compile incomplete token");
       case type::fillin: throw std::domain_error("Cannot compile incomplete token");
 
       case type::utterance:
       {
+        bool first = true;
         std::list<std::string> compiled;
         for (const token& tkn : utterance_)
         {
-          compiled.push_back(tkn.compile());
+          compiled.push_back(
+            tkn.compileHelper(" ",
+              first && definiteArticle,
+              first && capitalize));
+
+          first = false;
         }
 
-        return implode(std::begin(compiled), std::end(compiled), " ");
+        return implode(std::begin(compiled), std::end(compiled), separator);
+      }
+
+      case type::transform:
+      {
+        switch (transform_.type_)
+        {
+          case transform_type::separator:
+          {
+            return transform_.inner_->compileHelper(
+              transform_.param_, definiteArticle, capitalize);
+          }
+
+          case transform_type::punctuation:
+          {
+            return transform_.inner_->compileHelper(
+              separator, definiteArticle, capitalize) + transform_.param_;
+          }
+
+          case transform_type::definite_article:
+          {
+            return transform_.inner_->compileHelper(separator, true, capitalize);
+          }
+
+          case transform_type::capitalize:
+          {
+            return transform_.inner_->compileHelper(separator, definiteArticle, true);
+          }
+        }
       }
     }
   }
@@ -384,6 +531,11 @@ namespace verbly {
     new(&utterance_) std::list<token>(std::begin(parts), std::end(parts));
   }
 
+  token::token(std::initializer_list<token> parts) : type_(type::utterance)
+  {
+    new(&utterance_) std::list<token>(std::move(parts));
+  }
+
   token::iterator token::begin()
   {
     if (type_ != type::utterance)
@@ -436,6 +588,57 @@ namespace verbly {
     return *this;
   }
 
+  token token::separator(std::string param, token inner)
+  {
+    return token(transform_type::separator, std::move(param), std::move(inner));
+  }
+
+  token token::punctuation(std::string param, token inner)
+  {
+    return token(transform_type::punctuation, std::move(param), std::move(inner));
+  }
+
+  token token::definiteArticle(token inner)
+  {
+    return token(transform_type::definite_article, "", std::move(inner));
+  }
+
+  token token::capitalize(token inner)
+  {
+    return token(transform_type::capitalize, "", std::move(inner));
+  }
+
+  token& token::getInnerToken()
+  {
+    if (type_ != type::transform)
+    {
+      throw std::domain_error("Invalid access on non-tranform token");
+    }
+
+    return *transform_.inner_;
+  }
+
+  const token& token::getInnerToken() const
+  {
+    if (type_ != type::transform)
+    {
+      throw std::domain_error("Invalid access on non-tranform token");
+    }
+
+    return *transform_.inner_;
+  }
+
+  token::token(
+    transform_type type,
+    std::string param,
+    token inner) :
+      type_(type::transform)
+  {
+    transform_.type_ = type;
+    new(&transform_.param_) std::string(std::move(param));
+    new(&transform_.inner_) std::unique_ptr<token>(new token(std::move(inner)));
+  }
+
   std::ostream& operator<<(std::ostream& os, token::type type)
   {
     switch (type)
@@ -445,6 +648,7 @@ namespace verbly {
       case token::type::part: return os << "part";
       case token::type::fillin: return os << "fillin";
       case token::type::utterance: return os << "utterance";
+      case token::type::transform: return os << "transform";
     }
   }
 
