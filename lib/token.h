@@ -50,6 +50,11 @@ namespace verbly {
 
       std::string compile() const;
 
+      bool isEmpty() const
+      {
+        return ((type_ == type::utterance) && (utterance_.empty()));
+      }
+
       // Word
 
       token(word arg, inflection category = inflection::base);
