@@ -105,10 +105,17 @@ namespace verbly {
 
       // Transform
 
+      enum class casing {
+        normal,
+        capitalize,
+        all_caps,
+        title_case
+      };
+
       static token separator(std::string param, token inner);
       static token punctuation(std::string param, token inner);
       static token definiteArticle(token inner);
-      static token capitalize(token inner);
+      static token capitalize(casing param, token inner);
 
       token& getInnerToken();
       const token& getInnerToken() const;
@@ -118,7 +125,7 @@ namespace verbly {
       std::string compileHelper(
         std::string separator,
         bool definiteArticle,
-        bool capitalize) const;
+        casing capitalization) const;
 
       enum class transform_type {
         separator,
@@ -132,6 +139,11 @@ namespace verbly {
         std::string param,
         token inner);
 
+      token(
+        transform_type type,
+        casing param,
+        token inner);
+
       union {
         struct {
           word word_;
@@ -143,7 +155,8 @@ namespace verbly {
         std::list<token> utterance_;
         struct {
           transform_type type_;
-          std::string param_;
+          std::string strParam_;
+          casing casingParam_;
           std::unique_ptr<token> inner_;
         } transform_;
       };

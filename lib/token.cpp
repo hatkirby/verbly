@@ -50,7 +50,8 @@ namespace verbly {
       case type::transform:
       {
         transform_.type_ = other.transform_.type_;
-        new(&transform_.param_) std::string(other.transform_.param_);
+        new(&transform_.strParam_) std::string(other.transform_.strParam_);
+        transform_.casingParam_ = other.transform_.casingParam_;
         new(&transform_.inner_) std::unique_ptr<token>(new token(*other.transform_.inner_));
 
         break;
@@ -74,6 +75,7 @@ namespace verbly {
   {
     using type = token::type;
     using transform_type = token::transform_type;
+    using casing = token::casing;
 
     type tempType = first.type_;
     word tempWord;
@@ -83,7 +85,8 @@ namespace verbly {
     std::set<std::string> tempFillin;
     std::list<token> tempUtterance;
     transform_type tempTransformType;
-    std::string tempTransformParam;
+    std::string tempTransformStrParam;
+    casing tempTransformCasingParam;
     std::unique_ptr<token> tempTransformInner;
 
     switch (tempType)
@@ -127,7 +130,8 @@ namespace verbly {
       case type::transform:
       {
         tempTransformType = first.transform_.type_;
-        tempTransformParam = std::move(first.transform_.param_);
+        tempTransformStrParam = std::move(first.transform_.strParam_);
+        tempTransformCasingParam = first.transform_.casingParam_;
         tempTransformInner = std::move(first.transform_.inner_);
 
         break;
@@ -179,7 +183,8 @@ namespace verbly {
       case type::transform:
       {
         first.transform_.type_ = second.transform_.type_;
-        new(&first.transform_.param_) std::string(std::move(second.transform_.param_));
+        new(&first.transform_.strParam_) std::string(std::move(second.transform_.strParam_));
+        first.transform_.casingParam_ = second.transform_.casingParam_;
         new(&first.transform_.inner_) std::unique_ptr<token>(std::move(second.transform_.inner_));
 
         break;
@@ -231,7 +236,8 @@ namespace verbly {
       case type::transform:
       {
         second.transform_.type_ = tempTransformType;
-        new(&second.transform_.param_) std::string(std::move(tempTransformParam));
+        new(&second.transform_.strParam_) std::string(std::move(tempTransformStrParam));
+        second.transform_.casingParam_ = tempTransformCasingParam;
         new(&second.transform_.inner_) std::unique_ptr<token>(std::move(tempTransformInner));
 
         break;
@@ -286,7 +292,7 @@ namespace verbly {
         using string_type = std::string;
         using ptr_type = std::unique_ptr<token>;
 
-        transform_.param_.~string_type();
+        transform_.strParam_.~string_type();
         transform_.inner_.~ptr_type();
 
         break;
@@ -311,13 +317,13 @@ namespace verbly {
 
   std::string token::compile() const
   {
-    return compileHelper(" ", false, false);
+    return compileHelper(" ", false, casing::normal);
   }
 
   std::string token::compileHelper(
     std::string separator,
     bool definiteArticle,
-    bool capitalize) const
+    casing capitalization) const
   {
     switch (type_)
     {
@@ -338,13 +344,23 @@ namespace verbly {
           }
         }
 
-        if (capitalize)
+        if ((capitalization == casing::capitalize) || (capitalization == casing::title_case))
         {
           if (std::isalpha(result[0]))
           {
             result[0] = std::toupper(result[0]);
           }
+        } else if (capitalization == casing::all_caps)
+        {
+          for (char& ch : result)
+          {
+            if (std::isalpha(ch))
+            {
+              ch = std::toupper(ch);
+            }
+          }
         }
+
 
         return result;
       }
@@ -365,11 +381,20 @@ namespace verbly {
           }
         }
 
-        if (capitalize)
+        if ((capitalization == casing::capitalize) || (capitalization == casing::title_case))
         {
           if (std::isalpha(result[0]))
           {
             result[0] = std::toupper(result[0]);
+          }
+        } else if (capitalization == casing::all_caps)
+        {
+          for (char& ch : result)
+          {
+            if (std::isalpha(ch))
+            {
+              ch = std::toupper(ch);
+            }
           }
         }
 
@@ -385,10 +410,16 @@ namespace verbly {
         std::list<std::string> compiled;
         for (const token& tkn : utterance_)
         {
+          casing propagateCasing = capitalization;
+          if ((capitalization == casing::capitalize) && (!first))
+          {
+            propagateCasing = casing::normal;
+          }
+
           compiled.push_back(
             tkn.compileHelper(" ",
               first && definiteArticle,
-              first && capitalize));
+              propagateCasing));
 
           first = false;
         }
@@ -403,23 +434,26 @@ namespace verbly {
           case transform_type::separator:
           {
             return transform_.inner_->compileHelper(
-              transform_.param_, definiteArticle, capitalize);
+              transform_.strParam_, definiteArticle, capitalization);
           }
 
           case transform_type::punctuation:
           {
             return transform_.inner_->compileHelper(
-              separator, definiteArticle, capitalize) + transform_.param_;
+              separator, definiteArticle, capitalization) + transform_.strParam_;
           }
 
           case transform_type::definite_article:
           {
-            return transform_.inner_->compileHelper(separator, true, capitalize);
+            return transform_.inner_->compileHelper(separator, true, capitalization);
           }
 
           case transform_type::capitalize:
           {
-            return transform_.inner_->compileHelper(separator, definiteArticle, true);
+            return transform_.inner_->compileHelper(
+              separator,
+              definiteArticle,
+              transform_.casingParam_);
           }
         }
       }
@@ -603,9 +637,9 @@ namespace verbly {
     return token(transform_type::definite_article, "", std::move(inner));
   }
 
-  token token::capitalize(token inner)
+  token token::capitalize(casing param, token inner)
   {
-    return token(transform_type::capitalize, "", std::move(inner));
+    return token(transform_type::capitalize, param, std::move(inner));
   }
 
   token& token::getInnerToken()
@@ -635,7 +669,19 @@ namespace verbly {
       type_(type::transform)
   {
     transform_.type_ = type;
-    new(&transform_.param_) std::string(std::move(param));
+    new(&transform_.strParam_) std::string(std::move(param));
+    new(&transform_.inner_) std::unique_ptr<token>(new token(std::move(inner)));
+  }
+
+  token::token(
+    transform_type type,
+    casing param,
+    token inner) :
+      type_(type::transform)
+  {
+    transform_.type_ = type;
+    new(&transform_.strParam_) std::string();
+    transform_.casingParam_ = param;
     new(&transform_.inner_) std::unique_ptr<token>(new token(std::move(inner)));
   }
 
