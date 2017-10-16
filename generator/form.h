@@ -43,6 +43,11 @@ namespace verbly {
         return proper_;
       }
 
+      int getLength() const
+      {
+        return length_;
+      }
+
       std::set<const pronunciation*> getPronunciations() const
       {
         return pronunciations_;
@@ -56,6 +61,7 @@ namespace verbly {
       const std::string text_;
       const int complexity_;
       const bool proper_;
+      const int length_;
 
       std::set<const pronunciation*> pronunciations_;
 

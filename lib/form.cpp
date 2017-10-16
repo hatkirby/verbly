@@ -10,12 +10,13 @@ namespace verbly {
 
   const object form::objectType = object::form;
 
-  const std::list<std::string> form::select = {"form_id", "form", "complexity", "proper"};
+  const std::list<std::string> form::select = {"form_id", "form", "complexity", "proper", "length"};
 
   const field form::id = field::integerField(object::form, "form_id");
   const field form::text = field::stringField(object::form, "form");
   const field form::complexity = field::integerField(object::form, "complexity");
   const field form::proper = field::booleanField(object::form, "proper");
+  const field form::length = field::integerField(object::form, "length");
 
   const field form::pronunciations = field::joinThrough(object::form, "form_id", object::pronunciation, "forms_pronunciations", "pronunciation_id");
 
@@ -30,6 +31,7 @@ namespace verbly {
     text_ = std::string(reinterpret_cast<const char*>(sqlite3_column_text(row, 1)));
     complexity_ = sqlite3_column_int(row, 2);
     proper_ = (sqlite3_column_int(row, 3) == 1);
+    length_ = sqlite3_column_int(row, 4);
   }
 
   const std::vector<pronunciation>& form::getPronunciations() const

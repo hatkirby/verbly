@@ -73,6 +73,16 @@ namespace verbly {
       return proper_;
     }
 
+    int getLength() const
+    {
+      if (!valid_)
+      {
+        throw std::domain_error("Bad access to uninitialized form");
+      }
+
+      return length_;
+    }
+
     const std::vector<pronunciation>& getPronunciations() const;
 
     // Convenience
@@ -91,6 +101,7 @@ namespace verbly {
     static const field text;
     static const field complexity;
     static const field proper;
+    static const field length;
 
     operator filter() const
     {
@@ -123,8 +134,9 @@ namespace verbly {
 
     int id_;
     std::string text_;
-    int complexity_ ;
+    int complexity_;
     bool proper_;
+    int length_;
 
     const database* db_;
 

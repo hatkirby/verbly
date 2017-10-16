@@ -155,7 +155,8 @@ CREATE TABLE `forms` (
   `form_id` INTEGER PRIMARY KEY,
   `form` VARCHAR(32) NOT NULL,
   `complexity` SMALLINT NOT NULL,
-  `proper` SMALLINT NOT NULL
+  `proper` SMALLINT NOT NULL,
+  `length` SMALLINT NOT NULL
 );
 
 CREATE UNIQUE INDEX `form_by_string` ON `forms`(`form`);

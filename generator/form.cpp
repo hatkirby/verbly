@@ -14,7 +14,8 @@ namespace verbly {
       id_(nextId_++),
       text_(text),
       complexity_(std::count(std::begin(text), std::end(text), ' ') + 1),
-      proper_(std::any_of(std::begin(text), std::end(text), std::isupper))
+      proper_(std::any_of(std::begin(text), std::end(text), std::isupper)),
+      length_(text.length())
     {
     }
 
@@ -32,6 +33,7 @@ namespace verbly {
         fields.emplace_back("form", arg.getText());
         fields.emplace_back("complexity", arg.getComplexity());
         fields.emplace_back("proper", arg.isProper());
+        fields.emplace_back("length", arg.getLength());
 
         db.insertIntoTable("forms", std::move(fields));
       }
