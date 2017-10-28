@@ -344,12 +344,26 @@ namespace verbly {
           }
         }
 
-        if ((capitalization == casing::capitalize) || (capitalization == casing::title_case))
+        if (capitalization == casing::capitalize)
         {
           if (std::isalpha(result[0]))
           {
             result[0] = std::toupper(result[0]);
           }
+        } else if (capitalization == casing::title_case)
+        {
+          std::list<std::string> swords =
+            split<std::list<std::string>>(result, " ");
+
+          for (std::string& sword : swords)
+          {
+            if (std::isalpha(sword[0]))
+            {
+              sword[0] = std::toupper(sword[0]);
+            }
+          }
+
+          result = implode(std::begin(swords), std::end(swords), " ");
         } else if (capitalization == casing::all_caps)
         {
           for (char& ch : result)
@@ -381,12 +395,26 @@ namespace verbly {
           }
         }
 
-        if ((capitalization == casing::capitalize) || (capitalization == casing::title_case))
+        if (capitalization == casing::capitalize)
         {
           if (std::isalpha(result[0]))
           {
             result[0] = std::toupper(result[0]);
           }
+        } else if (capitalization == casing::title_case)
+        {
+          std::list<std::string> swords =
+            split<std::list<std::string>>(result, " ");
+
+          for (std::string& sword : swords)
+          {
+            if (std::isalpha(sword[0]))
+            {
+              sword[0] = std::toupper(sword[0]);
+            }
+          }
+
+          result = implode(std::begin(swords), std::end(swords), " ");
         } else if (capitalization == casing::all_caps)
         {
           for (char& ch : result)
