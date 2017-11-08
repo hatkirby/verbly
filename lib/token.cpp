@@ -322,7 +322,7 @@ namespace verbly {
 
   std::string token::compileHelper(
     std::string separator,
-    bool definiteArticle,
+    bool indefiniteArticle,
     casing capitalization) const
   {
     switch (type_)
@@ -334,7 +334,7 @@ namespace verbly {
 
         std::string result = wordForm.getText();
 
-        if (definiteArticle)
+        if (indefiniteArticle)
         {
           if (wordForm.startsWithVowelSound())
           {
@@ -383,7 +383,7 @@ namespace verbly {
       {
         std::string result = literal_;
 
-        if (definiteArticle && std::isalpha(result[0]))
+        if (indefiniteArticle && std::isalpha(result[0]))
         {
           char canon = std::tolower(result[0]);
           if ((canon == 'a') || (canon == 'e') || (canon == 'i')
@@ -446,7 +446,7 @@ namespace verbly {
 
           compiled.push_back(
             tkn.compileHelper(" ",
-              first && definiteArticle,
+              first && indefiniteArticle,
               propagateCasing));
 
           first = false;
@@ -462,25 +462,27 @@ namespace verbly {
           case transform_type::separator:
           {
             return transform_.inner_->compileHelper(
-              transform_.strParam_, definiteArticle, capitalization);
+              transform_.strParam_, indefiniteArticle, capitalization);
           }
 
           case transform_type::punctuation:
           {
             return transform_.inner_->compileHelper(
-              separator, definiteArticle, capitalization) + transform_.strParam_;
+              separator, indefiniteArticle, capitalization)
+              + transform_.strParam_;
           }
 
-          case transform_type::definite_article:
+          case transform_type::indefinite_article:
           {
-            return transform_.inner_->compileHelper(separator, true, capitalization);
+            return transform_.inner_->compileHelper(
+              separator, true, capitalization);
           }
 
           case transform_type::capitalize:
           {
             return transform_.inner_->compileHelper(
               separator,
-              definiteArticle,
+              indefiniteArticle,
               transform_.casingParam_);
           }
         }
@@ -660,9 +662,9 @@ namespace verbly {
     return token(transform_type::punctuation, std::move(param), std::move(inner));
   }
 
-  token token::definiteArticle(token inner)
+  token token::indefiniteArticle(token inner)
   {
-    return token(transform_type::definite_article, "", std::move(inner));
+    return token(transform_type::indefinite_article, "", std::move(inner));
   }
 
   token token::capitalize(casing param, token inner)

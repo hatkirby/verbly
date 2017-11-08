@@ -114,7 +114,7 @@ namespace verbly {
 
       static token separator(std::string param, token inner);
       static token punctuation(std::string param, token inner);
-      static token definiteArticle(token inner);
+      static token indefiniteArticle(token inner);
       static token capitalize(casing param, token inner);
 
       token& getInnerToken();
@@ -124,13 +124,13 @@ namespace verbly {
 
       std::string compileHelper(
         std::string separator,
-        bool definiteArticle,
+        bool indefiniteArticle,
         casing capitalization) const;
 
       enum class transform_type {
         separator,
         punctuation,
-        definite_article,
+        indefinite_article,
         capitalize
       };
 
