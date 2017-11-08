@@ -1,7 +1,9 @@
 #include "database.h"
 #include <sqlite3.h>
 #include <stdexcept>
+#include <sstream>
 #include "query.h"
+#include "version.h"
 
 namespace verbly {
 
@@ -16,6 +18,35 @@ namespace verbly {
       sqlite3_close_v2(ppdb_);
 
       throw database_error("Could not open verbly datafile", errmsg);
+    }
+
+    std::string queryString = "SELECT major, minor FROM version";
+
+    sqlite3_stmt* ppstmt;
+    if (sqlite3_prepare_v2(ppdb_, queryString.c_str(), queryString.length(), &ppstmt, NULL) != SQLITE_OK)
+    {
+      std::string errorMsg = sqlite3_errmsg(ppdb_);
+      sqlite3_finalize(ppstmt);
+
+      throw database_error("Error reading database version", errorMsg);
+    }
+
+    if (sqlite3_step(ppstmt) != SQLITE_ROW)
+    {
+      std::string errorMsg = sqlite3_errmsg(ppdb_);
+      sqlite3_finalize(ppstmt);
+
+      throw database_error("Error reading database version", errorMsg);
+    }
+
+    major_ = sqlite3_column_int(ppstmt, 0);
+    minor_ = sqlite3_column_int(ppstmt, 1);
+
+    sqlite3_finalize(ppstmt);
+
+    if (major_ != DATABASE_MAJOR_VERSION)
+    {
+      throw database_version_mismatch(DATABASE_MAJOR_VERSION, major_);
     }
   }
 
@@ -133,6 +164,17 @@ namespace verbly {
     sqlite3_finalize(ppstmt);
 
     return result;
+  }
+
+  std::string database_version_mismatch::generateMessage(int right, int wrong)
+  {
+    std::ostringstream msgbuilder;
+    msgbuilder << "Incompatible database version: needed ";
+    msgbuilder << right;
+    msgbuilder << ", found ";
+    msgbuilder << wrong;
+
+    return msgbuilder.str();
   }
 
 };

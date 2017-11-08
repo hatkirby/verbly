@@ -1,3 +1,8 @@
+CREATE TABLE `version` (
+  `major` INTEGER NOT NULL,
+  `minor` INTEGER NOT NULL
+);
+
 CREATE TABLE `notions` (
   `notion_id` INTEGER PRIMARY KEY,
   `part_of_speech` SMALLINT NOT NULL,

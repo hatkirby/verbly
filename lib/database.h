@@ -3,6 +3,7 @@
 
 #include <string>
 #include <exception>
+#include <stdexcept>
 #include <list>
 #include <set>
 #include "notion.h"
@@ -45,6 +46,18 @@ namespace verbly {
 
     ~database();
 
+    // Information
+
+    int getMajorVersion() const
+    {
+      return major_;
+    }
+
+    int getMinorVersion() const
+    {
+      return minor_;
+    }
+
     // Queries
 
     query<notion> notions(filter where, order sortOrder = {}, int limit = 1) const;
@@ -69,6 +82,37 @@ namespace verbly {
 
     sqlite3* ppdb_ = nullptr;
 
+    int major_;
+    int minor_;
+
+  };
+
+  class database_version_mismatch : public std::logic_error {
+  public:
+
+    database_version_mismatch(int right, int wrong) :
+      std::logic_error(generateMessage(right, wrong)),
+      right_(right),
+      wrong_(wrong)
+    {
+    }
+
+    int getRightVersion() const noexcept
+    {
+      return right_;
+    }
+
+    int getWrongVersion() const noexcept
+    {
+      return wrong_;
+    }
+
+  private:
+
+    static std::string generateMessage(int right, int wrong);
+
+    int right_;
+    int wrong_;
   };
 
 };

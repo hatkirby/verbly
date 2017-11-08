@@ -60,6 +60,8 @@ namespace verbly {
 
       void writeSchema();
 
+      void writeVersion();
+
       void dumpObjects();
 
       void readWordNetAntonymy();
@@ -87,6 +89,8 @@ namespace verbly {
       void readWordNetSpecification();
 
       void readWordNetSimilarity();
+
+      void analyzeDatabase();
 
       // Helpers
 

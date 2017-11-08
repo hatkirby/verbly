@@ -11,6 +11,7 @@
 #include "part.h"
 #include "field.h"
 #include "../lib/util.h"
+#include "../lib/version.h"
 
 namespace verbly {
   namespace generator {
@@ -112,6 +113,9 @@ namespace verbly {
       // Writes the database schema
       writeSchema();
 
+      // Writes the database version
+      writeVersion();
+
       // Dumps data to the database
       dumpObjects();
 
@@ -154,6 +158,9 @@ namespace verbly {
 
       // Populates the adjective similarity relationship from WordNet
       readWordNetSimilarity();
+
+      // Generates analysis data to assist in query planning.
+      analyzeDatabase();
     }
 
     void generator::readWordNetSynsets()
@@ -579,6 +586,15 @@ namespace verbly {
 
         ppgs.update();
       }
+    }
+
+    void generator::writeVersion()
+    {
+      std::list<field> fields;
+      fields.emplace_back("major", DATABASE_MAJOR_VERSION);
+      fields.emplace_back("minor", DATABASE_MINOR_VERSION);
+
+      db_.insertIntoTable("version", std::move(fields));
     }
 
     void generator::dumpObjects()
@@ -1108,6 +1124,13 @@ namespace verbly {
           db_.insertIntoTable("similarity", std::move(fields));
         }
       }
+    }
+
+    void generator::analyzeDatabase()
+    {
+      std::cout << "Analyzing data..." << std::endl;
+
+      db_.runQuery("ANALYZE");
     }
 
     std::list<std::string> generator::readFile(std::string path)
