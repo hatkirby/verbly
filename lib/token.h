@@ -116,6 +116,7 @@ namespace verbly {
       static token punctuation(std::string param, token inner);
       static token indefiniteArticle(token inner);
       static token capitalize(casing param, token inner);
+      static token quote(std::string open, std::string close, token inner);
 
       token& getInnerToken();
       const token& getInnerToken() const;
@@ -131,12 +132,14 @@ namespace verbly {
         separator,
         punctuation,
         indefinite_article,
-        capitalize
+        capitalize,
+        quote
       };
 
       token(
         transform_type type,
-        std::string param,
+        std::string param1,
+        std::string param2,
         token inner);
 
       token(
@@ -156,6 +159,7 @@ namespace verbly {
         struct {
           transform_type type_;
           std::string strParam_;
+          std::string strParam2_;
           casing casingParam_;
           std::unique_ptr<token> inner_;
         } transform_;

@@ -51,6 +51,7 @@ namespace verbly {
       {
         transform_.type_ = other.transform_.type_;
         new(&transform_.strParam_) std::string(other.transform_.strParam_);
+        new(&transform_.strParam2_) std::string(other.transform_.strParam2_);
         transform_.casingParam_ = other.transform_.casingParam_;
         new(&transform_.inner_) std::unique_ptr<token>(new token(*other.transform_.inner_));
 
@@ -86,6 +87,7 @@ namespace verbly {
     std::list<token> tempUtterance;
     transform_type tempTransformType;
     std::string tempTransformStrParam;
+    std::string tempTransformStrParam2;
     casing tempTransformCasingParam;
     std::unique_ptr<token> tempTransformInner;
 
@@ -131,6 +133,7 @@ namespace verbly {
       {
         tempTransformType = first.transform_.type_;
         tempTransformStrParam = std::move(first.transform_.strParam_);
+        tempTransformStrParam2 = std::move(first.transform_.strParam2_);
         tempTransformCasingParam = first.transform_.casingParam_;
         tempTransformInner = std::move(first.transform_.inner_);
 
@@ -184,6 +187,7 @@ namespace verbly {
       {
         first.transform_.type_ = second.transform_.type_;
         new(&first.transform_.strParam_) std::string(std::move(second.transform_.strParam_));
+        new(&first.transform_.strParam2_) std::string(std::move(second.transform_.strParam2_));
         first.transform_.casingParam_ = second.transform_.casingParam_;
         new(&first.transform_.inner_) std::unique_ptr<token>(std::move(second.transform_.inner_));
 
@@ -237,6 +241,7 @@ namespace verbly {
       {
         second.transform_.type_ = tempTransformType;
         new(&second.transform_.strParam_) std::string(std::move(tempTransformStrParam));
+        new(&second.transform_.strParam2_) std::string(std::move(tempTransformStrParam2));
         second.transform_.casingParam_ = tempTransformCasingParam;
         new(&second.transform_.inner_) std::unique_ptr<token>(std::move(tempTransformInner));
 
@@ -293,6 +298,7 @@ namespace verbly {
         using ptr_type = std::unique_ptr<token>;
 
         transform_.strParam_.~string_type();
+        transform_.strParam2_.~string_type();
         transform_.inner_.~ptr_type();
 
         break;
@@ -485,6 +491,16 @@ namespace verbly {
               indefiniteArticle,
               transform_.casingParam_);
           }
+
+          case transform_type::quote:
+          {
+            return transform_.strParam_ +
+              transform_.inner_->compileHelper(
+                separator,
+                indefiniteArticle,
+                capitalization) +
+              transform_.strParam2_;
+          }
         }
       }
     }
@@ -654,22 +670,31 @@ namespace verbly {
 
   token token::separator(std::string param, token inner)
   {
-    return token(transform_type::separator, std::move(param), std::move(inner));
+    return token(transform_type::separator, std::move(param), "", std::move(inner));
   }
 
   token token::punctuation(std::string param, token inner)
   {
-    return token(transform_type::punctuation, std::move(param), std::move(inner));
+    return token(transform_type::punctuation, std::move(param), "", std::move(inner));
   }
 
   token token::indefiniteArticle(token inner)
   {
-    return token(transform_type::indefinite_article, "", std::move(inner));
+    return token(transform_type::indefinite_article, "", "", std::move(inner));
   }
 
   token token::capitalize(casing param, token inner)
   {
     return token(transform_type::capitalize, param, std::move(inner));
+  }
+
+  token token::quote(std::string opening, std::string closing, token inner)
+  {
+    return token(
+      transform_type::quote,
+      std::move(opening),
+      std::move(closing),
+      std::move(inner));
   }
 
   token& token::getInnerToken()
@@ -694,12 +719,14 @@ namespace verbly {
 
   token::token(
     transform_type type,
-    std::string param,
+    std::string param1,
+    std::string param2,
     token inner) :
       type_(type::transform)
   {
     transform_.type_ = type;
-    new(&transform_.strParam_) std::string(std::move(param));
+    new(&transform_.strParam_) std::string(std::move(param1));
+    new(&transform_.strParam2_) std::string(std::move(param2));
     new(&transform_.inner_) std::unique_ptr<token>(new token(std::move(inner)));
   }
 
@@ -711,6 +738,7 @@ namespace verbly {
   {
     transform_.type_ = type;
     new(&transform_.strParam_) std::string();
+    new(&transform_.strParam2_) std::string();
     transform_.casingParam_ = param;
     new(&transform_.inner_) std::unique_ptr<token>(new token(std::move(inner)));
   }
