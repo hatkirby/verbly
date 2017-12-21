@@ -92,6 +92,15 @@ namespace verbly {
 
         break;
       }
+
+      case type::mask:
+      {
+        new(&mask_.name) std::string(other.mask_.name);
+        mask_.internal = other.mask_.internal;
+        new(&mask_.subfilter) std::unique_ptr<filter>(new filter(*other.mask_.subfilter));
+
+        break;
+      }
     }
   }
 
@@ -122,6 +131,9 @@ namespace verbly {
     field tempCompareField;
     std::list<filter> tempChildren;
     bool tempOrlogic;
+    std::string tempMaskName;
+    bool tempMaskInternal;
+    std::unique_ptr<filter> tempMaskSubfilter;
 
     switch (tempType)
     {
@@ -198,6 +210,15 @@ namespace verbly {
       {
         tempChildren = std::move(first.group_.children);
         tempOrlogic = first.group_.orlogic;
+
+        break;
+      }
+
+      case type::mask:
+      {
+        tempMaskName = std::move(first.mask_.name);
+        tempMaskInternal = first.mask_.internal;
+        tempMaskSubfilter = std::move(first.mask_.subfilter);
 
         break;
       }
@@ -285,6 +306,15 @@ namespace verbly {
 
         break;
       }
+
+      case type::mask:
+      {
+        new(&first.mask_.name) std::string(std::move(second.mask_.name));
+        first.mask_.internal = second.mask_.internal;
+        new(&first.mask_.subfilter) std::unique_ptr<filter>(std::move(second.mask_.subfilter));
+
+        break;
+      }
     }
 
     second.~filter();
@@ -369,6 +399,15 @@ namespace verbly {
 
         break;
       }
+
+      case type::mask:
+      {
+        new(&first.mask_.name) std::string(std::move(tempMaskName));
+        first.mask_.internal = tempMaskInternal;
+        new(&first.mask_.subfilter) std::unique_ptr<filter>(std::move(tempMaskSubfilter));
+
+        break;
+      }
     }
   }
 
@@ -441,6 +480,17 @@ namespace verbly {
         using list_type = std::list<filter>;
 
         group_.children.~list_type();
+
+        break;
+      }
+
+      case type::mask:
+      {
+        using string_type = std::string;
+        using ptr_type = std::unique_ptr<filter>;
+
+        mask_.name.~string_type();
+        mask_.subfilter.~ptr_type();
 
         break;
       }
@@ -1024,6 +1074,44 @@ namespace verbly {
     }
   }
 
+  filter::filter(std::string name, bool internal, filter subfilter) :
+    type_(type::mask)
+  {
+    new(&mask_.name) std::string(std::move(name));
+    mask_.internal = internal;
+    new(&mask_.subfilter) std::unique_ptr<filter>(new filter(std::move(subfilter)));
+  }
+
+  const std::string& filter::getMaskName() const
+  {
+    if (type_ == type::mask)
+    {
+      return mask_.name;
+    } else {
+      throw std::domain_error("This filter is not a mask filter");
+    }
+  }
+
+  bool filter::isMaskInternal() const
+  {
+    if (type_ == type::mask)
+    {
+      return mask_.internal;
+    } else {
+      throw std::domain_error("This filter is not a mask filter");
+    }
+  }
+
+  const filter& filter::getMaskFilter() const
+  {
+    if (type_ == type::mask)
+    {
+      return *mask_.subfilter;
+    } else {
+      throw std::domain_error("This filter is not a mask filter");
+    }
+  }
+
   filter filter::operator!() const
   {
     switch (type_)
@@ -1145,6 +1233,11 @@ namespace verbly {
 
         return result;
       }
+
+      case type::mask:
+      {
+        return {mask_.name, mask_.internal, !*mask_.subfilter};
+      }
     }
   }
 
@@ -1168,6 +1261,7 @@ namespace verbly {
       }
 
       case type::singleton:
+      case type::mask:
       {
         filter result(false);
         result.group_.children.push_back(*this);
@@ -1205,6 +1299,7 @@ namespace verbly {
       }
 
       case type::singleton:
+      case type::mask:
       {
         filter result(true);
         result.group_.children.push_back(*this);
@@ -1230,6 +1325,11 @@ namespace verbly {
         }
       }
     }
+  }
+
+  filter filter::mask(std::string name, filter subfilter)
+  {
+    return {std::move(name), false, std::move(subfilter)};
   }
 
   filter filter::normalize(object context) const
@@ -1408,6 +1508,7 @@ namespace verbly {
           filter result(group_.orlogic);
           std::map<field, filter> positiveJoins;
           std::map<field, filter> negativeJoins;
+          std::map<std::tuple<std::string, bool>, filter> masks;
 
           for (const filter& child : group_.children)
           {
@@ -1502,6 +1603,20 @@ namespace verbly {
 
                 break;
               }
+
+              case type::mask:
+              {
+                auto maskId = std::tie(normalized.mask_.name, normalized.mask_.internal);
+
+                if (!masks.count(maskId))
+                {
+                  masks[maskId] = filter(group_.orlogic);
+                }
+
+                masks.at(maskId) += std::move(*normalized.mask_.subfilter);
+
+                break;
+              }
             }
           }
 
@@ -1521,7 +1636,21 @@ namespace verbly {
             result += !(joinOn %= joinCondition.normalize(joinOn.getJoinObject()));
           }
 
+          for (auto& mapping : masks)
+          {
+            const std::string& name = std::get<0>(mapping.first);
+            bool internal = std::get<1>(mapping.first);
+            filter& subfilter = mapping.second;
+
+            result += {name, internal, std::move(subfilter)};
+          }
+
           return result;
+        }
+
+        case type::mask:
+        {
+          return {mask_.name, mask_.internal, mask_.subfilter->normalize(context)};
         }
       }
     }
@@ -1552,9 +1681,26 @@ namespace verbly {
         if (result.group_.children.empty())
         {
           result = {};
+        } else if (result.group_.children.size() == 1)
+        {
+          filter tempChild = std::move(result.group_.children.front());
+
+          result = std::move(tempChild);
         }
 
         return result;
+      }
+
+      case type::mask:
+      {
+        filter subfilter = mask_.subfilter->compact();
+
+        if (subfilter.type_ == type::empty)
+        {
+          return {};
+        } else {
+          return {mask_.name, mask_.internal, std::move(subfilter)};
+        }
       }
     }
   }

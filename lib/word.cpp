@@ -172,20 +172,24 @@ namespace verbly {
 
   filter word::synonyms_field::operator%=(filter joinCondition) const
   {
-    return (verbly::notion::words %= (
-      std::move(joinCondition)
-      && (filter(
-        verbly::word::id,
-        filter::comparison::field_does_not_equal,
-        verbly::word::id))));
+    return (verbly::word::notions %=
+      filter("synonyms", true,
+        (verbly::notion::words %= (
+          std::move(joinCondition)
+          && (filter(
+            verbly::word::id,
+            filter::comparison::field_does_not_equal,
+            verbly::word::id))))));
   }
 
   word::synonyms_field::operator filter() const
   {
-    return (verbly::notion::words %= filter(
-      verbly::word::id,
-      filter::comparison::field_does_not_equal,
-      verbly::word::id));
+    return (verbly::word::notions %=
+      filter("synonyms", true,
+        (verbly::notion::words %= filter(
+          verbly::word::id,
+          filter::comparison::field_does_not_equal,
+          verbly::word::id))));
   }
 
 };

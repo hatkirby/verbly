@@ -594,6 +594,18 @@ namespace verbly {
 
         return grp;
       }
+
+      case filter::type::mask:
+      {
+        condition result = parseFilter(clause.getMaskFilter());
+
+        if (result.getType() == condition::type::empty)
+        {
+          return {};
+        } else {
+          return result;
+        }
+      }
     }
   }
 

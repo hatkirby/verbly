@@ -14,7 +14,8 @@ namespace verbly {
     enum class type {
       empty,
       singleton,
-      group
+      group,
+      mask
     };
 
     enum class comparison {
@@ -106,6 +107,16 @@ namespace verbly {
 
     const_iterator end() const;
 
+    // Mask
+
+    filter(std::string name, bool internal, filter subfilter);
+
+    const std::string& getMaskName() const;
+
+    bool isMaskInternal() const;
+
+    const filter& getMaskFilter() const;
+
     // Negation
 
     filter operator!() const;
@@ -117,6 +128,10 @@ namespace verbly {
 
     filter& operator&=(filter condition);
     filter& operator|=(filter condition);
+
+    // Maskifying
+
+    static filter mask(std::string name, filter subfilter);
 
     // Utility
 
@@ -141,6 +156,11 @@ namespace verbly {
         std::list<filter> children;
         bool orlogic;
       } group_;
+      struct {
+        std::string name;
+        bool internal;
+        std::unique_ptr<filter> subfilter;
+      } mask_;
     };
     type type_ = type::empty;
 
