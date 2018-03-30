@@ -120,7 +120,7 @@ namespace verbly {
 
       // Output
 
-      database db_;
+      hatkirby::database db_;
 
       // Data
 

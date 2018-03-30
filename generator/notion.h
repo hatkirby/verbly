@@ -9,8 +9,6 @@
 namespace verbly {
   namespace generator {
 
-    class database;
-
     class notion {
     public:
 

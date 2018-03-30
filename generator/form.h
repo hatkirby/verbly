@@ -8,7 +8,6 @@ namespace verbly {
   namespace generator {
 
     class pronunciation;
-    class database;
 
     class form {
     public:

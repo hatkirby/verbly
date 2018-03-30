@@ -46,10 +46,11 @@ namespace verbly {
     {
       // First, serialize the notion
       {
-        std::list<field> fields;
+        std::list<hatkirby::column> fields;
 
         fields.emplace_back("notion_id", arg.getId());
-        fields.emplace_back("part_of_speech", static_cast<int>(arg.getPartOfSpeech()));
+        fields.emplace_back("part_of_speech",
+          static_cast<int>(arg.getPartOfSpeech()));
 
         if (arg.hasWnid())
         {
@@ -69,12 +70,12 @@ namespace verbly {
       {
         for (std::string group : arg.getPrepositionGroups())
         {
-          std::list<field> fields;
-
-          fields.emplace_back("notion_id", arg.getId());
-          fields.emplace_back("groupname", group);
-
-          db.insertIntoTable("is_a", std::move(fields));
+          db.insertIntoTable(
+            "is_a",
+            {
+              { "notion_id", arg.getId() },
+              { "groupname", group }
+            });
         }
       }
 

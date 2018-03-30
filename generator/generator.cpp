@@ -594,7 +594,12 @@ namespace verbly {
       fields.emplace_back("major", DATABASE_MAJOR_VERSION);
       fields.emplace_back("minor", DATABASE_MINOR_VERSION);
 
-      db_.insertIntoTable("version", std::move(fields));
+      db_.insertIntoTable(
+        "version",
+        {
+          { "major", DATABASE_MAJOR_VERSION },
+          { "minor", DATABASE_MINOR_VERSION }
+        });
     }
 
     void generator::dumpObjects()
@@ -689,11 +694,12 @@ namespace verbly {
           word& word1 = *wordByWnidAndWnum_.at(lookup1);
           word& word2 = *wordByWnidAndWnum_.at(lookup2);
 
-          std::list<field> fields;
-          fields.emplace_back("antonym_1_id", word1.getId());
-          fields.emplace_back("antonym_2_id", word2.getId());
-
-          db_.insertIntoTable("antonymy", std::move(fields));
+          db_.insertIntoTable(
+            "antonymy",
+            {
+              { "antonym_1_id", word1.getId() },
+              { "antonym_2_id", word2.getId() }
+            });
         }
       }
     }
@@ -721,11 +727,12 @@ namespace verbly {
           notion& notion1 = *notionByWnid_.at(lookup1);
           notion& notion2 = *notionByWnid_.at(lookup2);
 
-          std::list<field> fields;
-          fields.emplace_back("noun_id", notion1.getId());
-          fields.emplace_back("adjective_id", notion2.getId());
-
-          db_.insertIntoTable("variation", std::move(fields));
+          db_.insertIntoTable(
+            "variation",
+            {
+              { "noun_id", notion1.getId() }
+              { "adjective_id", notion2.getId() }
+            });
         }
       }
     }
@@ -786,11 +793,12 @@ namespace verbly {
         {
           for (int word2 : rightJoin)
           {
-            std::list<field> fields;
-            fields.emplace_back("term_id", word1);
-            fields.emplace_back("domain_id", word2);
-
-            db_.insertIntoTable(table_name, std::move(fields));
+            db_.insertIntoTable(
+              table_name,
+              {
+                { "term_id", word1 },
+                { "domain_id", word2 }
+              });
           }
         }
       }
@@ -819,11 +827,12 @@ namespace verbly {
           notion& notion1 = *notionByWnid_.at(lookup1);
           notion& notion2 = *notionByWnid_.at(lookup2);
 
-          std::list<field> fields;
-          fields.emplace_back("effect_id", notion1.getId());
-          fields.emplace_back("cause_id", notion2.getId());
-
-          db_.insertIntoTable("causality", std::move(fields));
+          db_.insertIntoTable(
+            "causality",
+            {
+              { "effect_id", notion1.getId() },
+              { "cause_id", notion2.getId() }
+            });
         }
       }
     }
@@ -851,11 +860,12 @@ namespace verbly {
           notion& notion1 = *notionByWnid_.at(lookup1);
           notion& notion2 = *notionByWnid_.at(lookup2);
 
-          std::list<field> fields;
-          fields.emplace_back("given_id", notion1.getId());
-          fields.emplace_back("entailment_id", notion2.getId());
-
-          db_.insertIntoTable("entailment", std::move(fields));
+          db_.insertIntoTable(
+            "entailment",
+            {
+              { "given_id", notion1.getId() },
+              { "entailment_id", notion2.getId() }
+            });
         }
       }
     }
@@ -883,11 +893,12 @@ namespace verbly {
           notion& notion1 = *notionByWnid_.at(lookup1);
           notion& notion2 = *notionByWnid_.at(lookup2);
 
-          std::list<field> fields;
-          fields.emplace_back("hyponym_id", notion1.getId());
-          fields.emplace_back("hypernym_id", notion2.getId());
-
-          db_.insertIntoTable("hypernymy", std::move(fields));
+          db_.insertIntoTable(
+            "hypernymy",
+            {
+              { "hyponym_id", notion1.getId() },
+              { "hypernym_id", notion2.getId() }
+            });
         }
       }
     }
@@ -915,11 +926,12 @@ namespace verbly {
           notion& notion1 = *notionByWnid_.at(lookup1);
           notion& notion2 = *notionByWnid_.at(lookup2);
 
-          std::list<field> fields;
-          fields.emplace_back("instance_id", notion1.getId());
-          fields.emplace_back("class_id", notion2.getId());
-
-          db_.insertIntoTable("instantiation", std::move(fields));
+          db_.insertIntoTable(
+            "instantiation",
+            {
+              { "instance_id", notion1.getId() },
+              { "class_id", notion2.getId() }
+            });
         }
       }
     }
@@ -947,11 +959,12 @@ namespace verbly {
           notion& notion1 = *notionByWnid_.at(lookup1);
           notion& notion2 = *notionByWnid_.at(lookup2);
 
-          std::list<field> fields;
-          fields.emplace_back("holonym_id", notion1.getId());
-          fields.emplace_back("meronym_id", notion2.getId());
-
-          db_.insertIntoTable("member_meronymy", std::move(fields));
+          db_.insertIntoTable(
+            "member_meronymy",
+            {
+              { "holonym_id", notion1.getId() },
+              { "meronym_id", notion2.getId() }
+            });
         }
       }
     }
@@ -979,11 +992,12 @@ namespace verbly {
           notion& notion1 = *notionByWnid_.at(lookup1);
           notion& notion2 = *notionByWnid_.at(lookup2);
 
-          std::list<field> fields;
-          fields.emplace_back("holonym_id", notion1.getId());
-          fields.emplace_back("meronym_id", notion2.getId());
-
-          db_.insertIntoTable("part_meronymy", std::move(fields));
+          db_.insertIntoTable(
+            "part_meronymy",
+            {
+              { "holonym_id", notion1.getId() },
+              { "meronym_id", notion2.getId() }
+            });
         }
       }
     }
@@ -1011,11 +1025,12 @@ namespace verbly {
           notion& notion1 = *notionByWnid_.at(lookup1);
           notion& notion2 = *notionByWnid_.at(lookup2);
 
-          std::list<field> fields;
-          fields.emplace_back("holonym_id", notion1.getId());
-          fields.emplace_back("meronym_id", notion2.getId());
-
-          db_.insertIntoTable("substance_meronymy", std::move(fields));
+          db_.insertIntoTable(
+            "substance_meronymy",
+            {
+              { "holonym_id", notion1.getId() },
+              { "meronym_id", notion2.getId() }
+            });
         }
       }
     }
@@ -1045,18 +1060,20 @@ namespace verbly {
 
           if (word1.getNotion().getPartOfSpeech() == part_of_speech::adjective)
           {
-            std::list<field> fields;
-            fields.emplace_back("pertainym_id", word1.getId());
-            fields.emplace_back("noun_id", word2.getId());
-
-            db_.insertIntoTable("pertainymy", std::move(fields));
+            db_.insertIntoTable(
+              "pertainymy",
+              {
+                { "pertainym_id", word1.getId() },
+                { "noun_id", word2.getId() }
+              });
           } else if (word1.getNotion().getPartOfSpeech() == part_of_speech::adverb)
           {
-            std::list<field> fields;
-            fields.emplace_back("mannernym_id", word1.getId());
-            fields.emplace_back("adjective_id", word2.getId());
-
-            db_.insertIntoTable("mannernymy", std::move(fields));
+            db_.insertIntoTable(
+              "mannernymy",
+              {
+                { "mannernym_id", word1.getId() },
+                { "adjective_id", word2.getId() }
+              });
           }
         }
       }
@@ -1085,11 +1102,12 @@ namespace verbly {
           word& word1 = *wordByWnidAndWnum_.at(lookup1);
           word& word2 = *wordByWnidAndWnum_.at(lookup2);
 
-          std::list<field> fields;
-          fields.emplace_back("general_id", word1.getId());
-          fields.emplace_back("specific_id", word2.getId());
-
-          db_.insertIntoTable("specification", std::move(fields));
+          db_.insertIntoTable(
+            "specification",
+            {
+              { "general_id", word1.getId() },
+              { "specific_id", word2.getId() }
+            });
         }
       }
     }
@@ -1117,11 +1135,12 @@ namespace verbly {
           notion& notion1 = *notionByWnid_.at(lookup1);
           notion& notion2 = *notionByWnid_.at(lookup2);
 
-          std::list<field> fields;
-          fields.emplace_back("adjective_1_id", notion1.getId());
-          fields.emplace_back("adjective_2_id", notion2.getId());
-
-          db_.insertIntoTable("similarity", std::move(fields));
+          db_.insertIntoTable(
+            "similarity",
+            {
+              { "adjective_1_id", notion1.getId() },
+              { "adjective_2_id", notion2.getId() }
+            });
         }
       }
     }
