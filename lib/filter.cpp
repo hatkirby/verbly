@@ -10,497 +10,6 @@
 
 namespace verbly {
 
-  filter::filter(const filter& other)
-  {
-    type_ = other.type_;
-
-    switch (type_)
-    {
-      case type::empty:
-      {
-        break;
-      }
-
-      case type::singleton:
-      {
-        new(&singleton_.filterField) field(other.singleton_.filterField);
-        singleton_.filterType = other.singleton_.filterType;
-
-        switch (singleton_.filterType)
-        {
-          case comparison::int_equals:
-          case comparison::int_does_not_equal:
-          case comparison::int_is_at_least:
-          case comparison::int_is_greater_than:
-          case comparison::int_is_at_most:
-          case comparison::int_is_less_than:
-          {
-            singleton_.intValue = other.singleton_.intValue;
-
-            break;
-          }
-
-          case comparison::boolean_equals:
-          {
-            singleton_.boolValue = other.singleton_.boolValue;
-
-            break;
-          }
-
-          case comparison::string_equals:
-          case comparison::string_does_not_equal:
-          case comparison::string_is_like:
-          case comparison::string_is_not_like:
-          {
-            new(&singleton_.stringValue) std::string(other.singleton_.stringValue);
-
-            break;
-          }
-
-          case comparison::is_null:
-          case comparison::is_not_null:
-          {
-            break;
-          }
-
-          case comparison::matches:
-          case comparison::does_not_match:
-          case comparison::hierarchally_matches:
-          case comparison::does_not_hierarchally_match:
-          {
-            new(&singleton_.join) std::unique_ptr<filter>(new filter(*other.singleton_.join));
-
-            break;
-          }
-
-          case comparison::field_equals:
-          case comparison::field_does_not_equal:
-          {
-            new(&singleton_.compareField) field(other.singleton_.compareField);
-
-            break;
-          }
-        }
-
-        break;
-      }
-
-      case type::group:
-      {
-        new(&group_.children) std::list<filter>(other.group_.children);
-        group_.orlogic = other.group_.orlogic;
-
-        break;
-      }
-
-      case type::mask:
-      {
-        new(&mask_.name) std::string(other.mask_.name);
-        mask_.internal = other.mask_.internal;
-        new(&mask_.subfilter) std::unique_ptr<filter>(new filter(*other.mask_.subfilter));
-
-        break;
-      }
-    }
-  }
-
-  filter::filter(filter&& other) : filter()
-  {
-    swap(*this, other);
-  }
-
-  filter& filter::operator=(filter other)
-  {
-    swap(*this, other);
-
-    return *this;
-  }
-
-  void swap(filter& first, filter& second)
-  {
-    using type = filter::type;
-    using comparison = filter::comparison;
-
-    type tempType = first.type_;
-    field tempField;
-    comparison tempComparison;
-    std::unique_ptr<filter> tempJoin;
-    std::string tempStringValue;
-    int tempIntValue;
-    bool tempBoolValue;
-    field tempCompareField;
-    std::list<filter> tempChildren;
-    bool tempOrlogic;
-    std::string tempMaskName;
-    bool tempMaskInternal;
-    std::unique_ptr<filter> tempMaskSubfilter;
-
-    switch (tempType)
-    {
-      case type::empty:
-      {
-        break;
-      }
-
-      case type::singleton:
-      {
-        tempField = std::move(first.singleton_.filterField);
-        tempComparison = first.singleton_.filterType;
-
-        switch (tempComparison)
-        {
-          case comparison::int_equals:
-          case comparison::int_does_not_equal:
-          case comparison::int_is_at_least:
-          case comparison::int_is_greater_than:
-          case comparison::int_is_at_most:
-          case comparison::int_is_less_than:
-          {
-            tempIntValue = first.singleton_.intValue;
-
-            break;
-          }
-
-          case comparison::boolean_equals:
-          {
-            tempBoolValue = first.singleton_.boolValue;
-
-            break;
-          }
-
-          case comparison::string_equals:
-          case comparison::string_does_not_equal:
-          case comparison::string_is_like:
-          case comparison::string_is_not_like:
-          {
-            tempStringValue = std::move(first.singleton_.stringValue);
-
-            break;
-          }
-
-          case comparison::is_null:
-          case comparison::is_not_null:
-          {
-            break;
-          }
-
-          case comparison::matches:
-          case comparison::does_not_match:
-          case comparison::hierarchally_matches:
-          case comparison::does_not_hierarchally_match:
-          {
-            tempJoin = std::move(first.singleton_.join);
-
-            break;
-          }
-
-          case comparison::field_equals:
-          case comparison::field_does_not_equal:
-          {
-            tempCompareField = std::move(first.singleton_.compareField);
-
-            break;
-          }
-        }
-
-        break;
-      }
-
-      case type::group:
-      {
-        tempChildren = std::move(first.group_.children);
-        tempOrlogic = first.group_.orlogic;
-
-        break;
-      }
-
-      case type::mask:
-      {
-        tempMaskName = std::move(first.mask_.name);
-        tempMaskInternal = first.mask_.internal;
-        tempMaskSubfilter = std::move(first.mask_.subfilter);
-
-        break;
-      }
-    }
-
-    first.~filter();
-
-    first.type_ = second.type_;
-
-    switch (first.type_)
-    {
-      case type::empty:
-      {
-        break;
-      }
-
-      case type::singleton:
-      {
-        new(&first.singleton_.filterField) field(std::move(second.singleton_.filterField));
-        first.singleton_.filterType = second.singleton_.filterType;
-
-        switch (first.singleton_.filterType)
-        {
-          case comparison::int_equals:
-          case comparison::int_does_not_equal:
-          case comparison::int_is_at_least:
-          case comparison::int_is_greater_than:
-          case comparison::int_is_at_most:
-          case comparison::int_is_less_than:
-          {
-            first.singleton_.intValue = second.singleton_.intValue;
-
-            break;
-          }
-
-          case comparison::boolean_equals:
-          {
-            first.singleton_.boolValue = second.singleton_.boolValue;
-
-            break;
-          }
-
-          case comparison::string_equals:
-          case comparison::string_does_not_equal:
-          case comparison::string_is_like:
-          case comparison::string_is_not_like:
-          {
-            new(&first.singleton_.stringValue) std::string(std::move(second.singleton_.stringValue));
-
-            break;
-          }
-
-          case comparison::is_null:
-          case comparison::is_not_null:
-          {
-            break;
-          }
-
-          case comparison::matches:
-          case comparison::does_not_match:
-          case comparison::hierarchally_matches:
-          case comparison::does_not_hierarchally_match:
-          {
-            new(&first.singleton_.join) std::unique_ptr<filter>(std::move(second.singleton_.join));
-
-            break;
-          }
-
-          case comparison::field_equals:
-          case comparison::field_does_not_equal:
-          {
-            new(&first.singleton_.compareField) field(std::move(second.singleton_.compareField));
-
-            break;
-          }
-        }
-
-        break;
-      }
-
-      case type::group:
-      {
-        new(&first.group_.children) std::list<filter>(std::move(second.group_.children));
-        first.group_.orlogic = second.group_.orlogic;
-
-        break;
-      }
-
-      case type::mask:
-      {
-        new(&first.mask_.name) std::string(std::move(second.mask_.name));
-        first.mask_.internal = second.mask_.internal;
-        new(&first.mask_.subfilter) std::unique_ptr<filter>(std::move(second.mask_.subfilter));
-
-        break;
-      }
-    }
-
-    second.~filter();
-
-    second.type_ = tempType;
-
-    switch (second.type_)
-    {
-      case type::empty:
-      {
-        break;
-      }
-
-      case type::singleton:
-      {
-        new(&second.singleton_.filterField) field(std::move(tempField));
-        second.singleton_.filterType = tempComparison;
-
-        switch (second.singleton_.filterType)
-        {
-          case comparison::int_equals:
-          case comparison::int_does_not_equal:
-          case comparison::int_is_at_least:
-          case comparison::int_is_greater_than:
-          case comparison::int_is_at_most:
-          case comparison::int_is_less_than:
-          {
-            second.singleton_.intValue = tempIntValue;
-
-            break;
-          }
-
-          case comparison::boolean_equals:
-          {
-            second.singleton_.boolValue = tempBoolValue;
-
-            break;
-          }
-
-          case comparison::string_equals:
-          case comparison::string_does_not_equal:
-          case comparison::string_is_like:
-          case comparison::string_is_not_like:
-          {
-            new(&second.singleton_.stringValue) std::string(std::move(tempStringValue));
-
-            break;
-          }
-
-          case comparison::is_null:
-          case comparison::is_not_null:
-          {
-            break;
-          }
-
-          case comparison::matches:
-          case comparison::does_not_match:
-          case comparison::hierarchally_matches:
-          case comparison::does_not_hierarchally_match:
-          {
-            new(&second.singleton_.join) std::unique_ptr<filter>(std::move(tempJoin));
-
-            break;
-          }
-
-          case comparison::field_equals:
-          case comparison::field_does_not_equal:
-          {
-            new(&second.singleton_.compareField) field(std::move(tempCompareField));
-
-            break;
-          }
-        }
-
-        break;
-      }
-
-      case type::group:
-      {
-        new(&second.group_.children) std::list<filter>(std::move(tempChildren));
-        second.group_.orlogic = tempOrlogic;
-
-        break;
-      }
-
-      case type::mask:
-      {
-        new(&first.mask_.name) std::string(std::move(tempMaskName));
-        first.mask_.internal = tempMaskInternal;
-        new(&first.mask_.subfilter) std::unique_ptr<filter>(std::move(tempMaskSubfilter));
-
-        break;
-      }
-    }
-  }
-
-  filter::~filter()
-  {
-    switch (type_)
-    {
-      case type::empty:
-      {
-        break;
-      }
-
-      case type::singleton:
-      {
-        singleton_.filterField.~field();
-
-        switch (singleton_.filterType)
-        {
-          case comparison::int_equals:
-          case comparison::int_does_not_equal:
-          case comparison::int_is_at_least:
-          case comparison::int_is_greater_than:
-          case comparison::int_is_at_most:
-          case comparison::int_is_less_than:
-          case comparison::boolean_equals:
-          case comparison::is_null:
-          case comparison::is_not_null:
-          {
-            break;
-          }
-
-          case comparison::string_equals:
-          case comparison::string_does_not_equal:
-          case comparison::string_is_like:
-          case comparison::string_is_not_like:
-          {
-            using string_type = std::string;
-
-            singleton_.stringValue.~string_type();
-
-            break;
-          }
-
-          case comparison::matches:
-          case comparison::does_not_match:
-          case comparison::hierarchally_matches:
-          case comparison::does_not_hierarchally_match:
-          {
-            using ptr_type = std::unique_ptr<filter>;
-
-            singleton_.join.~ptr_type();
-
-            break;
-          }
-
-          case comparison::field_equals:
-          case comparison::field_does_not_equal:
-          {
-            singleton_.compareField.~field();
-
-            break;
-          }
-        }
-
-        break;
-      }
-
-      case type::group:
-      {
-        using list_type = std::list<filter>;
-
-        group_.children.~list_type();
-
-        break;
-      }
-
-      case type::mask:
-      {
-        using string_type = std::string;
-        using ptr_type = std::unique_ptr<filter>;
-
-        mask_.name.~string_type();
-        mask_.subfilter.~ptr_type();
-
-        break;
-      }
-    }
-  }
-
-  filter::filter()
-  {
-  }
-
   filter::filter(
     field filterField,
     comparison filterType,
@@ -518,9 +27,12 @@ namespace verbly {
         case comparison::int_is_at_most:
         case comparison::int_is_less_than:
         {
-          new(&singleton_.filterField) field(std::move(filterField));
-          singleton_.filterType = filterType;
-          singleton_.intValue = filterValue;
+          variant_ = singleton_type
+            {
+              std::move(filterField),
+              filterType,
+              filterValue
+            };
 
           break;
         }
@@ -543,7 +55,8 @@ namespace verbly {
         }
       }
     } else {
-      throw std::domain_error("Cannot match a non-integer field against an integer value");
+      throw std::domain_error(
+        "Cannot match a non-integer field against an integer value");
     }
   }
 
@@ -562,9 +75,12 @@ namespace verbly {
         case comparison::string_is_like:
         case comparison::string_is_not_like:
         {
-          new(&singleton_.filterField) field(std::move(filterField));
-          singleton_.filterType = filterType;
-          new(&singleton_.stringValue) std::string(std::move(filterValue));
+          variant_ = singleton_type
+            {
+              std::move(filterField),
+              filterType,
+              std::move(filterValue)
+            };
 
           break;
         }
@@ -589,7 +105,8 @@ namespace verbly {
         }
       }
     } else {
-      throw std::domain_error("Cannot match a non-string field against an string value");
+      throw std::domain_error(
+        "Cannot match a non-string field against an string value");
     }
   }
 
@@ -605,9 +122,12 @@ namespace verbly {
       {
         case comparison::boolean_equals:
         {
-          new(&singleton_.filterField) field(std::move(filterField));
-          singleton_.filterType = filterType;
-          singleton_.boolValue = filterValue;
+          variant_ = singleton_type
+            {
+              std::move(filterField),
+              filterType,
+              filterValue
+            };
 
           break;
         }
@@ -635,7 +155,8 @@ namespace verbly {
         }
       }
     } else {
-      throw std::domain_error("Cannot match a non-boolean field against a boolean value");
+      throw std::domain_error(
+        "Cannot match a non-boolean field against a boolean value");
     }
   }
 
@@ -651,8 +172,11 @@ namespace verbly {
         case comparison::is_null:
         case comparison::is_not_null:
         {
-          new(&singleton_.filterField) field(std::move(filterField));
-          singleton_.filterType = filterType;
+          variant_ = singleton_type
+            {
+              std::move(filterField),
+              filterType
+            };
 
           break;
         }
@@ -675,11 +199,13 @@ namespace verbly {
         case comparison::field_equals:
         case comparison::field_does_not_equal:
         {
-          throw std::invalid_argument("Incorrect constructor for given comparison");
+          throw std::invalid_argument(
+            "Incorrect constructor for given comparison");
         }
       }
     } else {
-      throw std::domain_error("Cannot check nullity/non-nullity of non-nullable field");
+      throw std::domain_error(
+        "Cannot check nullity/non-nullity of non-nullable field");
     }
   }
 
@@ -701,9 +227,12 @@ namespace verbly {
           case comparison::matches:
           case comparison::does_not_match:
           {
-            new(&singleton_.filterField) field(std::move(joinOn));
-            singleton_.filterType = filterType;
-            new(&singleton_.join) std::unique_ptr<filter>(new filter(std::move(joinCondition)));
+            variant_ = singleton_type
+              {
+                std::move(joinOn),
+                filterType,
+                rec_filter(new filter(std::move(joinCondition)))
+              };
 
             break;
           }
@@ -726,7 +255,8 @@ namespace verbly {
           case comparison::field_equals:
           case comparison::field_does_not_equal:
           {
-            throw std::invalid_argument("Incorrect constructor for given comparison");
+            throw std::invalid_argument(
+              "Incorrect constructor for given comparison");
           }
         }
 
@@ -740,9 +270,12 @@ namespace verbly {
           case comparison::hierarchally_matches:
           case comparison::does_not_hierarchally_match:
           {
-            new(&singleton_.filterField) field(std::move(joinOn));
-            singleton_.filterType = filterType;
-            new(&singleton_.join) std::unique_ptr<filter>(new filter(std::move(joinCondition)));
+            variant_ = singleton_type
+              {
+                std::move(joinOn),
+                filterType,
+                rec_filter(new filter(std::move(joinCondition)))
+              };
 
             break;
           }
@@ -765,7 +298,8 @@ namespace verbly {
           case comparison::field_equals:
           case comparison::field_does_not_equal:
           {
-            throw std::invalid_argument("Incorrect constructor for given comparison");
+            throw std::invalid_argument(
+              "Incorrect constructor for given comparison");
           }
         }
 
@@ -803,9 +337,12 @@ namespace verbly {
           throw std::domain_error("Cannot compare join fields");
         }
 
-        new(&singleton_.filterField) field(std::move(filterField));
-        singleton_.filterType = filterType;
-        new(&singleton_.compareField) field(std::move(compareField));
+        variant_ = singleton_type
+          {
+            std::move(filterField),
+            filterType,
+            std::move(compareField)
+          };
 
         break;
       }
@@ -835,146 +372,155 @@ namespace verbly {
 
   field filter::getField() const
   {
-    if (type_ == type::singleton)
+    if (type_ != type::singleton)
     {
-      return singleton_.filterField;
-    } else {
       throw std::domain_error("This filter does not have a field");
     }
+
+    return mpark::get<singleton_type>(variant_).filterField;
   }
 
   filter::comparison filter::getComparison() const
   {
-    if (type_ == type::singleton)
+    if (type_ != type::singleton)
     {
-      return singleton_.filterType;
-    } else {
       throw std::domain_error("This filter does not have a comparison");
     }
+
+    return mpark::get<singleton_type>(variant_).filterType;
   }
 
   filter filter::getJoinCondition() const
   {
-    if (type_ == type::singleton)
+    if (type_ != type::singleton)
     {
-      switch (singleton_.filterType)
-      {
-        case comparison::matches:
-        case comparison::does_not_match:
-        case comparison::hierarchally_matches:
-        case comparison::does_not_hierarchally_match:
-        {
-          return *singleton_.join;
-        }
-
-        case comparison::string_equals:
-        case comparison::string_does_not_equal:
-        case comparison::string_is_like:
-        case comparison::string_is_not_like:
-        case comparison::int_equals:
-        case comparison::int_does_not_equal:
-        case comparison::int_is_at_least:
-        case comparison::int_is_greater_than:
-        case comparison::int_is_at_most:
-        case comparison::int_is_less_than:
-        case comparison::boolean_equals:
-        case comparison::is_null:
-        case comparison::is_not_null:
-        case comparison::field_equals:
-        case comparison::field_does_not_equal:
-        {
-          throw std::domain_error("This filter does not have a join condition");
-        }
-      }
-    } else {
       throw std::domain_error("This filter does not have a join condition");
+    }
+
+    const singleton_type& ss = mpark::get<singleton_type>(variant_);
+
+    switch (ss.filterType)
+    {
+      case comparison::matches:
+      case comparison::does_not_match:
+      case comparison::hierarchally_matches:
+      case comparison::does_not_hierarchally_match:
+      {
+        return *mpark::get<rec_filter>(ss.data);
+      }
+
+      case comparison::string_equals:
+      case comparison::string_does_not_equal:
+      case comparison::string_is_like:
+      case comparison::string_is_not_like:
+      case comparison::int_equals:
+      case comparison::int_does_not_equal:
+      case comparison::int_is_at_least:
+      case comparison::int_is_greater_than:
+      case comparison::int_is_at_most:
+      case comparison::int_is_less_than:
+      case comparison::boolean_equals:
+      case comparison::is_null:
+      case comparison::is_not_null:
+      case comparison::field_equals:
+      case comparison::field_does_not_equal:
+      {
+        throw std::domain_error("This filter does not have a join condition");
+      }
     }
   }
 
   std::string filter::getStringArgument() const
   {
-    if (type_ == type::singleton)
+    if (type_ != type::singleton)
     {
-      switch (singleton_.filterType)
-      {
-        case comparison::string_equals:
-        case comparison::string_does_not_equal:
-        case comparison::string_is_like:
-        case comparison::string_is_not_like:
-        {
-          return singleton_.stringValue;
-        }
-
-        case comparison::int_equals:
-        case comparison::int_does_not_equal:
-        case comparison::int_is_at_least:
-        case comparison::int_is_greater_than:
-        case comparison::int_is_at_most:
-        case comparison::int_is_less_than:
-        case comparison::boolean_equals:
-        case comparison::is_null:
-        case comparison::is_not_null:
-        case comparison::matches:
-        case comparison::does_not_match:
-        case comparison::hierarchally_matches:
-        case comparison::does_not_hierarchally_match:
-        case comparison::field_equals:
-        case comparison::field_does_not_equal:
-        {
-          throw std::domain_error("This filter does not have a string argument");
-        }
-      }
-    } else {
       throw std::domain_error("This filter does not have a string argument");
+    }
+
+    const singleton_type& ss = mpark::get<singleton_type>(variant_);
+
+    switch (ss.filterType)
+    {
+      case comparison::string_equals:
+      case comparison::string_does_not_equal:
+      case comparison::string_is_like:
+      case comparison::string_is_not_like:
+      {
+        return mpark::get<std::string>(ss.data);
+      }
+
+      case comparison::int_equals:
+      case comparison::int_does_not_equal:
+      case comparison::int_is_at_least:
+      case comparison::int_is_greater_than:
+      case comparison::int_is_at_most:
+      case comparison::int_is_less_than:
+      case comparison::boolean_equals:
+      case comparison::is_null:
+      case comparison::is_not_null:
+      case comparison::matches:
+      case comparison::does_not_match:
+      case comparison::hierarchally_matches:
+      case comparison::does_not_hierarchally_match:
+      case comparison::field_equals:
+      case comparison::field_does_not_equal:
+      {
+        throw std::domain_error("This filter does not have a string argument");
+      }
     }
   }
 
   int filter::getIntegerArgument() const
   {
-    if (type_ == type::singleton)
+    if (type_ != type::singleton)
     {
-      switch (singleton_.filterType)
-      {
-        case comparison::int_equals:
-        case comparison::int_does_not_equal:
-        case comparison::int_is_at_least:
-        case comparison::int_is_greater_than:
-        case comparison::int_is_at_most:
-        case comparison::int_is_less_than:
-        {
-          return singleton_.intValue;
-        }
-
-        case comparison::string_equals:
-        case comparison::string_does_not_equal:
-        case comparison::string_is_like:
-        case comparison::string_is_not_like:
-        case comparison::boolean_equals:
-        case comparison::is_null:
-        case comparison::is_not_null:
-        case comparison::matches:
-        case comparison::does_not_match:
-        case comparison::hierarchally_matches:
-        case comparison::does_not_hierarchally_match:
-        case comparison::field_equals:
-        case comparison::field_does_not_equal:
-        {
-          throw std::domain_error("This filter does not have an integer argument");
-        }
-      }
-    } else {
       throw std::domain_error("This filter does not have an integer argument");
+    }
+
+    const singleton_type& ss = mpark::get<singleton_type>(variant_);
+
+    switch (ss.filterType)
+    {
+      case comparison::int_equals:
+      case comparison::int_does_not_equal:
+      case comparison::int_is_at_least:
+      case comparison::int_is_greater_than:
+      case comparison::int_is_at_most:
+      case comparison::int_is_less_than:
+      {
+        return mpark::get<int>(ss.data);
+      }
+
+      case comparison::string_equals:
+      case comparison::string_does_not_equal:
+      case comparison::string_is_like:
+      case comparison::string_is_not_like:
+      case comparison::boolean_equals:
+      case comparison::is_null:
+      case comparison::is_not_null:
+      case comparison::matches:
+      case comparison::does_not_match:
+      case comparison::hierarchally_matches:
+      case comparison::does_not_hierarchally_match:
+      case comparison::field_equals:
+      case comparison::field_does_not_equal:
+      {
+        throw std::domain_error(
+          "This filter does not have an integer argument");
+      }
     }
   }
 
   bool filter::getBooleanArgument() const
   {
-    if ((type_ == type::singleton) && (singleton_.filterType == comparison::boolean_equals))
+    if ((type_ != type::singleton) ||
+      (mpark::get<singleton_type>(variant_).filterType !=
+        comparison::boolean_equals))
     {
-      return singleton_.boolValue;
-    } else {
       throw std::domain_error("This filter does not have a boolean argument");
     }
+
+    return mpark::get<bool>(mpark::get<singleton_type>(variant_).data);
   }
 
   field filter::getCompareField() const
@@ -984,12 +530,14 @@ namespace verbly {
       throw std::domain_error("This filter does not have a compare field");
     }
 
-    switch (singleton_.filterType)
+    const singleton_type& ss = mpark::get<singleton_type>(variant_);
+
+    switch (ss.filterType)
     {
       case comparison::field_equals:
       case comparison::field_does_not_equal:
       {
-        return singleton_.compareField;
+        return mpark::get<field>(ss.data);
 
         break;
       }
@@ -1018,20 +566,20 @@ namespace verbly {
 
   }
 
-  filter::filter(bool orlogic) : type_(type::group)
+  filter::filter(bool orlogic) :
+    type_(type::group),
+    variant_(group_type {{}, orlogic})
   {
-    new(&group_.children) std::list<filter>();
-    group_.orlogic = orlogic;
   }
 
   bool filter::getOrlogic() const
   {
-    if (type_ == type::group)
+    if (type_ != type::group)
     {
-      return group_.orlogic;
-    } else {
       throw std::domain_error("This filter is not a group filter");
     }
+
+    return mpark::get<group_type>(variant_).orlogic;
   }
 
   filter filter::operator+(filter condition) const
@@ -1044,72 +592,77 @@ namespace verbly {
 
   filter& filter::operator+=(filter condition)
   {
-    if (type_ == type::group)
+    if (type_ != type::group)
     {
-      group_.children.push_back(std::move(condition));
-
-      return *this;
-    } else {
       throw std::domain_error("Children can only be added to group filters");
     }
+
+    mpark::get<group_type>(variant_).children.push_back(std::move(condition));
+
+    return *this;
   }
 
   filter::const_iterator filter::begin() const
   {
-    if (type_ == type::group)
+    if (type_ != type::group)
     {
-      return std::begin(group_.children);
-    } else {
       throw std::domain_error("This filter has no children");
     }
+
+    return std::begin(mpark::get<group_type>(variant_).children);
   }
 
   filter::const_iterator filter::end() const
   {
-    if (type_ == type::group)
+    if (type_ != type::group)
     {
-      return std::end(group_.children);
-    } else {
       throw std::domain_error("This filter has no children");
     }
+
+    return std::end(mpark::get<group_type>(variant_).children);
   }
 
-  filter::filter(std::string name, bool internal, filter subfilter) :
-    type_(type::mask)
+  filter::filter(
+    std::string name,
+    bool internal,
+    filter subfilter) :
+      type_(type::mask),
+      variant_(mask_type {
+        std::move(name),
+        internal,
+        rec_filter(new filter(std::move(subfilter)))
+      })
   {
-    new(&mask_.name) std::string(std::move(name));
-    mask_.internal = internal;
-    new(&mask_.subfilter) std::unique_ptr<filter>(new filter(std::move(subfilter)));
   }
 
   const std::string& filter::getMaskName() const
   {
-    if (type_ == type::mask)
+    if (type_ != type::mask)
     {
-      return mask_.name;
-    } else {
       throw std::domain_error("This filter is not a mask filter");
     }
+
+    return mpark::get<mask_type>(variant_).name;
   }
 
   bool filter::isMaskInternal() const
   {
-    if (type_ == type::mask)
+    if (type_ != type::mask)
     {
-      return mask_.internal;
-    } else {
       throw std::domain_error("This filter is not a mask filter");
     }
+
+    return mpark::get<mask_type>(variant_).internal;
   }
 
   const filter& filter::getMaskFilter() const
   {
-    if (type_ == type::mask)
+    if (type_ != type::mask)
     {
-      return *mask_.subfilter;
-    } else {
       throw std::domain_error("This filter is not a mask filter");
     }
+
+    return *mpark::get<mask_type>(variant_).subfilter;
   }
 
   filter filter::operator!() const
@@ -1123,110 +676,169 @@ namespace verbly {
 
       case type::singleton:
       {
-        switch (singleton_.filterType)
+        const singleton_type& ss = mpark::get<singleton_type>(variant_);
+
+        switch (ss.filterType)
         {
           case comparison::int_equals:
           {
-            return filter(singleton_.filterField, comparison::int_does_not_equal, singleton_.intValue);
+            return filter(
+              ss.filterField,
+              comparison::int_does_not_equal,
+              mpark::get<int>(ss.data));
           }
 
           case comparison::int_does_not_equal:
           {
-            return filter(singleton_.filterField, comparison::int_equals, singleton_.intValue);
+            return filter(
+              ss.filterField,
+              comparison::int_equals,
+              mpark::get<int>(ss.data));
           }
 
           case comparison::int_is_at_least:
           {
-            return filter(singleton_.filterField, comparison::int_is_less_than, singleton_.intValue);
+            return filter(
+              ss.filterField,
+              comparison::int_is_less_than,
+              mpark::get<int>(ss.data));
           }
 
           case comparison::int_is_greater_than:
           {
-            return filter(singleton_.filterField, comparison::int_is_at_most, singleton_.intValue);
+            return filter(
+              ss.filterField,
+              comparison::int_is_at_most,
+              mpark::get<int>(ss.data));
           }
 
           case comparison::int_is_at_most:
           {
-            return filter(singleton_.filterField, comparison::int_is_greater_than, singleton_.intValue);
+            return filter(
+              ss.filterField,
+              comparison::int_is_greater_than,
+              mpark::get<int>(ss.data));
           }
 
           case comparison::int_is_less_than:
           {
-            return filter(singleton_.filterField, comparison::int_is_at_least, singleton_.intValue);
+            return filter(
+              ss.filterField,
+              comparison::int_is_at_least,
+              mpark::get<int>(ss.data));
           }
 
           case comparison::boolean_equals:
           {
-            return filter(singleton_.filterField, comparison::boolean_equals, !singleton_.boolValue);
+            return filter(
+              ss.filterField,
+              comparison::boolean_equals,
+              !mpark::get<int>(ss.data));
           }
 
           case comparison::string_equals:
           {
-            return filter(singleton_.filterField, comparison::string_does_not_equal, singleton_.stringValue);
+            return filter(
+              ss.filterField,
+              comparison::string_does_not_equal,
+              mpark::get<std::string>(ss.data));
           }
 
           case comparison::string_does_not_equal:
           {
-            return filter(singleton_.filterField, comparison::string_equals, singleton_.stringValue);
+            return filter(
+              ss.filterField,
+              comparison::string_equals,
+              mpark::get<std::string>(ss.data));
           }
 
           case comparison::string_is_like:
           {
-            return filter(singleton_.filterField, comparison::string_is_not_like, singleton_.stringValue);
+            return filter(
+              ss.filterField,
+              comparison::string_is_not_like,
+              mpark::get<std::string>(ss.data));
           }
 
           case comparison::string_is_not_like:
           {
-            return filter(singleton_.filterField, comparison::string_is_like, singleton_.stringValue);
+            return filter(
+              ss.filterField,
+              comparison::string_is_like,
+              mpark::get<std::string>(ss.data));
           }
 
           case comparison::is_null:
           {
-            return filter(singleton_.filterField, comparison::is_not_null);
+            return filter(
+              ss.filterField,
+              comparison::is_not_null);
           }
 
           case comparison::is_not_null:
           {
-            return filter(singleton_.filterField, comparison::is_null);
+            return filter(
+              ss.filterField,
+              comparison::is_null);
           }
 
           case comparison::matches:
           {
-            return filter(singleton_.filterField, comparison::does_not_match, *singleton_.join);
+            return filter(
+              ss.filterField,
+              comparison::does_not_match,
+              *mpark::get<rec_filter>(ss.data));
           }
 
           case comparison::does_not_match:
           {
-            return filter(singleton_.filterField, comparison::matches, *singleton_.join);
+            return filter(
+              ss.filterField,
+              comparison::matches,
+              *mpark::get<rec_filter>(ss.data));
           }
 
           case comparison::hierarchally_matches:
           {
-            return filter(singleton_.filterField, comparison::does_not_hierarchally_match, *singleton_.join);
+            return filter(
+              ss.filterField,
+              comparison::does_not_hierarchally_match,
+              *mpark::get<rec_filter>(ss.data));
           }
 
           case comparison::does_not_hierarchally_match:
           {
-            return filter(singleton_.filterField, comparison::hierarchally_matches, *singleton_.join);
+            return filter(
+              ss.filterField,
+              comparison::hierarchally_matches,
+              *mpark::get<rec_filter>(ss.data));
           }
 
           case comparison::field_equals:
           {
-            return filter(singleton_.filterField, comparison::field_does_not_equal, singleton_.compareField);
+            return filter(
+              ss.filterField,
+              comparison::field_does_not_equal,
+              mpark::get<field>(ss.data));
           }
 
           case comparison::field_does_not_equal:
           {
-            return filter(singleton_.filterField, comparison::field_equals, singleton_.compareField);
+            return filter(
+              ss.filterField,
+              comparison::field_equals,
+              mpark::get<field>(ss.data));
           }
         }
       }
 
       case type::group:
       {
-        filter result(!group_.orlogic);
+        const group_type& gg = mpark::get<group_type>(variant_);
 
-        for (const filter& child : group_.children)
+        filter result(!gg.orlogic);
+
+        for (const filter& child : gg.children)
         {
           result += !child;
         }
@@ -1236,7 +848,9 @@ namespace verbly {
 
       case type::mask:
       {
-        return {mask_.name, mask_.internal, !*mask_.subfilter};
+        const mask_type& mm = mpark::get<mask_type>(variant_);
+
+        return {mm.name, mm.internal, !*mm.subfilter};
       }
     }
   }
@@ -1264,24 +878,35 @@ namespace verbly {
       case type::mask:
       {
         filter result(false);
-        result.group_.children.push_back(*this);
-        result.group_.children.push_back(std::move(condition));
+
+        group_type& gg = mpark::get<group_type>(result.variant_);
+
+        gg.children.push_back(*this);
+        gg.children.push_back(std::move(condition));
 
         return result;
       }
 
       case type::group:
       {
-        if (group_.orlogic)
+        const group_type& og = mpark::get<group_type>(variant_);
+
+        if (og.orlogic)
         {
           filter result(false);
-          result.group_.children.push_back(*this);
-          result.group_.children.push_back(std::move(condition));
+
+          group_type& gg = mpark::get<group_type>(result.variant_);
+
+          gg.children.push_back(*this);
+          gg.children.push_back(std::move(condition));
 
           return result;
         } else {
           filter result(*this);
-          result.group_.children.push_back(std::move(condition));
+
+          group_type& gg = mpark::get<group_type>(result.variant_);
+
+          gg.children.push_back(std::move(condition));
 
           return result;
         }
@@ -1302,24 +927,35 @@ namespace verbly {
       case type::mask:
       {
         filter result(true);
-        result.group_.children.push_back(*this);
-        result.group_.children.push_back(std::move(condition));
+
+        group_type& gg = mpark::get<group_type>(result.variant_);
+
+        gg.children.push_back(*this);
+        gg.children.push_back(std::move(condition));
 
         return result;
       }
 
       case type::group:
       {
-        if (!group_.orlogic)
+        const group_type& og = mpark::get<group_type>(variant_);
+
+        if (!og.orlogic)
         {
           filter result(true);
-          result.group_.children.push_back(*this);
-          result.group_.children.push_back(std::move(condition));
+
+          group_type& gg = mpark::get<group_type>(result.variant_);
+
+          gg.children.push_back(*this);
+          gg.children.push_back(std::move(condition));
 
           return result;
         } else {
           filter result(*this);
-          result.group_.children.push_back(std::move(condition));
+
+          group_type& gg = mpark::get<group_type>(result.variant_);
+
+          gg.children.push_back(std::move(condition));
 
           return result;
         }
@@ -1344,6 +980,8 @@ namespace verbly {
 
         case type::singleton:
         {
+          const singleton_type& ss = mpark::get<singleton_type>(variant_);
+
           // First, switch on the normalized context, and then switch on the
           // current context. We recursively recontextualize by using the
           // current filter as a subquery for a join such that the context of
@@ -1361,7 +999,7 @@ namespace verbly {
 
             case object::notion:
             {
-              switch (singleton_.filterField.getObject())
+              switch (ss.filterField.getObject())
               {
                 case object::undefined:
                 case object::notion:
@@ -1382,7 +1020,7 @@ namespace verbly {
 
             case object::word:
             {
-              switch (singleton_.filterField.getObject())
+              switch (ss.filterField.getObject())
               {
                 case object::notion:
                 {
@@ -1404,13 +1042,14 @@ namespace verbly {
                 case object::form:
                 case object::pronunciation:
                 {
-                  return (verbly::word::forms(inflection::base) %= normalize(object::form));
+                  return (verbly::word::forms(inflection::base) %=
+                    normalize(object::form));
                 }
               }
 
               case object::frame:
               {
-                switch (singleton_.filterField.getObject())
+                switch (ss.filterField.getObject())
                 {
                   case object::undefined:
                   case object::frame:
@@ -1435,7 +1074,7 @@ namespace verbly {
 
               case object::part:
               {
-                switch (singleton_.filterField.getObject())
+                switch (ss.filterField.getObject())
                 {
                   case object::undefined:
                   case object::part:
@@ -1456,14 +1095,15 @@ namespace verbly {
 
               case object::form:
               {
-                switch (singleton_.filterField.getObject())
+                switch (ss.filterField.getObject())
                 {
                   case object::notion:
                   case object::word:
                   case object::frame:
                   case object::part:
                   {
-                    return (verbly::form::words(inflection::base) %= normalize(object::word));
+                    return (verbly::form::words(inflection::base) %=
+                      normalize(object::word));
                   }
 
                   case object::undefined:
@@ -1474,14 +1114,15 @@ namespace verbly {
 
                   case object::pronunciation:
                   {
-                    return (verbly::form::pronunciations %= normalize(object::pronunciation));
+                    return (verbly::form::pronunciations %=
+                      normalize(object::pronunciation));
                   }
                 }
               }
 
               case object::pronunciation:
               {
-                switch (singleton_.filterField.getObject())
+                switch (ss.filterField.getObject())
                 {
                   case object::notion:
                   case object::word:
@@ -1489,7 +1130,8 @@ namespace verbly {
                   case object::part:
                   case object::form:
                   {
-                    return verbly::pronunciation::forms %= normalize(object::form);
+                    return verbly::pronunciation::forms %=
+                      normalize(object::form);
                   }
 
                   case object::undefined:
@@ -1505,12 +1147,14 @@ namespace verbly {
 
         case type::group:
         {
-          filter result(group_.orlogic);
+          const group_type& gg = mpark::get<group_type>(variant_);
+
+          filter result(gg.orlogic);
           std::map<field, filter> positiveJoins;
           std::map<field, filter> negativeJoins;
           std::map<std::tuple<std::string, bool>, filter> masks;
 
-          for (const filter& child : group_.children)
+          for (const filter& child : gg.children)
           {
             filter normalized = child.normalize(context);
 
@@ -1521,37 +1165,44 @@ namespace verbly {
             {
               case type::singleton:
               {
+                singleton_type& normSing =
+                  mpark::get<singleton_type>(normalized.variant_);
+
                 switch (normalized.getComparison())
                 {
                   case comparison::matches:
                   {
-                    if (!positiveJoins.count(normalized.singleton_.filterField))
+                    if (!positiveJoins.count(normSing.filterField))
                     {
-                      positiveJoins[normalized.getField()] = filter(group_.orlogic);
+                      positiveJoins[normalized.getField()] = filter(gg.orlogic);
                     }
 
-                    positiveJoins.at(normalized.getField()) += std::move(*normalized.singleton_.join);
+                    positiveJoins.at(normalized.getField()) +=
+                      std::move(*mpark::get<rec_filter>(normSing.data));
 
                     break;
                   }
 
                   case comparison::does_not_match:
                   {
-                    if (!negativeJoins.count(normalized.singleton_.filterField))
+                    if (!negativeJoins.count(normSing.filterField))
                     {
-                      negativeJoins[normalized.getField()] = filter(!group_.orlogic);
+                      negativeJoins[normalized.getField()] =
+                        filter(!gg.orlogic);
                     }
 
-                    negativeJoins.at(normalized.getField()) += std::move(*normalized.singleton_.join);
+                    negativeJoins.at(normalized.getField()) +=
+                      std::move(*mpark::get<rec_filter>(normSing.data));
 
                     break;
                   }
 
                   case comparison::hierarchally_matches:
                   {
-                    if (group_.orlogic)
+                    if (gg.orlogic)
                     {
-                      positiveJoins[normalized.getField()] |= std::move(*normalized.singleton_.join);
+                      positiveJoins[normalized.getField()] |=
+                        std::move(*mpark::get<rec_filter>(normSing.data));
                     } else {
                       result += std::move(normalized);
                     }
@@ -1561,9 +1212,10 @@ namespace verbly {
 
                   case comparison::does_not_hierarchally_match:
                   {
-                    if (!group_.orlogic)
+                    if (!gg.orlogic)
                     {
-                      negativeJoins[normalized.getField()] |= std::move(*normalized.singleton_.join);
+                      negativeJoins[normalized.getField()] |=
+                        std::move(*mpark::get<rec_filter>(normSing.data));
                     } else {
                       result += std::move(normalized);
                     }
@@ -1606,14 +1258,20 @@ namespace verbly {
 
               case type::mask:
               {
-                auto maskId = std::tie(normalized.mask_.name, normalized.mask_.internal);
+                mask_type& normMask =
+                  mpark::get<mask_type>(normalized.variant_);
+
+                auto maskId =
+                  std::tie(
+                    normMask.name,
+                    normMask.internal);
 
                 if (!masks.count(maskId))
                 {
-                  masks[maskId] = filter(group_.orlogic);
+                  masks[maskId] = filter(gg.orlogic);
                 }
 
-                masks.at(maskId) += std::move(*normalized.mask_.subfilter);
+                masks.at(maskId) += std::move(*normMask.subfilter);
 
                 break;
               }
@@ -1625,7 +1283,8 @@ namespace verbly {
             const field& joinOn = mapping.first;
             filter& joinCondition = mapping.second;
 
-            result += (joinOn %= joinCondition.normalize(joinOn.getJoinObject()));
+            result +=
+              (joinOn %= joinCondition.normalize(joinOn.getJoinObject()));
           }
 
           for (auto& mapping : negativeJoins)
@@ -1633,7 +1292,8 @@ namespace verbly {
             const field& joinOn = mapping.first;
             filter& joinCondition = mapping.second;
 
-            result += !(joinOn %= joinCondition.normalize(joinOn.getJoinObject()));
+            result +=
+              !(joinOn %= joinCondition.normalize(joinOn.getJoinObject()));
           }
 
           for (auto& mapping : masks)
@@ -1650,7 +1310,12 @@ namespace verbly {
 
         case type::mask:
         {
-          return {mask_.name, mask_.internal, mask_.subfilter->normalize(context)};
+          const mask_type& mm = mpark::get<mask_type>(variant_);
+
+          return {
+            mm.name,
+            mm.internal,
+            mm.subfilter->normalize(context)};
         }
       }
     }
@@ -1668,8 +1333,10 @@ namespace verbly {
 
       case type::group:
       {
-        filter result(group_.orlogic);
-        for (const filter& child : group_.children)
+        const group_type& gg = mpark::get<group_type>(variant_);
+
+        filter result(gg.orlogic);
+        for (const filter& child : gg.children)
         {
           filter compactedChild = child.compact();
           if (compactedChild.type_ != type::empty)
@@ -1678,12 +1345,14 @@ namespace verbly {
           }
         }
 
-        if (result.group_.children.empty())
+        group_type& resGroup = mpark::get<group_type>(result.variant_);
+
+        if (resGroup.children.empty())
         {
           result = {};
-        } else if (result.group_.children.size() == 1)
+        } else if (resGroup.children.size() == 1)
         {
-          filter tempChild = std::move(result.group_.children.front());
+          filter tempChild = std::move(resGroup.children.front());
 
           result = std::move(tempChild);
         }
@@ -1693,13 +1362,18 @@ namespace verbly {
 
       case type::mask:
       {
-        filter subfilter = mask_.subfilter->compact();
+        const mask_type& mm = mpark::get<mask_type>(variant_);
+
+        filter subfilter = mm.subfilter->compact();
 
         if (subfilter.type_ == type::empty)
         {
           return {};
         } else {
-          return {mask_.name, mask_.internal, std::move(subfilter)};
+          return {
+            mm.name,
+            mm.internal,
+            std::move(subfilter)};
         }
       }
     }

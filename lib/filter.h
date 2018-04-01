@@ -4,6 +4,8 @@
 #include <list>
 #include <string>
 #include <memory>
+#include "../vendor/hkutil/vendor/variant.hpp"
+#include "../vendor/hkutil/hkutil/recptr.h"
 #include "field.h"
 #include "enums.h"
 
@@ -11,6 +13,7 @@ namespace verbly {
 
   class filter {
   public:
+
     enum class type {
       empty,
       singleton,
@@ -40,23 +43,6 @@ namespace verbly {
       field_does_not_equal
     };
 
-    // Copy and move constructors
-
-    filter(const filter& other);
-    filter(filter&& other);
-
-    // Assignment
-
-    filter& operator=(filter other);
-
-    // Swap
-
-    friend void swap(filter& first, filter& second);
-
-    // Destructor
-
-    ~filter();
-
     // Accessors
 
     type getType() const
@@ -66,7 +52,7 @@ namespace verbly {
 
     // Empty
 
-    filter();
+    filter() = default;
 
     // Singleton
 
@@ -140,29 +126,42 @@ namespace verbly {
     filter compact() const;
 
   private:
-    union {
-      struct {
-        field filterField;
-        comparison filterType;
-        union {
-          std::unique_ptr<filter> join;
-          std::string stringValue;
-          int intValue;
-          bool boolValue;
-          field compareField;
-        };
-      } singleton_;
-      struct {
-        std::list<filter> children;
-        bool orlogic;
-      } group_;
-      struct {
-        std::string name;
-        bool internal;
-        std::unique_ptr<filter> subfilter;
-      } mask_;
+
+    using rec_filter = hatkirby::recptr<filter>;
+
+    struct singleton_type {
+      field filterField;
+      comparison filterType;
+
+      mpark::variant<
+        mpark::monostate,
+        rec_filter,
+        std::string,
+        int,
+        bool,
+        field> data;
     };
+
+    struct group_type {
+      std::list<filter> children;
+      bool orlogic;
+    };
+
+    struct mask_type {
+      std::string name;
+      bool internal;
+      rec_filter subfilter;
+    };
+
+    using variant_type =
+      mpark::variant<
+        mpark::monostate,
+        singleton_type,
+        group_type,
+        mask_type>;
+
     type type_ = type::empty;
+    variant_type variant_;
 
   };
 
