@@ -2,8 +2,8 @@
 #define PRONUNCIATION_H_584A08DD
 
 #include <string>
-#include <cassert>
 #include <hkutil/database.h>
+#include <stdexcept>
 
 namespace verbly {
   namespace generator {
@@ -34,16 +34,20 @@ namespace verbly {
 
       std::string getRhymePhonemes() const
       {
-        // Calling code should always call hasRhyme first.
-        assert(!rhyme_.empty());
+        if (rhyme_.empty())
+        {
+          throw std::domain_error("Pronunciation does not have a rhyme");
+        }
 
         return rhyme_;
       }
 
       std::string getPrerhyme() const
       {
-        // Calling code should always call hasRhyme first.
-        assert(!rhyme_.empty());
+        if (rhyme_.empty())
+        {
+          throw std::domain_error("Pronunciation does not have a rhyme");
+        }
 
         return prerhyme_;
       }

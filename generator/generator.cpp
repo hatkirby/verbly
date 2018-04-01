@@ -242,8 +242,7 @@ namespace verbly {
           {
             adj.setAdjectivePosition(positioning::postnominal);
           } else {
-            // Can't happen because of how we specified the regex.
-            assert(false);
+            throw std::logic_error("adjpos_str invalid");
           }
         }
       }

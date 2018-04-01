@@ -1,7 +1,7 @@
 #ifndef WORD_H_91F99D46
 #define WORD_H_91F99D46
 
-#include <cassert>
+#include <stdexcept>
 #include <hkutil/database.h>
 #include "../lib/enums.h"
 
@@ -61,8 +61,10 @@ namespace verbly {
 
       int getTagCount() const
       {
-        // Calling code should always call hasTagCount first.
-        assert(hasTagCount_);
+        if (!hasTagCount_)
+        {
+          throw std::domain_error("Word does not have a tag count");
+        }
 
         return tagCount_;
       }
@@ -79,8 +81,10 @@ namespace verbly {
 
       const group& getVerbGroup() const
       {
-        // Calling code should always call hasVerbGroup first.
-        assert(verbGroup_ != nullptr);
+        if (!hasVerbGroup())
+        {
+          throw std::domain_error("Word does not have a verb group");
+        }
 
         return *verbGroup_;
       }

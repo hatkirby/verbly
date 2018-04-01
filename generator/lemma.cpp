@@ -1,6 +1,6 @@
 #include "lemma.h"
 #include <list>
-#include <cassert>
+#include <stdexcept>
 #include "form.h"
 
 namespace verbly {
@@ -17,8 +17,10 @@ namespace verbly {
 
     void lemma::addInflection(inflection type, const form& f)
     {
-      // There can only be one base form.
-      assert(type != inflection::base);
+      if (type == inflection::base)
+      {
+        throw std::invalid_argument("There can only be one base form");
+      }
 
       inflections_[type].insert(&f);
     }

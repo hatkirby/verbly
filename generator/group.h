@@ -4,7 +4,6 @@
 #include <map>
 #include <set>
 #include <string>
-#include <cassert>
 #include <list>
 #include <hkutil/database.h>
 #include "role.h"

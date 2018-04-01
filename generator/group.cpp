@@ -144,8 +144,8 @@ namespace verbly {
 
             case part::type::invalid:
             {
-              // Invalid parts should not be serialized.
-              assert(false);
+              throw std::invalid_argument(
+                "Invalid parts should not be serialized");
 
               break;
             }
