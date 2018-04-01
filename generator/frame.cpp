@@ -1,6 +1,4 @@
 #include "frame.h"
-#include "database.h"
-#include "field.h"
 
 namespace verbly {
   namespace generator {

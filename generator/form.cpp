@@ -1,8 +1,7 @@
 #include "form.h"
 #include <algorithm>
 #include <list>
-#include "database.h"
-#include "field.h"
+#include <cctype>
 #include "pronunciation.h"
 
 namespace verbly {
@@ -14,7 +13,7 @@ namespace verbly {
       id_(nextId_++),
       text_(text),
       complexity_(std::count(std::begin(text), std::end(text), ' ') + 1),
-      proper_(std::any_of(std::begin(text), std::end(text), std::isupper)),
+      proper_(std::any_of(std::begin(text), std::end(text), ::isupper)),
       length_(text.length())
     {
     }
@@ -24,28 +23,30 @@ namespace verbly {
       pronunciations_.insert(&p);
     }
 
-    database& operator<<(database& db, const form& arg)
+    hatkirby::database& operator<<(hatkirby::database& db, const form& arg)
     {
       // Serialize the form first.
       {
-        std::list<field> fields;
-        fields.emplace_back("form_id", arg.getId());
-        fields.emplace_back("form", arg.getText());
-        fields.emplace_back("complexity", arg.getComplexity());
-        fields.emplace_back("proper", arg.isProper());
-        fields.emplace_back("length", arg.getLength());
-
-        db.insertIntoTable("forms", std::move(fields));
+        db.insertIntoTable(
+          "forms",
+          {
+            { "form_id", arg.getId() },
+            { "form", arg.getText() },
+            { "complexity", arg.getComplexity() },
+            { "proper", arg.isProper() },
+            { "length", arg.getLength() }
+          });
       }
 
       // Then, serialize the form/pronunciation relationship.
       for (const pronunciation* p : arg.getPronunciations())
       {
-        std::list<field> fields;
-        fields.emplace_back("form_id", arg.getId());
-        fields.emplace_back("pronunciation_id", p->getId());
-
-        db.insertIntoTable("forms_pronunciations", std::move(fields));
+        db.insertIntoTable(
+          "forms_pronunciations",
+          {
+            { "form_id", arg.getId() },
+            { "pronunciation_id", p->getId() }
+          });
       }
 
       return db;

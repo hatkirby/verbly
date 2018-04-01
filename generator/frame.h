@@ -8,8 +8,6 @@
 namespace verbly {
   namespace generator {
 
-    class database;
-
     class frame {
     public:
 
@@ -20,9 +18,9 @@ namespace verbly {
       // Constructor
 
       frame();
-      
+
       // Duplication
-      
+
       static frame duplicate(const frame& other);
 
       // Mutators
@@ -35,12 +33,12 @@ namespace verbly {
       {
         return id_;
       }
-      
+
       int getLength() const
       {
         return parts_.size();
       }
-      
+
       const part& operator[](int index) const
       {
         return parts_.at(index);

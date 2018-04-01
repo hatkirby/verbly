@@ -2,6 +2,7 @@
 #define WORD_H_91F99D46
 
 #include <cassert>
+#include <hkutil/database.h>
 #include "../lib/enums.h"
 
 namespace verbly {
@@ -9,7 +10,6 @@ namespace verbly {
 
     class notion;
     class lemma;
-    class database;
     class group;
 
     class word {
@@ -102,7 +102,7 @@ namespace verbly {
 
     // Serializer
 
-    database& operator<<(database& db, const word& arg);
+    hatkirby::database& operator<<(hatkirby::database& db, const word& arg);
 
   };
 };

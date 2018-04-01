@@ -3,9 +3,7 @@
 #include <algorithm>
 #include <cctype>
 #include <iterator>
-#include "database.h"
-#include "field.h"
-#include "../lib/util.h"
+#include <hkutil/string.h>
 
 namespace verbly {
   namespace generator {
@@ -16,28 +14,45 @@ namespace verbly {
       id_(nextId_++),
       phonemes_(phonemes)
     {
-      auto phonemeList = split<std::list<std::string>>(phonemes, " ");
+      auto phonemeList =
+        hatkirby::split<std::list<std::string>>(phonemes, " ");
 
-      auto rhymeStart = std::find_if(std::begin(phonemeList), std::end(phonemeList), [] (std::string phoneme) {
-        return phoneme.find("1") != std::string::npos;
-      });
+      std::list<std::string>::iterator rhymeStart =
+        std::find_if(
+          std::begin(phonemeList),
+          std::end(phonemeList),
+          [] (std::string phoneme) {
+            return phoneme.find("1") != std::string::npos;
+          });
 
       // Rhyme detection
       if (rhymeStart != std::end(phonemeList))
       {
         std::list<std::string> rhymePhonemes;
 
-        std::transform(rhymeStart, std::end(phonemeList), std::back_inserter(rhymePhonemes), [] (std::string phoneme) {
-          std::string naked;
+        std::transform(
+          rhymeStart,
+          std::end(phonemeList),
+          std::back_inserter(rhymePhonemes),
+          [] (std::string phoneme) {
+            std::string naked;
 
-          std::remove_copy_if(std::begin(phoneme), std::end(phoneme), std::back_inserter(naked), [] (char ch) {
-            return std::isdigit(ch);
+            std::remove_copy_if(
+              std::begin(phoneme),
+              std::end(phoneme),
+              std::back_inserter(naked),
+              [] (char ch) {
+                return std::isdigit(ch);
+              });
+
+            return naked;
           });
 
-          return naked;
-        });
-
-        rhyme_ = implode(std::begin(rhymePhonemes), std::end(rhymePhonemes), " ");
+        rhyme_ =
+          hatkirby::implode(
+            std::begin(rhymePhonemes),
+            std::end(rhymePhonemes),
+            " ");
 
         if (rhymeStart != std::begin(phonemeList))
         {
@@ -63,9 +78,11 @@ namespace verbly {
       }
     }
 
-    database& operator<<(database& db, const pronunciation& arg)
+    hatkirby::database& operator<<(
+      hatkirby::database& db,
+      const pronunciation& arg)
     {
-      std::list<field> fields;
+      std::list<hatkirby::column> fields;
 
       fields.emplace_back("pronunciation_id", arg.getId());
       fields.emplace_back("phonemes", arg.getPhonemes());

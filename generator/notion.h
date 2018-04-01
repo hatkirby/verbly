@@ -1,9 +1,9 @@
 #ifndef NOTION_H_221DE2BC
 #define NOTION_H_221DE2BC
 
-#include <cassert>
 #include <list>
 #include <string>
+#include <hkutil/database.h>
 #include "../lib/enums.h"
 
 namespace verbly {
@@ -43,24 +43,30 @@ namespace verbly {
 
       int getWnid() const
       {
-        // Calling code should always call hasWnid first.
-        assert(hasWnid_);
+        if (!hasWnid_)
+        {
+          throw std::domain_error("Notion does not have wnid");
+        }
 
         return wnid_;
       }
 
       int getNumOfImages() const
       {
-        // Calling code should always call hasWnid and check that the notion is a noun first.
-        assert(hasWnid_ && (partOfSpeech_ == part_of_speech::noun));
+        if (!hasWnid_ || (partOfSpeech_ != part_of_speech::noun))
+        {
+          throw std::domain_error("Notion is not a noun with wnid");
+        }
 
         return numOfImages_;
       }
 
       std::list<std::string> getPrepositionGroups() const
       {
-        // Calling code should always check that the notion is a preposition first.
-        assert(partOfSpeech_ == part_of_speech::preposition);
+        if (partOfSpeech_ != part_of_speech::preposition)
+        {
+          throw std::domain_error("Notion is not a preposition");
+        }
 
         return prepositionGroups_;
       }
@@ -81,7 +87,7 @@ namespace verbly {
 
     // Serializer
 
-    database& operator<<(database& db, const notion& arg);
+    hatkirby::database& operator<<(hatkirby::database& db, const notion& arg);
 
   };
 };

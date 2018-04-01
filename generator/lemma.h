@@ -4,12 +4,12 @@
 #include <string>
 #include <map>
 #include <set>
+#include <hkutil/database.h>
 #include "../lib/enums.h"
 
 namespace verbly {
   namespace generator {
 
-    class database;
     class form;
 
     class lemma {
@@ -50,7 +50,7 @@ namespace verbly {
 
     // Serializer
 
-    database& operator<<(database& db, const lemma& arg);
+    hatkirby::database& operator<<(hatkirby::database& db, const lemma& arg);
 
   };
 };

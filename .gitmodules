@@ -1,0 +1,3 @@
+[submodule "vendor/hkutil"]
+	path = vendor/hkutil
+	url = git@github.com:hatkirby/hkutil

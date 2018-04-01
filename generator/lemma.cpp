@@ -1,8 +1,6 @@
 #include "lemma.h"
 #include <list>
 #include <cassert>
-#include "field.h"
-#include "database.h"
 #include "form.h"
 
 namespace verbly {
@@ -35,7 +33,7 @@ namespace verbly {
       }
     }
 
-    database& operator<<(database& db, const lemma& arg)
+    hatkirby::database& operator<<(hatkirby::database& db, const lemma& arg)
     {
       for (inflection type : {
         inflection::base,
@@ -49,12 +47,13 @@ namespace verbly {
       {
         for (const form* f : arg.getInflections(type))
         {
-          std::list<field> fields;
-          fields.emplace_back("lemma_id", arg.getId());
-          fields.emplace_back("form_id", f->getId());
-          fields.emplace_back("category", static_cast<int>(type));
-
-          db.insertIntoTable("lemmas_forms", std::move(fields));
+          db.insertIntoTable(
+            "lemmas_forms",
+            {
+              { "lemma_id", arg.getId() },
+              { "form_id", f->getId() },
+              { "category", static_cast<int>(type) }
+            });
         }
       }
 

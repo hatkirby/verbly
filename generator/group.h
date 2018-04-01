@@ -6,13 +6,13 @@
 #include <string>
 #include <cassert>
 #include <list>
+#include <hkutil/database.h>
 #include "role.h"
 
 namespace verbly {
   namespace generator {
 
     class frame;
-    class database;
 
     class group {
     public:
@@ -67,7 +67,7 @@ namespace verbly {
 
     // Serializer
 
-    database& operator<<(database& db, const group& arg);
+    hatkirby::database& operator<<(hatkirby::database& db, const group& arg);
 
   };
 };

@@ -1,10 +1,8 @@
 #include "group.h"
 #include <stdexcept>
 #include <list>
-#include "database.h"
-#include "field.h"
+#include <hkutil/string.h>
 #include "frame.h"
-#include "../lib/util.h"
 
 namespace verbly {
   namespace generator {
@@ -50,28 +48,26 @@ namespace verbly {
       return roles_.at(name);
     }
 
-    database& operator<<(database& db, const group& arg)
+    hatkirby::database& operator<<(hatkirby::database& db, const group& arg)
     {
       // Serialize each frame
       for (const frame& f : arg.getFrames())
       {
         // First, serialize the group/frame relationship
-        {
-          std::list<field> fields;
-
-          fields.emplace_back("frame_id", f.getId());
-          fields.emplace_back("group_id", arg.getId());
-          fields.emplace_back("length", f.getLength());
-
-          db.insertIntoTable("frames", std::move(fields));
-        }
+        db.insertIntoTable(
+          "frames",
+          {
+            { "frame_id", f.getId() },
+            { "group_id", arg.getId() },
+            { "length", f.getLength() }
+          });
 
         // Then, serialize the frame parts in the context of the group
         for (int partIndex = 0; partIndex < f.getLength(); partIndex++)
         {
           const part& p = f[partIndex];
 
-          std::list<field> fields;
+          std::list<hatkirby::column> fields;
           fields.emplace_back("part_id", p.getId());
           fields.emplace_back("frame_id", f.getId());
           fields.emplace_back("part_index", partIndex);
@@ -92,23 +88,23 @@ namespace verbly {
 
               for (const std::string& s : partSelrestrs)
               {
-                std::list<field> selrestrFields;
-
-                selrestrFields.emplace_back("part_id", p.getId());
-                selrestrFields.emplace_back("selrestr", s);
-
-                db.insertIntoTable("selrestrs", std::move(selrestrFields));
+                db.insertIntoTable(
+                  "selrestrs",
+                  {
+                    { "part_id", p.getId() },
+                    { "selrestr", s }
+                  });
               }
 
               // Short interlude to serialize the synrestrs
               for (const std::string& s : p.getNounSynrestrs())
               {
-                std::list<field> synrestrFields;
-
-                synrestrFields.emplace_back("part_id", p.getId());
-                synrestrFields.emplace_back("synrestr", s);
-
-                db.insertIntoTable("synrestrs", std::move(synrestrFields));
+                db.insertIntoTable(
+                  "synrestrs",
+                  {
+                    { "part_id", p.getId() },
+                    { "synrestr", s }
+                  });
               }
 
               break;
@@ -117,10 +113,17 @@ namespace verbly {
             case part::type::preposition:
             {
               std::set<std::string> setChoices = p.getPrepositionChoices();
-              std::string serializedChoices = implode(std::begin(setChoices), std::end(setChoices), ",");
+
+              std::string serializedChoices =
+                hatkirby::implode(
+                  std::begin(setChoices),
+                  std::end(setChoices),
+                  ",");
 
               fields.emplace_back("prepositions", std::move(serializedChoices));
-              fields.emplace_back("preposition_literality", p.isPrepositionLiteral() ? 1 : 0);
+
+              fields.emplace_back("preposition_literality",
+                p.isPrepositionLiteral() ? 1 : 0);
 
               break;
             }

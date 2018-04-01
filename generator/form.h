@@ -3,6 +3,7 @@
 
 #include <string>
 #include <set>
+#include <hkutil/database.h>
 
 namespace verbly {
   namespace generator {
@@ -68,7 +69,7 @@ namespace verbly {
 
     // Serializer
 
-    database& operator<<(database& db, const form& arg);
+    hatkirby::database& operator<<(hatkirby::database& db, const form& arg);
 
   };
 };

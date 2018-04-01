@@ -1,8 +1,4 @@
 #include "notion.h"
-#include <string>
-#include <list>
-#include "database.h"
-#include "field.h"
 
 namespace verbly {
   namespace generator {
@@ -28,21 +24,25 @@ namespace verbly {
 
     void notion::incrementNumOfImages()
     {
-      // Calling code should always call hasWnid and check that the notion is a noun first.
-      assert(hasWnid_ && (partOfSpeech_ == part_of_speech::noun));
+      if (!hasWnid_ || (partOfSpeech_ != part_of_speech::noun))
+      {
+        throw std::domain_error("Notion is not a noun with wnid");
+      }
 
       numOfImages_++;
     }
 
     void notion::setPrepositionGroups(std::list<std::string> groups)
     {
-      // Calling code should always check that the notion is a preposition first.
-      assert(partOfSpeech_ == part_of_speech::preposition);
+      if (partOfSpeech_ != part_of_speech::preposition)
+      {
+        throw std::domain_error("Notion is not a preposition");
+      }
 
       prepositionGroups_ = groups;
     }
 
-    database& operator<<(database& db, const notion& arg)
+    hatkirby::database& operator<<(hatkirby::database& db, const notion& arg)
     {
       // First, serialize the notion
       {

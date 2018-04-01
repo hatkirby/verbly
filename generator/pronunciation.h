@@ -3,11 +3,10 @@
 
 #include <string>
 #include <cassert>
+#include <hkutil/database.h>
 
 namespace verbly {
   namespace generator {
-
-    class database;
 
     class pronunciation {
     public:
@@ -74,7 +73,9 @@ namespace verbly {
 
     // Serializer
 
-    database& operator<<(database& db, const pronunciation& arg);
+    hatkirby::database& operator<<(
+      hatkirby::database& db,
+      const pronunciation& arg);
 
   };
 };

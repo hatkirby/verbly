@@ -6,7 +6,7 @@
 #include <list>
 #include <set>
 #include <libxml/parser.h>
-#include "database.h"
+#include <hkutil/database.h>
 #include "notion.h"
 #include "word.h"
 #include "lemma.h"

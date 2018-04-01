@@ -1,16 +1,14 @@
 #include "generator.h"
-#include <cassert>
 #include <stdexcept>
 #include <iostream>
 #include <regex>
 #include <dirent.h>
 #include <fstream>
-#include "../lib/enums.h"
-#include "progress.h"
+#include <hkutil/string.h>
+#include <hkutil/progress.h>
 #include "role.h"
 #include "part.h"
-#include "field.h"
-#include "../lib/util.h"
+#include "../lib/enums.h"
 #include "../lib/version.h"
 
 namespace verbly {
@@ -28,7 +26,7 @@ namespace verbly {
         wordNetPath_(wordNetPath),
         cmudictPath_(cmudictPath),
         imageNetPath_(imageNetPath),
-        db_(outputPath)
+        db_(outputPath, hatkirby::dbmode::create)
     {
       // Ensure VerbNet directory exists
       DIR* dir;
@@ -53,7 +51,8 @@ namespace verbly {
 
       // Ensure WordNet tables exist
       for (std::string table : {
-        "s", "sk", "ant", "at", "cls", "hyp", "ins", "mm", "mp", "ms", "per", "sa", "sim", "syntax"
+        "s", "sk", "ant", "at", "cls", "hyp", "ins", "mm", "mp", "ms", "per",
+        "sa", "sim", "syntax"
       })
       {
         if (!std::ifstream(wordNetPath_ + "wn_" + table + ".pl"))
@@ -166,13 +165,15 @@ namespace verbly {
     void generator::readWordNetSynsets()
     {
       std::list<std::string> lines(readFile(wordNetPath_ + "wn_s.pl"));
-      progress ppgs("Reading synsets from WordNet...", lines.size());
+      hatkirby::progress ppgs("Reading synsets from WordNet...", lines.size());
 
       for (std::string line : lines)
       {
         ppgs.update();
 
-        std::regex relation("^s\\(([1234]\\d{8}),(\\d+),'(.+)',\\w,\\d+,(\\d+)\\)\\.$");
+        std::regex relation(
+          "^s\\(([1234]\\d{8}),(\\d+),'(.+)',\\w,\\d+,(\\d+)\\)\\.$");
+
         std::smatch relation_data;
         if (!std::regex_search(line, relation_data, relation))
         {
@@ -206,7 +207,10 @@ namespace verbly {
     void generator::readAdjectivePositioning()
     {
       std::list<std::string> lines(readFile(wordNetPath_ + "wn_syntax.pl"));
-      progress ppgs("Reading adjective positionings from WordNet...", lines.size());
+
+      hatkirby::progress ppgs(
+        "Reading adjective positionings from WordNet...",
+        lines.size());
 
       for (std::string line : lines)
       {
@@ -279,7 +283,10 @@ namespace verbly {
     void generator::readWordNetSenseKeys()
     {
       std::list<std::string> lines(readFile(wordNetPath_ + "wn_sk.pl"));
-      progress ppgs("Reading sense keys from WordNet...", lines.size());
+
+      hatkirby::progress ppgs(
+        "Reading sense keys from WordNet...",
+        lines.size());
 
       for (std::string line : lines)
       {
@@ -350,7 +357,8 @@ namespace verbly {
         }
 
         xmlNodePtr top = xmlDocGetRootElement(doc);
-        if ((top == nullptr) || (xmlStrcmp(top->name, reinterpret_cast<const xmlChar*>("VNCLASS"))))
+        if ((top == nullptr) ||
+            (xmlStrcmp(top->name, reinterpret_cast<const xmlChar*>("VNCLASS"))))
         {
           throw std::logic_error("Bad VerbNet file format: " + filename);
         }
@@ -360,7 +368,8 @@ namespace verbly {
           createGroup(top);
         } catch (const std::exception& e)
         {
-          std::throw_with_nested(std::logic_error("Error parsing VerbNet file: " + filename));
+          std::throw_with_nested(
+            std::logic_error("Error parsing VerbNet file: " + filename));
         }
       }
 
@@ -370,7 +379,7 @@ namespace verbly {
     void generator::readAgidInflections()
     {
       std::list<std::string> lines(readFile(agidPath_));
-      progress ppgs("Reading inflections from AGID...", lines.size());
+      hatkirby::progress ppgs("Reading inflections from AGID...", lines.size());
 
       for (std::string line : lines)
       {
@@ -395,12 +404,17 @@ namespace verbly {
 
         lemma& curLemma = lookupOrCreateLemma(infinitive);
 
-        std::vector<std::list<std::string>> agidForms;
-        for (std::string inflForms : split<std::list<std::string>>(line, " | "))
-        {
-          std::list<std::string> forms;
+        auto inflWordList =
+          hatkirby::split<std::list<std::string>>(line, " | ");
 
-          for (std::string inflForm : split<std::list<std::string>>(std::move(inflForms), ", "))
+        std::vector<std::list<std::string>> agidForms;
+        for (std::string inflForms : inflWordList)
+        {
+          auto inflFormList =
+            hatkirby::split<std::list<std::string>>(std::move(inflForms), ", ");
+
+          std::list<std::string> forms;
+          for (std::string inflForm : inflFormList)
           {
             int sympos = inflForm.find_first_of("~<!? ");
             if (sympos != std::string::npos)
@@ -443,7 +457,8 @@ namespace verbly {
               // - may and shall do not conjugate the way we want them to
               // - methinks only has a past tense and is an outlier
               // - wit has five forms, and is archaic/obscure enough that we can ignore it for now
-              std::cout << " Ignoring verb \"" << infinitive << "\" due to non-standard number of forms." << std::endl;
+              std::cout << " Ignoring verb \"" << infinitive
+                << "\" due to non-standard number of forms." << std::endl;
             }
 
             // For verbs in particular, we sometimes create a notion and a word
@@ -452,9 +467,13 @@ namespace verbly {
             // that this verb appears in the AGID data but not in either WordNet
             // or VerbNet.
             if (!wordsByBaseForm_.count(infinitive)
-              || !std::any_of(std::begin(wordsByBaseForm_.at(infinitive)), std::end(wordsByBaseForm_.at(infinitive)), [] (word* w) {
-                return w->getNotion().getPartOfSpeech() == part_of_speech::verb;
-              }))
+              || !std::any_of(
+                std::begin(wordsByBaseForm_.at(infinitive)),
+                std::end(wordsByBaseForm_.at(infinitive)),
+                [] (word* w) {
+                  return (w->getNotion().getPartOfSpeech() ==
+                    part_of_speech::verb);
+                }))
             {
               notion& n = createNotion(part_of_speech::verb);
               createWord(n, curLemma);
@@ -471,7 +490,8 @@ namespace verbly {
               mappedForms[inflection::superlative] = agidForms[1];
             } else {
               // As of AGID 2014.08.11, this is only "only", which has only the form "onliest"
-              std::cout << " Ignoring adjective/adverb \"" << infinitive << "\" due to non-standard number of forms." << std::endl;
+              std::cout << " Ignoring adjective/adverb \"" << infinitive
+                << "\" due to non-standard number of forms." << std::endl;
             }
 
             break;
@@ -484,7 +504,8 @@ namespace verbly {
               mappedForms[inflection::plural] = agidForms[0];
             } else {
               // As of AGID 2014.08.11, this is non-existent.
-              std::cout << " Ignoring noun \"" << infinitive << "\" due to non-standard number of forms." << std::endl;
+              std::cout << " Ignoring noun \"" << infinitive
+                << "\" due to non-standard number of forms." << std::endl;
             }
 
             break;
@@ -496,7 +517,9 @@ namespace verbly {
         {
           for (std::string infl : std::move(mapping.second))
           {
-            curLemma.addInflection(mapping.first, lookupOrCreateForm(std::move(infl)));
+            curLemma.addInflection(
+              mapping.first,
+              lookupOrCreateForm(std::move(infl)));
           }
         }
       }
@@ -505,7 +528,7 @@ namespace verbly {
     void generator::readPrepositions()
     {
       std::list<std::string> lines(readFile("prepositions.txt"));
-      progress ppgs("Reading prepositions...", lines.size());
+      hatkirby::progress ppgs("Reading prepositions...", lines.size());
 
       for (std::string line : lines)
       {
@@ -515,7 +538,9 @@ namespace verbly {
         std::smatch relation_data;
         std::regex_search(line, relation_data, relation);
         std::string prep = relation_data[1];
-        auto groups = split<std::list<std::string>>(relation_data[2], ", ");
+
+        auto groups =
+          hatkirby::split<std::list<std::string>>(relation_data[2], ", ");
 
         notion& n = createNotion(part_of_speech::preposition);
         lemma& l = lookupOrCreateLemma(prep);
@@ -528,7 +553,10 @@ namespace verbly {
     void generator::readCmudictPronunciations()
     {
       std::list<std::string> lines(readFile(cmudictPath_));
-      progress ppgs("Reading pronunciations from CMUDICT...", lines.size());
+
+      hatkirby::progress ppgs(
+        "Reading pronunciations from CMUDICT...",
+        lines.size());
 
       for (std::string line : lines)
       {
@@ -538,8 +566,7 @@ namespace verbly {
         std::smatch phoneme_data;
         if (std::regex_search(line, phoneme_data, phoneme))
         {
-          std::string canonical(phoneme_data[1]);
-          std::transform(std::begin(canonical), std::end(canonical), std::begin(canonical), ::tolower);
+          std::string canonical = hatkirby::lowercase(phoneme_data[1]);
 
           if (!formByText_.count(canonical))
           {
@@ -575,13 +602,14 @@ namespace verbly {
       }
 
       std::string schema = schemaBuilder.str();
-      auto queries = split<std::list<std::string>>(schema, ";");
-      progress ppgs("Writing database schema...", queries.size());
+      auto queries = hatkirby::split<std::list<std::string>>(schema, ";");
+
+      hatkirby::progress ppgs("Writing database schema...", queries.size());
       for (std::string query : queries)
       {
         if (!queries.empty())
         {
-          db_.runQuery(query);
+          db_.execute(query);
         }
 
         ppgs.update();
@@ -590,10 +618,6 @@ namespace verbly {
 
     void generator::writeVersion()
     {
-      std::list<field> fields;
-      fields.emplace_back("major", DATABASE_MAJOR_VERSION);
-      fields.emplace_back("minor", DATABASE_MINOR_VERSION);
-
       db_.insertIntoTable(
         "version",
         {
@@ -605,7 +629,7 @@ namespace verbly {
     void generator::dumpObjects()
     {
       {
-        progress ppgs("Writing notions...", notions_.size());
+        hatkirby::progress ppgs("Writing notions...", notions_.size());
 
         for (notion& n : notions_)
         {
@@ -616,7 +640,7 @@ namespace verbly {
       }
 
       {
-        progress ppgs("Writing words...", words_.size());
+        hatkirby::progress ppgs("Writing words...", words_.size());
 
         for (word& w : words_)
         {
@@ -627,7 +651,7 @@ namespace verbly {
       }
 
       {
-        progress ppgs("Writing lemmas...", lemmas_.size());
+        hatkirby::progress ppgs("Writing lemmas...", lemmas_.size());
 
         for (lemma& l : lemmas_)
         {
@@ -638,7 +662,7 @@ namespace verbly {
       }
 
       {
-        progress ppgs("Writing forms...", forms_.size());
+        hatkirby::progress ppgs("Writing forms...", forms_.size());
 
         for (form& f : forms_)
         {
@@ -649,7 +673,7 @@ namespace verbly {
       }
 
       {
-        progress ppgs("Writing pronunciations...", pronunciations_.size());
+        hatkirby::progress ppgs("Writing pronunciations...", pronunciations_.size());
 
         for (pronunciation& p : pronunciations_)
         {
@@ -660,7 +684,7 @@ namespace verbly {
       }
 
       {
-        progress ppgs("Writing verb frames...", groups_.size());
+        hatkirby::progress ppgs("Writing verb frames...", groups_.size());
 
         for (group& g : groups_)
         {
@@ -674,22 +698,30 @@ namespace verbly {
     void generator::readWordNetAntonymy()
     {
       std::list<std::string> lines(readFile(wordNetPath_ + "wn_ant.pl"));
-      progress ppgs("Writing antonyms...", lines.size());
+      hatkirby::progress ppgs("Writing antonyms...", lines.size());
       for (auto line : lines)
       {
         ppgs.update();
 
-        std::regex relation("^ant\\(([134]\\d{8}),(\\d+),([134]\\d{8}),(\\d+)\\)\\.");
+        std::regex relation(
+          "^ant\\(([134]\\d{8}),(\\d+),([134]\\d{8}),(\\d+)\\)\\.");
+
         std::smatch relation_data;
         if (!std::regex_search(line, relation_data, relation))
         {
           continue;
         }
 
-        std::pair<int, int> lookup1(std::stoi(relation_data[1]), std::stoi(relation_data[2]));
-        std::pair<int, int> lookup2(std::stoi(relation_data[3]), std::stoi(relation_data[4]));
+        std::pair<int, int> lookup1(
+          std::stoi(relation_data[1]),
+          std::stoi(relation_data[2]));
 
-        if (wordByWnidAndWnum_.count(lookup1) && wordByWnidAndWnum_.count(lookup2))
+        std::pair<int, int> lookup2(
+          std::stoi(relation_data[3]),
+          std::stoi(relation_data[4]));
+
+        if (wordByWnidAndWnum_.count(lookup1) &&
+            wordByWnidAndWnum_.count(lookup2))
         {
           word& word1 = *wordByWnidAndWnum_.at(lookup1);
           word& word2 = *wordByWnidAndWnum_.at(lookup2);
@@ -707,7 +739,7 @@ namespace verbly {
     void generator::readWordNetVariation()
     {
       std::list<std::string> lines(readFile(wordNetPath_ + "wn_at.pl"));
-      progress ppgs("Writing variation...", lines.size());
+      hatkirby::progress ppgs("Writing variation...", lines.size());
       for (auto line : lines)
       {
         ppgs.update();
@@ -730,7 +762,7 @@ namespace verbly {
           db_.insertIntoTable(
             "variation",
             {
-              { "noun_id", notion1.getId() }
+              { "noun_id", notion1.getId() },
               { "adjective_id", notion2.getId() }
             });
         }
@@ -740,20 +772,32 @@ namespace verbly {
     void generator::readWordNetClasses()
     {
       std::list<std::string> lines(readFile(wordNetPath_ + "wn_cls.pl"));
-      progress ppgs("Writing usage, topicality, and regionality...", lines.size());
+
+      hatkirby::progress ppgs(
+        "Writing usage, topicality, and regionality...",
+        lines.size());
+
       for (auto line : lines)
       {
         ppgs.update();
 
-        std::regex relation("^cls\\(([134]\\d{8}),(\\d+),(1\\d{8}),(\\d+),([tur])\\)\\.");
+        std::regex relation(
+          "^cls\\(([134]\\d{8}),(\\d+),(1\\d{8}),(\\d+),([tur])\\)\\.");
+
         std::smatch relation_data;
         if (!std::regex_search(line, relation_data, relation))
         {
           continue;
         }
 
-        std::pair<int, int> lookup1(std::stoi(relation_data[1]), std::stoi(relation_data[2]));
-        std::pair<int, int> lookup2(std::stoi(relation_data[3]), std::stoi(relation_data[4]));
+        std::pair<int, int> lookup1(
+          std::stoi(relation_data[1]),
+          std::stoi(relation_data[2]));
+
+        std::pair<int, int> lookup2(
+          std::stoi(relation_data[3]),
+          std::stoi(relation_data[4]));
+
         std::string class_type = relation_data[5];
 
         std::string table_name;
@@ -773,18 +817,30 @@ namespace verbly {
 
         if ((lookup1.second == 0) && (wordsByWnid_.count(lookup1.first)))
         {
-          std::transform(std::begin(wordsByWnid_.at(lookup1.first)), std::end(wordsByWnid_.at(lookup1.first)), std::back_inserter(leftJoin), [] (word* w) {
-            return w->getId();
-          });
+          auto& wordSet = wordsByWnid_.at(lookup1.first);
+
+          std::transform(
+            std::begin(wordSet),
+            std::end(wordSet),
+            std::back_inserter(leftJoin),
+            [] (word* w) {
+              return w->getId();
+            });
         } else if (wordByWnidAndWnum_.count(lookup1)) {
           leftJoin.push_back(wordByWnidAndWnum_.at(lookup1)->getId());
         }
 
         if ((lookup2.second == 0) && (wordsByWnid_.count(lookup2.first)))
         {
-          std::transform(std::begin(wordsByWnid_.at(lookup2.first)), std::end(wordsByWnid_.at(lookup2.first)), std::back_inserter(rightJoin), [] (word* w) {
-            return w->getId();
-          });
+          auto& wordSet = wordsByWnid_.at(lookup2.first);
+
+          std::transform(
+            std::begin(wordSet),
+            std::end(wordSet),
+            std::back_inserter(rightJoin),
+            [] (word* w) {
+              return w->getId();
+            });
         } else if (wordByWnidAndWnum_.count(lookup2)) {
           rightJoin.push_back(wordByWnidAndWnum_.at(lookup2)->getId());
         }
@@ -807,7 +863,7 @@ namespace verbly {
     void generator::readWordNetCausality()
     {
       std::list<std::string> lines(readFile(wordNetPath_ + "wn_cs.pl"));
-      progress ppgs("Writing causality...", lines.size());
+      hatkirby::progress ppgs("Writing causality...", lines.size());
       for (auto line : lines)
       {
         ppgs.update();
@@ -840,7 +896,7 @@ namespace verbly {
     void generator::readWordNetEntailment()
     {
       std::list<std::string> lines(readFile(wordNetPath_ + "wn_ent.pl"));
-      progress ppgs("Writing entailment...", lines.size());
+      hatkirby::progress ppgs("Writing entailment...", lines.size());
       for (auto line : lines)
       {
         ppgs.update();
@@ -873,7 +929,7 @@ namespace verbly {
     void generator::readWordNetHypernymy()
     {
       std::list<std::string> lines(readFile(wordNetPath_ + "wn_hyp.pl"));
-      progress ppgs("Writing hypernymy...", lines.size());
+      hatkirby::progress ppgs("Writing hypernymy...", lines.size());
       for (auto line : lines)
       {
         ppgs.update();
@@ -906,7 +962,7 @@ namespace verbly {
     void generator::readWordNetInstantiation()
     {
       std::list<std::string> lines(readFile(wordNetPath_ + "wn_ins.pl"));
-      progress ppgs("Writing instantiation...", lines.size());
+      hatkirby::progress ppgs("Writing instantiation...", lines.size());
       for (auto line : lines)
       {
         ppgs.update();
@@ -939,7 +995,7 @@ namespace verbly {
     void generator::readWordNetMemberMeronymy()
     {
       std::list<std::string> lines(readFile(wordNetPath_ + "wn_mm.pl"));
-      progress ppgs("Writing member meronymy...", lines.size());
+      hatkirby::progress ppgs("Writing member meronymy...", lines.size());
       for (auto line : lines)
       {
         ppgs.update();
@@ -972,7 +1028,7 @@ namespace verbly {
     void generator::readWordNetPartMeronymy()
     {
       std::list<std::string> lines(readFile(wordNetPath_ + "wn_mp.pl"));
-      progress ppgs("Writing part meronymy...", lines.size());
+      hatkirby::progress ppgs("Writing part meronymy...", lines.size());
       for (auto line : lines)
       {
         ppgs.update();
@@ -1005,7 +1061,7 @@ namespace verbly {
     void generator::readWordNetSubstanceMeronymy()
     {
       std::list<std::string> lines(readFile(wordNetPath_ + "wn_ms.pl"));
-      progress ppgs("Writing substance meronymy...", lines.size());
+      hatkirby::progress ppgs("Writing substance meronymy...", lines.size());
       for (auto line : lines)
       {
         ppgs.update();
@@ -1038,27 +1094,40 @@ namespace verbly {
     void generator::readWordNetPertainymy()
     {
       std::list<std::string> lines(readFile(wordNetPath_ + "wn_per.pl"));
-      progress ppgs("Writing pertainymy and mannernymy...", lines.size());
+
+      hatkirby::progress ppgs(
+        "Writing pertainymy and mannernymy...",
+        lines.size());
+
       for (auto line : lines)
       {
         ppgs.update();
 
-        std::regex relation("^per\\(([34]\\d{8}),(\\d+),([13]\\d{8}),(\\d+)\\)\\.");
+        std::regex relation(
+          "^per\\(([34]\\d{8}),(\\d+),([13]\\d{8}),(\\d+)\\)\\.");
+
         std::smatch relation_data;
         if (!std::regex_search(line, relation_data, relation))
         {
           continue;
         }
 
-        std::pair<int, int> lookup1(std::stoi(relation_data[1]), std::stoi(relation_data[2]));
-        std::pair<int, int> lookup2(std::stoi(relation_data[3]), std::stoi(relation_data[4]));
+        std::pair<int, int> lookup1(
+          std::stoi(relation_data[1]),
+          std::stoi(relation_data[2]));
 
-        if (wordByWnidAndWnum_.count(lookup1) && wordByWnidAndWnum_.count(lookup2))
+        std::pair<int, int> lookup2(
+          std::stoi(relation_data[3]),
+          std::stoi(relation_data[4]));
+
+        if (wordByWnidAndWnum_.count(lookup1) &&
+            wordByWnidAndWnum_.count(lookup2))
         {
           word& word1 = *wordByWnidAndWnum_.at(lookup1);
           word& word2 = *wordByWnidAndWnum_.at(lookup2);
 
-          if (word1.getNotion().getPartOfSpeech() == part_of_speech::adjective)
+          if (word1.getNotion().getPartOfSpeech() ==
+              part_of_speech::adjective)
           {
             db_.insertIntoTable(
               "pertainymy",
@@ -1066,7 +1135,8 @@ namespace verbly {
                 { "pertainym_id", word1.getId() },
                 { "noun_id", word2.getId() }
               });
-          } else if (word1.getNotion().getPartOfSpeech() == part_of_speech::adverb)
+          } else if (word1.getNotion().getPartOfSpeech() ==
+                      part_of_speech::adverb)
           {
             db_.insertIntoTable(
               "mannernymy",
@@ -1082,7 +1152,7 @@ namespace verbly {
     void generator::readWordNetSpecification()
     {
       std::list<std::string> lines(readFile(wordNetPath_ + "wn_sa.pl"));
-      progress ppgs("Writing specifications...", lines.size());
+      hatkirby::progress ppgs("Writing specifications...", lines.size());
       for (auto line : lines)
       {
         ppgs.update();
@@ -1094,10 +1164,17 @@ namespace verbly {
           continue;
         }
 
-        std::pair<int, int> lookup1(std::stoi(relation_data[1]), std::stoi(relation_data[2]));
-        std::pair<int, int> lookup2(std::stoi(relation_data[3]), std::stoi(relation_data[4]));
+        std::pair<int, int> lookup1(
+          std::stoi(relation_data[1]),
+          std::stoi(relation_data[2]));
 
-        if (wordByWnidAndWnum_.count(lookup1) && wordByWnidAndWnum_.count(lookup2))
+        std::pair<int, int> lookup2(
+          std::stoi(relation_data[3]),
+          std::stoi(relation_data[4]));
+
+
+        if (wordByWnidAndWnum_.count(lookup1) &&
+            wordByWnidAndWnum_.count(lookup2))
         {
           word& word1 = *wordByWnidAndWnum_.at(lookup1);
           word& word2 = *wordByWnidAndWnum_.at(lookup2);
@@ -1115,7 +1192,7 @@ namespace verbly {
     void generator::readWordNetSimilarity()
     {
       std::list<std::string> lines(readFile(wordNetPath_ + "wn_sim.pl"));
-      progress ppgs("Writing adjective similarity...", lines.size());
+      hatkirby::progress ppgs("Writing adjective similarity...", lines.size());
       for (auto line : lines)
       {
         ppgs.update();
@@ -1149,7 +1226,7 @@ namespace verbly {
     {
       std::cout << "Analyzing data..." << std::endl;
 
-      db_.runQuery("ANALYZE");
+      db_.execute("ANALYZE");
     }
 
     std::list<std::string> generator::readFile(std::string path)
@@ -1183,7 +1260,8 @@ namespace verbly {
         case 2: return part_of_speech::verb;
         case 3: return part_of_speech::adjective;
         case 4: return part_of_speech::adverb;
-        default: throw std::domain_error("Invalid WordNet synset ID: " + std::to_string(wnid));
+        default: throw std::domain_error(
+          "Invalid WordNet synset ID: " + std::to_string(wnid));
       }
     }
 
@@ -1296,20 +1374,30 @@ namespace verbly {
               std::string wnSenses(reinterpret_cast<const char*>(key));
               xmlFree(key);
 
-              auto wnSenseKeys = split<std::list<std::string>>(wnSenses, " ");
+              auto wnSenseKeys =
+                hatkirby::split<std::list<std::string>>(wnSenses, " ");
+
               if (!wnSenseKeys.empty())
               {
                 std::list<std::string> tempKeys;
 
-                std::transform(std::begin(wnSenseKeys), std::end(wnSenseKeys), std::back_inserter(tempKeys), [] (std::string sense) {
-                  return sense + "::";
-                });
+                std::transform(
+                  std::begin(wnSenseKeys),
+                  std::end(wnSenseKeys),
+                  std::back_inserter(tempKeys),
+                  [] (std::string sense) {
+                    return sense + "::";
+                  });
 
                 std::list<std::string> filteredKeys;
 
-                std::remove_copy_if(std::begin(tempKeys), std::end(tempKeys), std::back_inserter(filteredKeys), [&] (std::string sense) {
-                  return !wnSenseKeys_.count(sense);
-                });
+                std::remove_copy_if(
+                  std::begin(tempKeys),
+                  std::end(tempKeys),
+                  std::back_inserter(filteredKeys),
+                  [&] (std::string sense) {
+                    return !wnSenseKeys_.count(sense);
+                  });
 
                 wnSenseKeys = std::move(filteredKeys);
               }
@@ -1431,10 +1519,15 @@ namespace verbly {
                         std::string choicesStr = reinterpret_cast<const char*>(key);
                         xmlFree(key);
 
-                        for (std::string choice : split<std::list<std::string>>(choicesStr, " "))
+                        auto choices =
+                          hatkirby::split<std::list<std::string>>(
+                            choicesStr, " ");
+
+                        for (std::string choice : choices)
                         {
                           int chloc;
-                          while ((chloc = choice.find_first_of("_")) != std::string::npos)
+                          while ((chloc = choice.find_first_of("_"))
+                                  != std::string::npos)
                           {
                             choice.replace(chloc, 1, " ");
                           }
@@ -1444,7 +1537,9 @@ namespace verbly {
                       } else {
                         partLiteral = false;
 
-                        for (xmlNodePtr npnode = syntaxnode->xmlChildrenNode; npnode != nullptr; npnode = npnode->next)
+                        for (xmlNodePtr npnode = syntaxnode->xmlChildrenNode;
+                              npnode != nullptr;
+                              npnode = npnode->next)
                         {
                           if (!xmlStrcmp(npnode->name, reinterpret_cast<const xmlChar*>("SELRESTRS")))
                           {

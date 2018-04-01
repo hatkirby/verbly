@@ -1,10 +1,8 @@
 #include "word.h"
 #include <list>
 #include <string>
-#include "database.h"
 #include "notion.h"
 #include "lemma.h"
-#include "field.h"
 #include "group.h"
 
 namespace verbly {
@@ -43,9 +41,9 @@ namespace verbly {
       verbGroup_ = &verbGroup;
     }
 
-    database& operator<<(database& db, const word& arg)
+    hatkirby::database& operator<<(hatkirby::database& db, const word& arg)
     {
-      std::list<field> fields;
+      std::list<hatkirby::column> fields;
 
       fields.emplace_back("word_id", arg.getId());
       fields.emplace_back("notion_id", arg.getNotion().getId());
@@ -59,7 +57,8 @@ namespace verbly {
       if ((arg.getNotion().getPartOfSpeech() == part_of_speech::adjective)
         && (arg.getAdjectivePosition() != positioning::undefined))
       {
-        fields.emplace_back("position", static_cast<int>(arg.getAdjectivePosition()));
+        fields.emplace_back("position",
+          static_cast<int>(arg.getAdjectivePosition()));
       }
 
       if ((arg.getNotion().getPartOfSpeech() == part_of_speech::verb)
