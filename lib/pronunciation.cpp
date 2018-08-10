@@ -1,8 +1,8 @@
 #include "pronunciation.h"
 #include <sqlite3.h>
+#include <hkutil/string.h>
 #include "form.h"
 #include "word.h"
-#include "util.h"
 
 namespace verbly {
 
@@ -27,7 +27,7 @@ namespace verbly {
     id_ = sqlite3_column_int(row, 0);
 
     std::string phonemesStr(reinterpret_cast<const char*>(sqlite3_column_text(row, 1)));
-    phonemes_ = split<std::vector<std::string>>(phonemesStr, " ");
+    phonemes_ = hatkirby::split<std::vector<std::string>>(phonemesStr, " ");
 
     syllables_ = sqlite3_column_int(row, 2);
     stress_ = std::string(reinterpret_cast<const char*>(sqlite3_column_text(row, 3)));

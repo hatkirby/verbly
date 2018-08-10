@@ -1,8 +1,8 @@
 #include "part.h"
 #include <stdexcept>
 #include <sqlite3.h>
+#include <hkutil/string.h>
 #include "database.h"
-#include "util.h"
 
 namespace verbly {
 
@@ -19,7 +19,7 @@ namespace verbly {
 
   const field part::selrestr_field::selrestrJoin = field::joinField(object::part, "part_id", "selrestrs");
   const field part::selrestr_field::selrestrField = field::stringField("selrestrs", "selrestr");
-  
+
   const field part::synrestr_field::synrestrJoin = field::joinField(object::part, "part_id", "synrestrs");
   const field part::synrestr_field::synrestrField = field::stringField("synrestrs", "synrestr");
 
@@ -91,8 +91,8 @@ namespace verbly {
       case part_type::preposition:
       {
         std::string serializedChoices(reinterpret_cast<const char*>(sqlite3_column_blob(row, 5)));
-        new(&preposition_.choices) std::vector<std::string>(split<std::vector<std::string>>(serializedChoices, ","));
-        
+        new(&preposition_.choices) std::vector<std::string>(hatkirby::split<std::vector<std::string>>(serializedChoices, ","));
+
         preposition_.literal = (sqlite3_column_int(row, 6) == 1);
 
         break;

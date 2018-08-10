@@ -4,7 +4,6 @@
 #include "filter.h"
 #include "database.h"
 #include "query.h"
-#include "util.h"
 
 namespace verbly {
 

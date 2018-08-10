@@ -1,7 +1,7 @@
 #include "token.h"
 #include <stdexcept>
 #include <algorithm>
-#include "util.h"
+#include <hkutil/string.h>
 
 namespace verbly {
 
@@ -359,7 +359,7 @@ namespace verbly {
         } else if (capitalization == casing::title_case)
         {
           std::list<std::string> swords =
-            split<std::list<std::string>>(result, " ");
+            hatkirby::split<std::list<std::string>>(result, " ");
 
           for (std::string& sword : swords)
           {
@@ -369,7 +369,7 @@ namespace verbly {
             }
           }
 
-          result = implode(std::begin(swords), std::end(swords), " ");
+          result = hatkirby::implode(std::begin(swords), std::end(swords), " ");
         } else if (capitalization == casing::all_caps)
         {
           for (char& ch : result)
@@ -410,7 +410,7 @@ namespace verbly {
         } else if (capitalization == casing::title_case)
         {
           std::list<std::string> swords =
-            split<std::list<std::string>>(result, " ");
+            hatkirby::split<std::list<std::string>>(result, " ");
 
           for (std::string& sword : swords)
           {
@@ -420,7 +420,7 @@ namespace verbly {
             }
           }
 
-          result = implode(std::begin(swords), std::end(swords), " ");
+          result = hatkirby::implode(std::begin(swords), std::end(swords), " ");
         } else if (capitalization == casing::all_caps)
         {
           for (char& ch : result)
@@ -458,7 +458,7 @@ namespace verbly {
           first = false;
         }
 
-        return implode(std::begin(compiled), std::end(compiled), separator);
+        return hatkirby::implode(std::begin(compiled), std::end(compiled), separator);
       }
 
       case type::transform:

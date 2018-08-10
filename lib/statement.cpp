@@ -1,8 +1,8 @@
 #include "statement.h"
 #include <sstream>
 #include <utility>
+#include <hkutil/string.h>
 #include "filter.h"
-#include "util.h"
 #include "order.h"
 
 namespace verbly {
@@ -69,7 +69,7 @@ namespace verbly {
         ctes.push_back(cteStream.str());
       }
 
-      queryStream << implode(std::begin(ctes), std::end(ctes), ", ");
+      queryStream << hatkirby::implode(std::begin(ctes), std::end(ctes), ", ");
       queryStream << " ";
     }
 
@@ -80,7 +80,7 @@ namespace verbly {
     }
 
     queryStream << "SELECT ";
-    queryStream << implode(std::begin(realSelect), std::end(realSelect), ", ");
+    queryStream << hatkirby::implode(std::begin(realSelect), std::end(realSelect), ", ");
     queryStream << " FROM ";
     queryStream << tables_.at(topTable_);
     queryStream << " AS ";
@@ -1069,7 +1069,7 @@ namespace verbly {
         {
           return clauses.front();
         } else {
-          std::string result = implode(std::begin(clauses), std::end(clauses), group_.orlogic_ ? " OR " : " AND ");
+          std::string result = hatkirby::implode(std::begin(clauses), std::end(clauses), group_.orlogic_ ? " OR " : " AND ");
 
           if (toplevel)
           {
