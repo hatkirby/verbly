@@ -94,7 +94,7 @@ namespace verbly {
 
       // Helpers
 
-      std::list<std::string> readFile(std::string path);
+      std::list<std::string> readFile(std::string path, bool uniq = false);
 
       inline part_of_speech partOfSpeechByWnid(int wnid);
 

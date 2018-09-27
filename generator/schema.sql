@@ -14,79 +14,79 @@ CREATE UNIQUE INDEX `notion_by_wnid` ON `notions`(`wnid`);
 
 CREATE TABLE `hypernymy` (
   `hypernym_id` INTEGER NOT NULL,
-  `hyponym_id` INTEGER NOT NULL
-);
+  `hyponym_id` INTEGER NOT NULL,
+  PRIMARY KEY (`hypernym_id`,`hyponym_id`)
+) WITHOUT ROWID;
 
-CREATE INDEX `hyponym_of` ON `hypernymy`(`hypernym_id`,`hyponym_id`);
-CREATE INDEX `hypernym_of` ON `hypernymy`(`hyponym_id`,`hypernym_id`);
+CREATE INDEX `reverse_hypernymy` ON `hypernymy`(`hyponym_id`,`hypernym_id`);
 
 CREATE TABLE `instantiation` (
   `class_id` INTEGER NOT NULL,
-  `instance_id` INTEGER NOT NULL
-);
+  `instance_id` INTEGER NOT NULL,
+  PRIMARY KEY (`class_id`,`instance_id`)
+) WITHOUT ROWID;
 
-CREATE INDEX `instance_of` ON `instantiation`(`class_id`,`instance_id`);
-CREATE INDEX `class_of` ON `instantiation`(`instance_id`,`class_id`);
+CREATE INDEX `reverse_instantiation` ON `instantiation`(`instance_id`,`class_id`);
 
 CREATE TABLE `member_meronymy` (
   `meronym_id` INTEGER NOT NULL,
-  `holonym_id` INTEGER NOT NULL
-);
+  `holonym_id` INTEGER NOT NULL,
+  PRIMARY KEY (`meronym_id`,`holonym_id`)
+) WITHOUT ROWID;
 
-CREATE INDEX `member_holonym_of` ON `member_meronymy`(`meronym_id`,`holonym_id`);
-CREATE INDEX `member_meronym_of` ON `member_meronymy`(`holonym_id`,`meronym_id`);
+CREATE INDEX `reverse_member_meronymy` ON `member_meronymy`(`holonym_id`,`meronym_id`);
 
 CREATE TABLE `part_meronymy` (
   `meronym_id` INTEGER NOT NULL,
-  `holonym_id` INTEGER NOT NULL
-);
+  `holonym_id` INTEGER NOT NULL,
+  PRIMARY KEY (`meronym_id`,`holonym_id`)
+) WITHOUT ROWID;
 
-CREATE INDEX `part_holonym_of` ON `part_meronymy`(`meronym_id`,`holonym_id`);
-CREATE INDEX `part_meronym_of` ON `part_meronymy`(`holonym_id`,`meronym_id`);
+CREATE INDEX `reverse_part_meronymy` ON `part_meronymy`(`holonym_id`,`meronym_id`);
 
 CREATE TABLE `substance_meronymy` (
   `meronym_id` INTEGER NOT NULL,
-  `holonym_id` INTEGER NOT NULL
-);
+  `holonym_id` INTEGER NOT NULL,
+  PRIMARY KEY (`meronym_id`,`holonym_id`)
+) WITHOUT ROWID;
 
-CREATE INDEX `substance_holonym_of` ON `substance_meronymy`(`meronym_id`,`holonym_id`);
-CREATE INDEX `substance_meronym_of` ON `substance_meronymy`(`holonym_id`,`meronym_id`);
+CREATE INDEX `reverse_substance_meronymy` ON `substance_meronymy`(`holonym_id`,`meronym_id`);
 
 CREATE TABLE `variation` (
   `noun_id` INTEGER NOT NULL,
-  `adjective_id` INTEGER NOT NULL
-);
+  `adjective_id` INTEGER NOT NULL,
+  PRIMARY KEY (`noun_id`,`adjective_id`)
+) WITHOUT ROWID;
 
-CREATE INDEX `variant_of` ON `variation`(`noun_id`,`adjective_id`);
-CREATE INDEX `attribute_of` ON `variation`(`adjective_id`,`noun_id`);
+CREATE INDEX `reverse_variation` ON `variation`(`adjective_id`,`noun_id`);
 
 CREATE TABLE `similarity` (
   `adjective_1_id` INTEGER NOT NULL,
-  `adjective_2_id` INTEGER NOT NULL
-);
-
-CREATE INDEX `similar_to` ON `similarity`(`adjective_1_id`,`adjective_2_id`);
+  `adjective_2_id` INTEGER NOT NULL,
+  PRIMARY KEY (`adjective_1_id`,`adjective_2_id`)
+) WITHOUT ROWID;
 
 CREATE TABLE `is_a` (
   `notion_id` INTEGER NOT NULL,
-  `groupname` VARCHAR(32) NOT NULL
-);
+  `groupname` VARCHAR(32) NOT NULL,
+  PRIMARY KEY (`notion_id`,`groupname`)
+) WITHOUT ROWID;
 
 CREATE TABLE `entailment` (
   `given_id` INTEGER NOT NULL,
-  `entailment_id` INTEGER NOT NULL
-);
+  `entailment_id` INTEGER NOT NULL,
+  PRIMARY KEY (`given_id`,`entailment_id`)
+) WITHOUT ROWID;
 
-CREATE INDEX `entailment_of` ON `entailment`(`given_id`,`entailment_id`);
-CREATE INDEX `entailed_by` ON `entailment`(`entailment_id`,`given_id`);
+CREATE INDEX `reverse_entailment` ON `entailment`(`entailment_id`,`given_id`);
 
 CREATE TABLE `causality` (
   `cause_id` INTEGER NOT NULL,
-  `effect_id` INTEGER NOT NULL
-);
+  `effect_id` INTEGER NOT NULL,
+  PRIMARY KEY (`cause_id`,`effect_id`)
+) WITHOUT ROWID;
 
-CREATE INDEX `effect_of` ON `causality`(`cause_id`,`effect_id`);
-CREATE INDEX `cause_of` ON `causality`(`effect_id`,`cause_id`);
+CREATE INDEX `reverse_causality` ON `causality`(`effect_id`,`cause_id`);
 
 CREATE TABLE `words` (
   `word_id` INTEGER PRIMARY KEY,
@@ -103,58 +103,57 @@ CREATE INDEX `group_words` ON `words`(`group_id`);
 
 CREATE TABLE `antonymy` (
   `antonym_1_id` INTEGER NOT NULL,
-  `antonym_2_id` INTEGER NOT NULL
-);
-
-CREATE INDEX `antonym_of` ON `antonymy`(`antonym_1_id`,`antonym_2_id`);
+  `antonym_2_id` INTEGER NOT NULL,
+  PRIMARY KEY (`antonym_1_id`,`antonym_2_id`)
+) WITHOUT ROWID;
 
 CREATE TABLE `specification` (
   `general_id` INTEGER NOT NULL,
-  `specific_id` INTEGER NOT NULL
-);
+  `specific_id` INTEGER NOT NULL,
+  PRIMARY KEY (`general_id`,`specific_id`)
+) WITHOUT ROWID;
 
-CREATE INDEX `specification_of` ON `specification`(`general_id`,`specific_id`);
-CREATE INDEX `generalization_of` ON `specification`(`specific_id`,`general_id`);
+CREATE INDEX `reverse_specification` ON `specification`(`specific_id`,`general_id`);
 
 CREATE TABLE `pertainymy` (
   `noun_id` INTEGER NOT NULL,
-  `pertainym_id` INTEGER NOT NULL
-);
+  `pertainym_id` INTEGER NOT NULL,
+  PRIMARY KEY (`noun_id`,`pertainym_id`)
+) WITHOUT ROWID;
 
-CREATE INDEX `pertainym_of` ON `pertainymy`(`noun_id`,`pertainym_id`);
-CREATE INDEX `anti_pertainym_of` ON `pertainymy`(`pertainym_id`,`noun_id`);
+CREATE INDEX `reverse_pertainymy` ON `pertainymy`(`pertainym_id`,`noun_id`);
 
 CREATE TABLE `mannernymy` (
   `adjective_id` INTEGER NOT NULL,
-  `mannernym_id` INTEGER NOT NULL
-);
+  `mannernym_id` INTEGER NOT NULL,
+  PRIMARY KEY (`adjective_id`,`mannernym_id`)
+) WITHOUT ROWID;
 
-CREATE INDEX `mannernym_of` ON `mannernymy`(`adjective_id`,`mannernym_id`);
-CREATE INDEX `anti_mannernym_of` ON `mannernymy`(`mannernym_id`,`adjective_id`);
+CREATE INDEX `reverse_mannernymy` ON `mannernymy`(`mannernym_id`,`adjective_id`);
 
 CREATE TABLE `usage` (
   `domain_id` INTEGER NOT NULL,
-  `term_id` INTEGER NOT NULL
-);
+  `term_id` INTEGER NOT NULL,
+  PRIMARY KEY (`domain_id`,`term_id`)
+) WITHOUT ROWID;
 
-CREATE INDEX `usage_term_of` ON `usage`(`domain_id`,`term_id`);
-CREATE INDEX `usage_domain_of` ON `usage`(`term_id`,`domain_id`);
+CREATE INDEX `reverse_usage` ON `usage`(`term_id`,`domain_id`);
 
 CREATE TABLE `topicality` (
   `domain_id` INTEGER NOT NULL,
-  `term_id` INTEGER NOT NULL
-);
+  `term_id` INTEGER NOT NULL,
+  PRIMARY KEY (`domain_id`,`term_id`)
+) WITHOUT ROWID;
 
-CREATE INDEX `topical_term_of` ON `topicality`(`domain_id`,`term_id`);
-CREATE INDEX `topical_domain_of` ON `topicality`(`term_id`,`domain_id`);
+CREATE INDEX `reverse_topicality` ON `topicality`(`term_id`,`domain_id`);
 
 CREATE TABLE `regionality` (
   `domain_id` INTEGER NOT NULL,
-  `term_id` INTEGER NOT NULL
-);
+  `term_id` INTEGER NOT NULL,
+  PRIMARY KEY (`domain_id`,`term_id`)
+) WITHOUT ROWID;
 
-CREATE INDEX `regional_term_of` ON `regionality`(`domain_id`,`term_id`);
-CREATE INDEX `regional_domain_of` ON `regionality`(`term_id`,`domain_id`);
+CREATE INDEX `reverse_regionality` ON `regionality`(`term_id`,`domain_id`);
 
 CREATE TABLE `forms` (
   `form_id` INTEGER PRIMARY KEY,
@@ -169,11 +168,11 @@ CREATE UNIQUE INDEX `form_by_string` ON `forms`(`form`);
 CREATE TABLE `lemmas_forms` (
   `lemma_id` INTEGER NOT NULL,
   `form_id` INTEGER NOT NULL,
-  `category` SMALLINT NOT NULL
-);
+  `category` SMALLINT NOT NULL,
+  PRIMARY KEY (`lemma_id`,`category`,`form_id`)
+) WITHOUT ROWID;
 
-CREATE INDEX `form_of` ON `lemmas_forms`(`lemma_id`,`category`,`form_id`);
-CREATE INDEX `lemma_of` ON `lemmas_forms`(`form_id`,`category`,`lemma_id`);
+CREATE INDEX `forms_lemmas` ON `lemmas_forms`(`form_id`,`category`,`lemma_id`);
 
 CREATE TABLE `pronunciations` (
   `pronunciation_id` INTEGER PRIMARY KEY,
@@ -188,11 +187,11 @@ CREATE INDEX `rhymes_with` ON `pronunciations`(`rhyme`,`prerhyme`);
 
 CREATE TABLE `forms_pronunciations` (
   `form_id` INTEGER NOT NULL,
-  `pronunciation_id` INTEGER NOT NULL
-);
+  `pronunciation_id` INTEGER NOT NULL,
+  PRIMARY KEY (`form_id`,`pronunciation_id`)
+) WITHOUT ROWID;
 
-CREATE INDEX `pronunciation_of` ON `forms_pronunciations`(`form_id`,`pronunciation_id`);
-CREATE INDEX `spelling_of` ON `forms_pronunciations`(`pronunciation_id`,`form_id`);
+CREATE INDEX `pronunciations_forms` ON `forms_pronunciations`(`pronunciation_id`,`form_id`);
 
 CREATE TABLE `frames` (
   `frame_id` INTEGER NOT NULL,

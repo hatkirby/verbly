@@ -696,7 +696,8 @@ namespace verbly {
 
     void generator::readWordNetAntonymy()
     {
-      std::list<std::string> lines(readFile(wordNetPath_ + "wn_ant.pl"));
+      std::list<std::string> lines(readFile(wordNetPath_ + "wn_ant.pl", true));
+
       hatkirby::progress ppgs("Writing antonyms...", lines.size());
       for (auto line : lines)
       {
@@ -770,7 +771,7 @@ namespace verbly {
 
     void generator::readWordNetClasses()
     {
-      std::list<std::string> lines(readFile(wordNetPath_ + "wn_cls.pl"));
+      std::list<std::string> lines(readFile(wordNetPath_ + "wn_cls.pl", true));
 
       hatkirby::progress ppgs(
         "Writing usage, topicality, and regionality...",
@@ -1092,7 +1093,7 @@ namespace verbly {
 
     void generator::readWordNetPertainymy()
     {
-      std::list<std::string> lines(readFile(wordNetPath_ + "wn_per.pl"));
+      std::list<std::string> lines(readFile(wordNetPath_ + "wn_per.pl", true));
 
       hatkirby::progress ppgs(
         "Writing pertainymy and mannernymy...",
@@ -1228,7 +1229,7 @@ namespace verbly {
       db_.execute("ANALYZE");
     }
 
-    std::list<std::string> generator::readFile(std::string path)
+    std::list<std::string> generator::readFile(std::string path, bool uniq)
     {
       std::ifstream file(path);
       if (!file)
@@ -1246,6 +1247,18 @@ namespace verbly {
         }
 
         lines.push_back(line);
+      }
+
+      if (uniq)
+      {
+        std::vector<std::string> uniq(std::begin(lines), std::end(lines));
+        lines.clear();
+
+        std::sort(std::begin(uniq), std::end(uniq));
+        std::unique_copy(
+          std::begin(uniq),
+          std::end(uniq),
+          std::back_inserter(lines));
       }
 
       return lines;

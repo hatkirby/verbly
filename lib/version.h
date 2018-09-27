@@ -4,7 +4,7 @@
 namespace verbly {
 
   const int DATABASE_MAJOR_VERSION = 1;
-  const int DATABASE_MINOR_VERSION = 0;
+  const int DATABASE_MINOR_VERSION = 1;
 
 };
 
