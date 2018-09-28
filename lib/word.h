@@ -3,13 +3,12 @@
 
 #include <stdexcept>
 #include <map>
+#include <hkutil/database.h>
 #include "field.h"
 #include "filter.h"
 #include "notion.h"
 #include "frame.h"
 #include "form.h"
-
-struct sqlite3_stmt;
 
 namespace verbly {
 
@@ -24,7 +23,7 @@ namespace verbly {
 
     // Construct from database
 
-    word(const database& db, sqlite3_stmt* row);
+    word(const database& db, hatkirby::row row);
 
     // Accessors
 
@@ -93,11 +92,35 @@ namespace verbly {
       return adjectivePosition_;
     }
 
-    const notion& getNotion() const;
+    const notion& getNotion() const
+    {
+      if (!valid_)
+      {
+        throw std::domain_error("Bad access to uninitialized word");
+      }
 
-    bool hasFrames() const;
+      return notion_;
+    }
 
-    const std::vector<frame>& getFrames() const;
+    bool hasFrames() const
+    {
+      if (!valid_)
+      {
+        throw std::domain_error("Bad access to uninitialized word");
+      }
+
+      return !frames_.empty();
+    }
+
+    const std::vector<frame>& getFrames() const
+    {
+      if (!valid_)
+      {
+        throw std::domain_error("Bad access to uninitialized word");
+      }
+
+      return frames_;
+    }
 
     const form& getBaseForm() const;
 
@@ -181,26 +204,17 @@ namespace verbly {
   private:
 
     void initializeForm(inflection category) const;
-    void initializeFrames() const;
 
     bool valid_ = false;
-
     int id_;
     bool hasTagCount_ = false;
     int tagCount_;
     positioning adjectivePosition_ = positioning::undefined;
-    int notionId_;
-    int lemmaId_;
-    bool hasGroup_ = false;
-    int groupId_;
-
-    const database* db_;
-
-    mutable notion notion_;
-    mutable bool initializedFrames_ = false;
-    mutable std::vector<frame> frames_;
+    notion notion_;
+    std::vector<frame> frames_;
     mutable std::map<inflection, std::vector<form>> forms_;
 
+    const database& db_;
   };
 
 };

@@ -1,5 +1,4 @@
 #include "pronunciation.h"
-#include <sqlite3.h>
 #include <hkutil/string.h>
 #include "form.h"
 #include "word.h"
@@ -22,22 +21,27 @@ namespace verbly {
   const field pronunciation::rhymes_field::rhymeJoin = field::joinField(object::pronunciation, "rhyme", object::pronunciation);
   const pronunciation::rhymes_field pronunciation::rhymes = {};
 
-  pronunciation::pronunciation(const database& db, sqlite3_stmt* row) : db_(&db), valid_(true)
+  pronunciation::pronunciation(
+    const database& db,
+    hatkirby::row row) :
+      valid_(true)
   {
-    id_ = sqlite3_column_int(row, 0);
+    id_ = mpark::get<int>(row[0]);
 
-    std::string phonemesStr(reinterpret_cast<const char*>(sqlite3_column_text(row, 1)));
-    phonemes_ = hatkirby::split<std::vector<std::string>>(phonemesStr, " ");
+    phonemes_ =
+      hatkirby::split<std::vector<std::string>>(
+        mpark::get<std::string>(row[1]),
+        " ");
 
-    syllables_ = sqlite3_column_int(row, 2);
-    stress_ = std::string(reinterpret_cast<const char*>(sqlite3_column_text(row, 3)));
+    syllables_ = mpark::get<int>(row[2]);
+    stress_ = mpark::get<std::string>(row[3]);
 
-    if (sqlite3_column_type(row, 5) != SQLITE_NULL)
+    if (!mpark::holds_alternative<std::nullptr_t>(row[5]))
     {
       hasRhyme_ = true;
 
-      prerhyme_ = std::string(reinterpret_cast<const char*>(sqlite3_column_text(row, 4)));
-      rhyme_ = std::string(reinterpret_cast<const char*>(sqlite3_column_text(row, 5)));
+      prerhyme_ = mpark::get<std::string>(row[4]);
+      rhyme_ = mpark::get<std::string>(row[5]);
     }
   }
 

@@ -1,5 +1,4 @@
 #include "form.h"
-#include <sqlite3.h>
 #include <algorithm>
 #include "filter.h"
 #include "database.h"
@@ -24,29 +23,15 @@ namespace verbly {
     return field::joinThroughWhere(object::form, "form_id", object::word, "lemmas_forms", "lemma_id", "category", static_cast<int>(category));
   }
 
-  form::form(const database& db, sqlite3_stmt* row) : db_(&db), valid_(true)
+  form::form(const database& db, hatkirby::row row) : valid_(true)
   {
-    id_ = sqlite3_column_int(row, 0);
-    text_ = std::string(reinterpret_cast<const char*>(sqlite3_column_text(row, 1)));
-    complexity_ = sqlite3_column_int(row, 2);
-    proper_ = (sqlite3_column_int(row, 3) == 1);
-    length_ = sqlite3_column_int(row, 4);
-  }
+    id_ = mpark::get<int>(row[0]);
+    text_ = mpark::get<std::string>(row[1]);
+    complexity_ = mpark::get<int>(row[2]);
+    proper_ = (mpark::get<int>(row[3]) == 1);
+    length_ = mpark::get<int>(row[4]);
 
-  const std::vector<pronunciation>& form::getPronunciations() const
-  {
-    if (!valid_)
-    {
-      throw std::domain_error("Bad access to uninitialized form");
-    }
-
-    if (!initializedPronunciations_)
-    {
-      pronunciations_ = db_->pronunciations(pronunciation::forms %= *this, pronunciation::id, -1).all();
-      initializedPronunciations_ = true;
-    }
-
-    return pronunciations_;
+    pronunciations_ = db.pronunciations(*this, pronunciation::id, -1).all();
   }
 
   bool form::startsWithVowelSound() const
@@ -56,17 +41,24 @@ namespace verbly {
       throw std::domain_error("Bad access to uninitialized form");
     }
 
-    const std::vector<pronunciation>& pronunciations = getPronunciations();
-    if (!pronunciations.empty())
+    if (!pronunciations_.empty())
     {
-      return std::any_of(std::begin(pronunciations), std::end(pronunciations), [] (const pronunciation& p) {
-        return p.getPhonemes().front().find_first_of("012") != std::string::npos;
-      });
+      return std::any_of(
+        std::begin(pronunciations_),
+        std::end(pronunciations_),
+        [] (const pronunciation& p) {
+          return p.getPhonemes().front().find_first_of("012") !=
+            std::string::npos;
+        });
     } else {
-      // If the word is not in CMUDICT, fall back to checking whether the first letter is a vowel.
-      // Not perfect but will work in most cases.
+      // If the word is not in CMUDICT, fall back to checking whether the first
+      // letter is a vowel. Not perfect but will work in most cases.
       char ch = std::tolower(text_.front());
-      return (ch == 'a') || (ch == 'e') || (ch == 'i') || (ch == 'o') || (ch == 'u');
+      return (ch == 'a') ||
+             (ch == 'e') ||
+             (ch == 'i') ||
+             (ch == 'o') ||
+             (ch == 'u');
     }
   }
 

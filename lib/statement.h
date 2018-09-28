@@ -4,8 +4,8 @@
 #include <string>
 #include <list>
 #include <map>
-#include <set>
-#include "binding.h"
+#include <hkutil/database.h>
+#include <variant.hpp>
 #include "enums.h"
 #include "field.h"
 #include "filter.h"
@@ -15,14 +15,28 @@ namespace verbly {
   class filter;
   class order;
 
+  using field_binding =
+    std::tuple<std::string, std::string>;
+
+  using binding =
+    mpark::variant<
+      mpark::monostate,
+      std::string,
+      int,
+      field_binding>;
+
   class statement {
   public:
 
     statement(object context, filter queryFilter);
 
-    std::string getQueryString(std::list<std::string> select, order sortOrder, int limit, bool debug = false) const;
+    std::string getQueryString(
+      std::list<std::string> select,
+      order sortOrder,
+      int limit,
+      bool debug = false) const;
 
-    std::list<binding> getBindings() const;
+    std::list<hatkirby::binding> getBindings() const;
 
   private:
 
@@ -108,23 +122,6 @@ namespace verbly {
         is_null
       };
 
-      // Copy and move constructors
-
-      condition(const condition& other);
-      condition(condition&& other);
-
-      // Assignment
-
-      condition& operator=(condition other);
-
-      // Swap
-
-      friend void swap(condition& first, condition& second);
-
-      // Destructor
-
-      ~condition();
-
       // Accessors
 
       type getType() const
@@ -134,13 +131,21 @@ namespace verbly {
 
       // Empty
 
-      condition();
+      condition() = default;
 
       // Singleton
 
-      condition(std::string table, std::string column, bool isNull);
+      condition(
+        std::string table,
+        std::string column,
+        bool isNull);
 
-      condition(std::string table, std::string column, comparison comp, binding value, object parentObject = object::undefined);
+      condition(
+        std::string table,
+        std::string column,
+        comparison comp,
+        binding value,
+        object parentObject = object::undefined);
 
       // Group
 
@@ -156,30 +161,39 @@ namespace verbly {
 
       std::string toSql(bool toplevel, bool debug = false) const;
 
-      std::list<binding> flattenBindings() const;
+      std::list<hatkirby::binding> flattenBindings() const;
 
       condition flatten() const;
 
-      condition resolveCompareFields(object context, std::string tableName) const;
+      condition resolveCompareFields(
+        object context,
+        std::string tableName) const;
 
     private:
-      union {
-        struct {
-          std::string table_;
-          std::string column_;
-          comparison comparison_;
-          binding value_;
-          object parentObject_;
-        } singleton_;
-        struct {
-          std::list<condition> children_;
-          bool orlogic_;
-        } group_;
-      };
-      type type_;
-    };
 
-    friend void swap(condition& first, condition& second);
+      struct singleton_type {
+        std::string table;
+        std::string column;
+        comparison comparison;
+        binding value;
+        object parentObject;
+      };
+
+      struct group_type {
+        std::list<condition> children;
+        bool orlogic;
+      };
+
+      using variant_type =
+        mpark::variant<
+          mpark::monostate,
+          singleton_type,
+          group_type>;
+
+      variant_type variant_;
+
+      type type_ = type::empty;
+    };
 
     class with {
     public:

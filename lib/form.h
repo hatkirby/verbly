@@ -5,11 +5,10 @@
 #include <vector>
 #include <string>
 #include <stdexcept>
+#include <hkutil/database.h>
 #include "field.h"
 #include "pronunciation.h"
 #include "filter.h"
-
-struct sqlite3_stmt;
 
 namespace verbly {
 
@@ -24,7 +23,7 @@ namespace verbly {
 
     // Construct from database
 
-    form(const database& db, sqlite3_stmt* row);
+    form(const database& db, hatkirby::row row);
 
     // Accessors
 
@@ -43,7 +42,7 @@ namespace verbly {
       return id_;
     }
 
-    std::string getText() const
+    const std::string& getText() const
     {
       if (!valid_)
       {
@@ -83,7 +82,15 @@ namespace verbly {
       return length_;
     }
 
-    const std::vector<pronunciation>& getPronunciations() const;
+    const std::vector<pronunciation>& getPronunciations() const
+    {
+      if (!valid_)
+      {
+        throw std::domain_error("Bad access to uninitialized form");
+      }
+
+      return pronunciations_;
+    }
 
     // Convenience
 
@@ -130,19 +137,14 @@ namespace verbly {
     static const field pronunciations;
 
   private:
-    bool valid_ = false;
 
+    bool valid_ = false;
     int id_;
     std::string text_;
     int complexity_;
     bool proper_;
     int length_;
-
-    const database* db_;
-
-    mutable bool initializedPronunciations_ = false;
-    mutable std::vector<pronunciation> pronunciations_;
-
+    std::vector<pronunciation> pronunciations_;
   };
 
 };

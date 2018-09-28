@@ -1,6 +1,6 @@
 #include "notion.h"
-#include <sqlite3.h>
 #include <sstream>
+#include <hkutil/database.h>
 
 namespace verbly {
 
@@ -58,21 +58,21 @@ namespace verbly {
   const field notion::preposition_group_field::isA = field::joinField(object::notion, "notion_id", "is_a");
   const field notion::preposition_group_field::groupNameField = field::stringField("is_a", "groupname");
 
-  notion::notion(const database& db, sqlite3_stmt* row) : db_(&db), valid_(true)
+  notion::notion(const database& db, hatkirby::row row) : valid_(true)
   {
-    id_ = sqlite3_column_int(row, 0);
-    partOfSpeech_ = static_cast<part_of_speech>(sqlite3_column_int(row, 1));
+    id_ = mpark::get<int>(row[0]);
+    partOfSpeech_ = static_cast<part_of_speech>(mpark::get<int>(row[1]));
 
-    if (sqlite3_column_type(row, 2) != SQLITE_NULL)
+    if (!mpark::holds_alternative<std::nullptr_t>(row[2]))
     {
       hasWnid_ = true;
-      wnid_ = sqlite3_column_int(row, 2);
+      wnid_ = mpark::get<int>(row[2]);
     }
 
-    if (sqlite3_column_type(row, 3) != SQLITE_NULL)
+    if (!mpark::holds_alternative<std::nullptr_t>(row[3]))
     {
       hasNumOfImages_ = true;
-      numOfImages_ = sqlite3_column_int(row, 3);
+      numOfImages_ = mpark::get<int>(row[3]);
     }
   }
 

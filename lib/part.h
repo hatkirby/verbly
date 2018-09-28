@@ -5,11 +5,11 @@
 #include <vector>
 #include <set>
 #include <list>
+#include <hkutil/database.h>
+#include <variant.hpp>
 #include "field.h"
 #include "filter.h"
 #include "enums.h"
-
-struct sqlite3_stmt;
 
 namespace verbly {
 
@@ -20,11 +20,16 @@ namespace verbly {
 
     // Static factories
 
-    static part createNounPhrase(std::string role, std::set<std::string> selrestrs, std::set<std::string> synrestrs);
+    static part createNounPhrase(
+      std::string role,
+      std::set<std::string> selrestrs,
+      std::set<std::string> synrestrs);
 
     static part createVerb();
 
-    static part createPreposition(std::vector<std::string> choices, bool literal);
+    static part createPreposition(
+      std::vector<std::string> choices,
+      bool literal);
 
     static part createAdjective();
 
@@ -32,40 +37,11 @@ namespace verbly {
 
     static part createLiteral(std::string value);
 
-    // Default constructor
-
-    part()
-    {
-    }
-
     // Construct from database
 
-    part(const database& db, sqlite3_stmt* row);
-
-    // Copy and move constructors
-
-    part(const part& other);
-
-    part(part&& other);
-
-    // Assignment
-
-    part& operator=(part other);
-
-    // Swap
-
-    friend void swap(part& first, part& second);
-
-    // Destructor
-
-    ~part();
+    part(const database& db, hatkirby::row row);
 
     // General accessors
-
-    bool isValid() const
-    {
-      return (type_ != part_type::invalid);
-    }
 
     part_type getType() const
     {
@@ -74,23 +50,23 @@ namespace verbly {
 
     // Noun phrase accessors
 
-    std::string getNounRole() const;
+    const std::string& getNounRole() const;
 
-    std::set<std::string> getNounSelrestrs() const;
+    const std::set<std::string>& getNounSelrestrs() const;
 
-    std::set<std::string> getNounSynrestrs() const;
+    const std::set<std::string>& getNounSynrestrs() const;
 
     bool nounHasSynrestr(std::string synrestr) const;
 
     // Preposition accessors
 
-    std::vector<std::string> getPrepositionChoices() const;
+    const std::vector<std::string>& getPrepositionChoices() const;
 
     bool isPrepositionLiteral() const;
 
     // Literal accessors
 
-    std::string getLiteralValue() const;
+    const std::string& getLiteralValue() const;
 
     // Type info
 
@@ -123,7 +99,7 @@ namespace verbly {
     };
 
     static const selrestr_field selrestrs;
-    
+
     class synrestr_field {
     public:
 
@@ -139,28 +115,35 @@ namespace verbly {
 
   private:
 
-    // Private constructors
-
-    part(part_type t) : type_(t)
-    {
-    }
-
     // Data
 
-    union {
-      struct {
-        std::string role;
-        std::set<std::string> selrestrs;
-        std::set<std::string> synrestrs;
-      } noun_phrase_;
-      struct {
-        std::vector<std::string> choices;
-        bool literal;
-      } preposition_;
-      std::string literal_;
+    struct np_type {
+      std::string role;
+      std::set<std::string> selrestrs;
+      std::set<std::string> synrestrs;
     };
 
+    struct prep_type {
+      std::vector<std::string> choices;
+      bool literal;
+    };
+
+    using variant_type =
+      mpark::variant<
+        mpark::monostate,
+        np_type,
+        prep_type,
+        std::string>;
+
+    variant_type variant_;
+
     part_type type_ = part_type::invalid;
+
+    // Private constructors
+
+    part(part_type t, variant_type v = {}) : type_(t), variant_(v)
+    {
+    }
 
   };
 

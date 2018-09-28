@@ -1,5 +1,4 @@
 #include "word.h"
-#include <sqlite3.h>
 #include "form.h"
 #include "util.h"
 #include "database.h"
@@ -45,89 +44,27 @@ namespace verbly {
     return field::joinThroughWhere(object::word, "lemma_id", object::form, "lemmas_forms", "form_id", "category", static_cast<int>(category));
   }
 
-  word::word(const database& db, sqlite3_stmt* row) : db_(&db), valid_(true)
+  word::word(const database& db, hatkirby::row row) : db_(db), valid_(true)
   {
-    id_ = sqlite3_column_int(row, 0);
-    notionId_ = sqlite3_column_int(row, 1);
-    lemmaId_ = sqlite3_column_int(row, 2);
+    id_ = mpark::get<int>(row[0]);
 
-    if (sqlite3_column_type(row, 3) != SQLITE_NULL)
+    notion_ = db.notions(notion::id == mpark::get<int>(row[1])).first();
+
+    if (!mpark::holds_alternative<std::nullptr_t>(row[3]))
     {
       hasTagCount_ = true;
-      tagCount_ = sqlite3_column_int(row, 3);
+      tagCount_ = mpark::get<int>(row[3]);
     }
 
-    if (sqlite3_column_type(row, 4) != SQLITE_NULL)
+    if (!mpark::holds_alternative<std::nullptr_t>(row[4]))
     {
-      adjectivePosition_ = static_cast<positioning>(sqlite3_column_int(row, 4));
+      adjectivePosition_ = static_cast<positioning>(mpark::get<int>(row[4]));
     }
 
-    if (sqlite3_column_type(row, 5) != SQLITE_NULL)
+    if (!mpark::holds_alternative<std::nullptr_t>(row[5]))
     {
-      hasGroup_ = true;
-      groupId_ = sqlite3_column_int(row, 5);
+      frames_ = db.frames(*this).all();
     }
-  }
-
-  const notion& word::getNotion() const
-  {
-    if (!valid_)
-    {
-      throw std::domain_error("Bad access to uninitialized word");
-    }
-
-    if (!notion_.isValid())
-    {
-      notion_ = db_->notions(notion::id == notionId_).first();
-    }
-
-    return notion_;
-  }
-
-  bool word::hasFrames() const
-  {
-    if (!valid_)
-    {
-      throw std::domain_error("Bad access to uninitialized word");
-    }
-
-    if (!hasGroup_)
-    {
-      return false;
-    }
-
-    if (!initializedFrames_)
-    {
-      initializeFrames();
-    }
-
-    return !frames_.empty();
-  }
-
-  const std::vector<frame>& word::getFrames() const
-  {
-    if (!valid_)
-    {
-      throw std::domain_error("Bad access to uninitialized word");
-    }
-
-    if (!hasGroup_)
-    {
-      throw std::domain_error("Word does not have a group");
-    }
-
-    if (!initializedFrames_)
-    {
-      initializeFrames();
-    }
-
-    return frames_;
-  }
-
-  void word::initializeFrames() const
-  {
-    initializedFrames_ = true;
-    frames_ = db_->frames(*this, {}, -1).all();
   }
 
   const form& word::getBaseForm() const
@@ -167,7 +104,7 @@ namespace verbly {
 
   void word::initializeForm(inflection infl) const
   {
-    forms_[infl] = db_->forms(form::words(infl) %= *this, verbly::form::id, -1).all();
+    forms_[infl] = db_.forms(form::words(infl) %= *this, verbly::form::id, -1).all();
   }
 
   filter word::synonyms_field::operator%=(filter joinCondition) const

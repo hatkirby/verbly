@@ -1,11 +1,10 @@
-#ifndef DATABASE_H_0B0A47D2
-#define DATABASE_H_0B0A47D2
+#ifndef DATABASE_H_0B0A47D1
+#define DATABASE_H_0B0A47D1
 
 #include <string>
-#include <exception>
 #include <stdexcept>
-#include <list>
 #include <set>
+#include <hkutil/database.h>
 #include "notion.h"
 #include "word.h"
 #include "frame.h"
@@ -13,8 +12,6 @@
 #include "form.h"
 #include "pronunciation.h"
 #include "order.h"
-
-struct sqlite3;
 
 namespace verbly {
 
@@ -27,24 +24,6 @@ namespace verbly {
     // Constructor
 
     explicit database(std::string path);
-
-    // Disable copying
-
-    database(const database& other) = delete;
-    database& operator=(const database& other) = delete;
-
-    // Move constructor and move assignment
-
-    database(database&& other);
-    database& operator=(database&& other);
-
-    // Swap
-
-    friend void swap(database& first, database& second);
-
-    // Destructor
-
-    ~database();
 
     // Information
 
@@ -60,17 +39,35 @@ namespace verbly {
 
     // Queries
 
-    query<notion> notions(filter where, order sortOrder = {}, int limit = 1) const;
+    query<notion> notions(
+      filter where,
+      order sortOrder = {},
+      int limit = 1) const;
 
-    query<word> words(filter where, order sortOrder = {}, int limit = 1) const;
+    query<word> words(
+      filter where,
+      order sortOrder = {},
+      int limit = 1) const;
 
-    query<frame> frames(filter where, order sortOrder = {}, int limit = 1) const;
+    query<frame> frames(
+      filter where,
+      order sortOrder = {},
+      int limit = 1) const;
 
-    query<part> parts(filter where, order sortOrder = {}, int limit = 1) const;
+    query<part> parts(
+      filter where,
+      order sortOrder = {},
+      int limit = 1) const;
 
-    query<form> forms(filter where, order sortOrder = {}, int limit = 1) const;
+    query<form> forms(
+      filter where,
+      order sortOrder = {},
+      int limit = 1) const;
 
-    query<pronunciation> pronunciations(filter where, order sortOrder = {}, int limit = 1) const;
+    query<pronunciation> pronunciations(
+      filter where,
+      order sortOrder = {},
+      int limit = 1) const;
 
     std::set<std::string> selrestrs(int partId) const;
 
@@ -78,9 +75,7 @@ namespace verbly {
 
   private:
 
-    database() = default;
-
-    sqlite3* ppdb_ = nullptr;
+    mutable hatkirby::database ppdb_;
 
     int major_;
     int minor_;

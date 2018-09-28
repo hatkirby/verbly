@@ -133,19 +133,19 @@ namespace verbly {
     return queryStream.str();
   }
 
-  std::list<binding> statement::getBindings() const
+  std::list<hatkirby::binding> statement::getBindings() const
   {
-    std::list<binding> result;
+    std::list<hatkirby::binding> result;
 
     for (const with& w : withs_)
     {
-      for (binding value : w.getCondition().flattenBindings())
+      for (hatkirby::binding value : w.getCondition().flattenBindings())
       {
         result.push_back(std::move(value));
       }
     }
 
-    for (binding value : topCondition_.flattenBindings())
+    for (hatkirby::binding value : topCondition_.flattenBindings())
     {
       result.push_back(std::move(value));
     }
@@ -203,77 +203,152 @@ namespace verbly {
             {
               case filter::comparison::is_null:
               {
-                return condition(topTable_, clause.getField().getColumn(), true);
+                return {
+                  topTable_,
+                  clause.getField().getColumn(),
+                  true
+                };
               }
 
               case filter::comparison::is_not_null:
               {
-                return condition(topTable_, clause.getField().getColumn(), false);
+                return {
+                  topTable_,
+                  clause.getField().getColumn(),
+                  false
+                };
               }
 
               case filter::comparison::int_equals:
               {
-                return condition(topTable_, clause.getField().getColumn(), condition::comparison::equals, clause.getIntegerArgument());
+                return {
+                  topTable_,
+                  clause.getField().getColumn(),
+                  condition::comparison::equals,
+                  clause.getIntegerArgument()
+                };
               }
 
               case filter::comparison::int_does_not_equal:
               {
-                return condition(topTable_, clause.getField().getColumn(), condition::comparison::does_not_equal, clause.getIntegerArgument());
+                return {
+                  topTable_,
+                  clause.getField().getColumn(),
+                  condition::comparison::does_not_equal,
+                  clause.getIntegerArgument()
+                };
               }
 
               case filter::comparison::int_is_at_least:
               {
-                return condition(topTable_, clause.getField().getColumn(), condition::comparison::is_at_least, clause.getIntegerArgument());
+                return {
+                  topTable_,
+                  clause.getField().getColumn(),
+                  condition::comparison::is_at_least,
+                  clause.getIntegerArgument()
+                };
               }
 
               case filter::comparison::int_is_greater_than:
               {
-                return condition(topTable_, clause.getField().getColumn(), condition::comparison::is_greater_than, clause.getIntegerArgument());
+                return {
+                  topTable_,
+                  clause.getField().getColumn(),
+                  condition::comparison::is_greater_than,
+                  clause.getIntegerArgument()
+                };
               }
 
               case filter::comparison::int_is_at_most:
               {
-                return condition(topTable_, clause.getField().getColumn(), condition::comparison::is_at_most, clause.getIntegerArgument());
+                return {
+                  topTable_,
+                  clause.getField().getColumn(),
+                  condition::comparison::is_at_most,
+                  clause.getIntegerArgument()
+                };
               }
 
               case filter::comparison::int_is_less_than:
               {
-                return condition(topTable_, clause.getField().getColumn(), condition::comparison::is_less_than, clause.getIntegerArgument());
+                return {
+                  topTable_,
+                  clause.getField().getColumn(),
+                  condition::comparison::is_less_than,
+                  clause.getIntegerArgument()
+                };
               }
 
               case filter::comparison::boolean_equals:
               {
-                return condition(topTable_, clause.getField().getColumn(), condition::comparison::equals, clause.getBooleanArgument() ? 1 : 0);
+                return {
+                  topTable_,
+                  clause.getField().getColumn(),
+                  condition::comparison::equals,
+                  clause.getBooleanArgument() ? 1 : 0
+                };
               }
 
               case filter::comparison::string_equals:
               {
-                return condition(topTable_, clause.getField().getColumn(), condition::comparison::equals, clause.getStringArgument());
+                return {
+                  topTable_,
+                  clause.getField().getColumn(),
+                  condition::comparison::equals,
+                  clause.getStringArgument()
+                };
               }
 
               case filter::comparison::string_does_not_equal:
               {
-                return condition(topTable_, clause.getField().getColumn(), condition::comparison::does_not_equal, clause.getStringArgument());
+                return {
+                  topTable_,
+                  clause.getField().getColumn(),
+                  condition::comparison::does_not_equal,
+                  clause.getStringArgument()
+                };
               }
 
               case filter::comparison::string_is_like:
               {
-                return condition(topTable_, clause.getField().getColumn(), condition::comparison::is_like, clause.getStringArgument());
+                return {
+                  topTable_,
+                  clause.getField().getColumn(),
+                  condition::comparison::is_like,
+                  clause.getStringArgument()
+                };
               }
 
               case filter::comparison::string_is_not_like:
               {
-                return condition(topTable_, clause.getField().getColumn(), condition::comparison::is_not_like, clause.getStringArgument());
+                return {
+                  topTable_,
+                  clause.getField().getColumn(),
+                  condition::comparison::is_not_like,
+                  clause.getStringArgument()
+                };
               }
 
               case filter::comparison::field_equals:
               {
-                return condition(topTable_, clause.getField().getColumn(), condition::comparison::equals, {"", clause.getCompareField().getColumn()}, clause.getCompareField().getObject());
+                return {
+                  topTable_,
+                  clause.getField().getColumn(),
+                  condition::comparison::equals,
+                  field_binding {"", clause.getCompareField().getColumn()},
+                  clause.getCompareField().getObject()
+                };
               }
 
               case filter::comparison::field_does_not_equal:
               {
-                return condition(topTable_, clause.getField().getColumn(), condition::comparison::does_not_equal, {"", clause.getCompareField().getColumn()}, clause.getCompareField().getObject());
+                return {
+                  topTable_,
+                  clause.getField().getColumn(),
+                  condition::comparison::does_not_equal,
+                  field_binding {"", clause.getCompareField().getColumn()},
+                  clause.getCompareField().getObject()
+                };
               }
 
               case filter::comparison::matches:
@@ -680,206 +755,19 @@ namespace verbly {
       << j.getJoinColumn();
   }
 
-  statement::condition::condition(const condition& other)
-  {
-    type_ = other.type_;
-
-    switch (type_)
-    {
-      case type::empty:
-      {
-        break;
-      }
-
-      case type::singleton:
-      {
-        new(&singleton_.table_) std::string(other.singleton_.table_);
-        new(&singleton_.column_) std::string(other.singleton_.column_);
-        singleton_.comparison_ = other.singleton_.comparison_;
-        new(&singleton_.value_) binding(other.singleton_.value_);
-        singleton_.parentObject_ = other.singleton_.parentObject_;
-
-        break;
-      }
-
-      case type::group:
-      {
-        new(&group_.children_) std::list<condition>(other.group_.children_);
-        group_.orlogic_ = other.group_.orlogic_;
-
-        break;
-      }
-    }
-  }
-
-  statement::condition::condition(condition&& other) : condition()
-  {
-    swap(*this, other);
-  }
-
-  statement::condition& statement::condition::operator=(condition other)
-  {
-    swap(*this, other);
-
-    return *this;
-  }
-
-  void swap(statement::condition& first, statement::condition& second)
-  {
-    using type = statement::condition::type;
-    using condition = statement::condition;
-
-    type tempType = first.type_;
-    std::string tempTable;
-    std::string tempColumn;
-    condition::comparison tempComparison;
-    binding tempBinding;
-    object tempParentObject;
-    std::list<condition> tempChildren;
-    bool tempOrlogic;
-
-    switch (tempType)
-    {
-      case type::empty:
-      {
-        break;
-      }
-
-      case type::singleton:
-      {
-        tempTable = std::move(first.singleton_.table_);
-        tempColumn = std::move(first.singleton_.column_);
-        tempComparison = first.singleton_.comparison_;
-        tempBinding = std::move(first.singleton_.value_);
-        tempParentObject = first.singleton_.parentObject_;
-
-        break;
-      }
-
-      case type::group:
-      {
-        tempChildren = std::move(first.group_.children_);
-        tempOrlogic = first.group_.orlogic_;
-
-        break;
-      }
-    }
-
-    first.~condition();
-
-    first.type_ = second.type_;
-
-    switch (first.type_)
-    {
-      case type::empty:
-      {
-        break;
-      }
-
-      case type::singleton:
-      {
-        new(&first.singleton_.table_) std::string(std::move(second.singleton_.table_));
-        new(&first.singleton_.column_) std::string(std::move(second.singleton_.column_));
-        first.singleton_.comparison_ = second.singleton_.comparison_;
-        new(&first.singleton_.value_) binding(std::move(second.singleton_.value_));
-        first.singleton_.parentObject_ = second.singleton_.parentObject_;
-
-        break;
-      }
-
-      case type::group:
-      {
-        new(&first.group_.children_) std::list<condition>(std::move(second.group_.children_));
-        first.group_.orlogic_ = second.group_.orlogic_;
-
-        break;
-      }
-    }
-
-    second.~condition();
-
-    second.type_ = tempType;
-
-    switch (second.type_)
-    {
-      case type::empty:
-      {
-        break;
-      }
-
-      case type::singleton:
-      {
-        new(&second.singleton_.table_) std::string(std::move(tempTable));
-        new(&second.singleton_.column_) std::string(std::move(tempColumn));
-        second.singleton_.comparison_ = tempComparison;
-        new(&second.singleton_.value_) binding(std::move(tempBinding));
-        second.singleton_.parentObject_ = tempParentObject;
-
-        break;
-      }
-
-      case type::group:
-      {
-        new(&second.group_.children_) std::list<condition>(std::move(tempChildren));
-        second.group_.orlogic_ = tempOrlogic;
-
-        break;
-      }
-    }
-  }
-
-  statement::condition::~condition()
-  {
-    switch (type_)
-    {
-      case type::empty:
-      {
-        break;
-      }
-
-      case type::singleton:
-      {
-        using string_type = std::string;
-
-        singleton_.table_.~string_type();
-        singleton_.column_.~string_type();
-        singleton_.value_.~binding();
-
-        break;
-      }
-
-      case type::group:
-      {
-        using list_type = std::list<condition>;
-
-        group_.children_.~list_type();
-
-        break;
-      }
-    }
-  }
-
-  statement::condition::condition() : type_(type::empty)
-  {
-  }
-
   statement::condition::condition(
     std::string table,
     std::string column,
     bool isNull) :
-      type_(type::singleton)
+      type_(type::singleton),
+      variant_(singleton_type {
+        std::move(table),
+        std::move(column),
+        isNull ? comparison::is_null : comparison::is_not_null,
+        {},
+        object::undefined
+      })
   {
-    new(&singleton_.table_) std::string(std::move(table));
-    new(&singleton_.column_) std::string(std::move(column));
-
-    if (isNull)
-    {
-      singleton_.comparison_ = comparison::is_null;
-    } else {
-      singleton_.comparison_ = comparison::is_not_null;
-    }
-
-    singleton_.parentObject_ = object::undefined;
   }
 
   statement::condition::condition(
@@ -888,201 +776,210 @@ namespace verbly {
     comparison comp,
     binding value,
     object parentObject) :
-      type_(type::singleton)
+      type_(type::singleton),
+      variant_(singleton_type {
+        std::move(table),
+        std::move(column),
+        comp,
+        std::move(value),
+        parentObject
+      })
   {
-    new(&singleton_.table_) std::string(std::move(table));
-    new(&singleton_.column_) std::string(std::move(column));
-    singleton_.comparison_ = comp;
-    new(&singleton_.value_) binding(std::move(value));
-    singleton_.parentObject_ = parentObject;
   }
 
   std::string statement::condition::toSql(bool toplevel, bool debug) const
   {
+    std::ostringstream sql;
+
     switch (type_)
     {
       case type::empty:
       {
-        return "";
+        break;
       }
 
       case type::singleton:
       {
-        switch (singleton_.comparison_)
+        const singleton_type& singleton = mpark::get<singleton_type>(variant_);
+
+        sql << singleton.table << "." << singleton.column;
+
+        switch (singleton.comparison)
         {
           case comparison::equals:
-          {
-            if (debug)
-            {
-              switch (singleton_.value_.getType())
-              {
-                case binding::type::string:
-                {
-                  return singleton_.table_ + "." + singleton_.column_ + " = \"" + singleton_.value_.getString() + "\"";
-                }
-
-                case binding::type::integer:
-                {
-                  return singleton_.table_ + "." + singleton_.column_ + " = " + std::to_string(singleton_.value_.getInteger());
-                }
-
-                case binding::type::field:
-                {
-                  return singleton_.table_ + "." + singleton_.column_ + " = " + singleton_.value_.getTable() + "." + singleton_.value_.getColumn();
-                }
-
-                case binding::type::invalid:
-                {
-                  throw std::logic_error("Invalid binding in statement generation");
-                }
-              }
-            } else {
-              if (singleton_.value_.getType() == binding::type::field)
-              {
-                return singleton_.table_ + "." + singleton_.column_ + " = " + singleton_.value_.getTable() + "." + singleton_.value_.getColumn();
-              } else {
-                return singleton_.table_ + "." + singleton_.column_ + " = ?";
-              }
-            }
-          }
-
           case comparison::does_not_equal:
           {
-            if (debug)
+            if (singleton.comparison == comparison::equals)
             {
-              switch (singleton_.value_.getType())
+              sql << " = ";
+            } else {
+              sql << " != ";
+            }
+
+            if (mpark::holds_alternative<field_binding>(singleton.value))
+            {
+              sql << std::get<0>(mpark::get<field_binding>(singleton.value))
+                << "."
+                << std::get<1>(mpark::get<field_binding>(singleton.value));
+            } else if (debug)
+            {
+              if (mpark::holds_alternative<std::string>(singleton.value))
               {
-                case binding::type::string:
-                {
-                  return singleton_.table_ + "." + singleton_.column_ + " != \"" + singleton_.value_.getString() + "\"";
-                }
-
-                case binding::type::integer:
-                {
-                  return singleton_.table_ + "." + singleton_.column_ + " != " + std::to_string(singleton_.value_.getInteger());
-                }
-
-                case binding::type::field:
-                {
-                  return singleton_.table_ + "." + singleton_.column_ + " != " + singleton_.value_.getTable() + "." + singleton_.value_.getColumn();
-                }
-
-                case binding::type::invalid:
-                {
-                  throw std::logic_error("Invalid binding in statement generation");
-                }
+                sql << "\"" << mpark::get<std::string>(singleton.value) << "\"";
+              }
+              else if (mpark::holds_alternative<int>(singleton.value))
+              {
+                sql << mpark::get<int>(singleton.value);
               }
             } else {
-              if (singleton_.value_.getType() == binding::type::field)
-              {
-                return singleton_.table_ + "." + singleton_.column_ + " != " + singleton_.value_.getTable() + "." + singleton_.value_.getColumn();
-              } else {
-                return singleton_.table_ + "." + singleton_.column_ + " != ?";
-              }
+              sql << "?";
             }
+
+            break;
           }
 
           case comparison::is_greater_than:
           {
+            sql << " > ";
+
             if (debug)
             {
-              return singleton_.table_ + "." + singleton_.column_ + " > " + std::to_string(singleton_.value_.getInteger());
+              sql << mpark::get<int>(singleton.value);
             } else {
-              return singleton_.table_ + "." + singleton_.column_ + " > ?";
+              sql << "?";
             }
+
+            break;
           }
 
           case comparison::is_at_most:
           {
+            sql << " <= ";
+
             if (debug)
             {
-              return singleton_.table_ + "." + singleton_.column_ + " <= " + std::to_string(singleton_.value_.getInteger());
+              sql << mpark::get<int>(singleton.value);
             } else {
-              return singleton_.table_ + "." + singleton_.column_ + " <= ?";
+              sql << "?";
             }
+
+            break;
           }
 
           case comparison::is_less_than:
           {
+            sql << " < ";
+
             if (debug)
             {
-              return singleton_.table_ + "." + singleton_.column_ + " < " + std::to_string(singleton_.value_.getInteger());
+              sql << mpark::get<int>(singleton.value);
             } else {
-              return singleton_.table_ + "." + singleton_.column_ + " < ?";
+              sql << "?";
             }
+
+            break;
           }
 
           case comparison::is_at_least:
           {
+            sql << " >= ";
+
             if (debug)
             {
-              return singleton_.table_ + "." + singleton_.column_ + " >= " + std::to_string(singleton_.value_.getInteger());
+              sql << mpark::get<int>(singleton.value);
             } else {
-              return singleton_.table_ + "." + singleton_.column_ + " >= ?";
+              sql << "?";
             }
+
+            break;
           }
 
           case comparison::is_like:
           {
+            sql << " LIKE ";
+
             if (debug)
             {
-              return singleton_.table_ + "." + singleton_.column_ + " LIKE \"" + singleton_.value_.getString() + "\"";
+              sql << "\"" << mpark::get<std::string>(singleton.value) << "\"";
             } else {
-              return singleton_.table_ + "." + singleton_.column_ + " LIKE ?";
+              sql << "?";
             }
+
+            break;
           }
 
           case comparison::is_not_like:
           {
+            sql << " NOT LIKE ";
+
             if (debug)
             {
-              return singleton_.table_ + "." + singleton_.column_ + " NOT LIKE \"" + singleton_.value_.getString() + "\"";
+              sql << "\"" << mpark::get<std::string>(singleton.value) << "\"";
             } else {
-              return singleton_.table_ + "." + singleton_.column_ + " NOT LIKE ?";
+              sql << "?";
             }
+
+            break;
           }
 
           case comparison::is_not_null:
           {
-            return singleton_.table_ + "." + singleton_.column_ + " IS NOT NULL";
+            sql << " IS NOT NULL";
+
+            break;
           }
 
           case comparison::is_null:
           {
-            return singleton_.table_ + "." + singleton_.column_ + " IS NULL";
+            sql << " IS NULL";
+
+            break;
           }
         }
+
+        break;
       }
 
       case type::group:
       {
+        const group_type& group = mpark::get<group_type>(variant_);
+
         std::list<std::string> clauses;
-        for (const condition& cond : group_.children_)
+        for (const condition& cond : group.children)
         {
           clauses.push_back(cond.toSql(false, debug));
         }
 
-        if (clauses.empty())
+        if (clauses.size() == 1)
         {
-          return "";
-        } else if (clauses.size() == 1)
+          sql << clauses.front();
+        } else if (!clauses.empty())
         {
-          return clauses.front();
-        } else {
-          std::string result = hatkirby::implode(std::begin(clauses), std::end(clauses), group_.orlogic_ ? " OR " : " AND ");
-
-          if (toplevel)
+          if (!toplevel)
           {
-            return result;
-          } else {
-            return "(" + result + ")";
+            sql << "(";
+          }
+
+          sql <<
+            hatkirby::implode(
+              std::begin(clauses),
+              std::end(clauses),
+              group.orlogic ? " OR " : " AND ");
+
+          if (!toplevel)
+          {
+            sql << ")";
           }
         }
+
+        break;
       }
     }
+
+    return sql.str();
   }
 
-  std::list<binding> statement::condition::flattenBindings() const
+  std::list<hatkirby::binding> statement::condition::flattenBindings() const
   {
     switch (type_)
     {
@@ -1093,39 +990,27 @@ namespace verbly {
 
       case type::singleton:
       {
-        if (singleton_.value_.getType() == binding::type::field)
-        {
-          return {};
-        } else {
-          switch (singleton_.comparison_)
-          {
-            case comparison::equals:
-            case comparison::does_not_equal:
-            case comparison::is_greater_than:
-            case comparison::is_at_most:
-            case comparison::is_less_than:
-            case comparison::is_at_least:
-            case comparison::is_like:
-            case comparison::is_not_like:
-            {
-              return {singleton_.value_};
-            }
+        const singleton_type& singleton = mpark::get<singleton_type>(variant_);
 
-            case comparison::is_not_null:
-            case comparison::is_null:
-            {
-              return {};
-            }
-          }
+        if (mpark::holds_alternative<std::string>(singleton.value))
+        {
+          return {{ mpark::get<std::string>(singleton.value) }};
+        } else if (mpark::holds_alternative<int>(singleton.value))
+        {
+          return {{ mpark::get<int>(singleton.value) }};
+        } else {
+          return {};
         }
       }
 
       case type::group:
       {
-        std::list<binding> bindings;
-        for (const condition& cond : group_.children_)
+        const group_type& group = mpark::get<group_type>(variant_);
+
+        std::list<hatkirby::binding> bindings;
+        for (const condition& cond : group.children)
         {
-          for (binding value : cond.flattenBindings())
+          for (hatkirby::binding value : cond.flattenBindings())
           {
             bindings.push_back(std::move(value));
           }
@@ -1136,22 +1021,24 @@ namespace verbly {
     }
   }
 
-  statement::condition::condition(bool orlogic) : type_(type::group)
+  statement::condition::condition(
+    bool orlogic) :
+      type_(type::group),
+      variant_(group_type { {}, orlogic })
   {
-    new(&group_.children_) std::list<condition>();
-    group_.orlogic_ = orlogic;
   }
 
   statement::condition& statement::condition::operator+=(condition n)
   {
-    if (type_ == type::group)
+    if (type_ != type::group)
     {
-      group_.children_.push_back(std::move(n));
-
-      return *this;
-    } else {
       throw std::domain_error("Cannot add condition to non-group condition");
     }
+
+    group_type& group = mpark::get<group_type>(variant_);
+    group.children.emplace_back(std::move(n));
+
+    return *this;
   }
 
   statement::condition& statement::condition::operator&=(condition n)
@@ -1187,14 +1074,17 @@ namespace verbly {
     return *this;
   }
 
-  const std::list<statement::condition>& statement::condition::getChildren() const
+  const std::list<statement::condition>& statement::condition::getChildren()
+    const
   {
-    if (type_ == type::group)
+    if (type_ != type::group)
     {
-      return group_.children_;
-    } else {
       throw std::domain_error("Cannot get children of non-group condition");
     }
+
+    const group_type& group = mpark::get<group_type>(variant_);
+
+    return group.children;
   }
 
   statement::condition statement::condition::flatten() const
@@ -1209,17 +1099,27 @@ namespace verbly {
 
       case type::group:
       {
-        condition result(group_.orlogic_);
+        const group_type& group = mpark::get<group_type>(variant_);
 
-        for (const condition& child : group_.children_)
+        condition result(group.orlogic);
+
+        for (const condition& child : group.children)
         {
           condition newChild = child.flatten();
 
-          if ((newChild.type_ == type::group) && (newChild.group_.orlogic_ == group_.orlogic_))
+          if (newChild.type_ == type::group)
           {
-            for (condition subChild : std::move(newChild.group_.children_))
+            group_type& childGroup =
+              mpark::get<group_type>(newChild.variant_);
+
+            if (childGroup.orlogic == group.orlogic)
             {
-              result += std::move(subChild);
+              for (condition subChild : std::move(childGroup.children))
+              {
+                result += std::move(subChild);
+              }
+            } else {
+              result += std::move(newChild);
             }
           } else {
             result += std::move(newChild);
@@ -1231,7 +1131,9 @@ namespace verbly {
     }
   }
 
-  statement::condition statement::condition::resolveCompareFields(object context, std::string tableName) const
+  statement::condition statement::condition::resolveCompareFields(
+    object context,
+    std::string tableName) const
   {
     switch (type_)
     {
@@ -1242,9 +1144,20 @@ namespace verbly {
 
       case type::singleton:
       {
-        if ((singleton_.parentObject_ != object::undefined) && (singleton_.parentObject_ == context))
+        const singleton_type& singleton = mpark::get<singleton_type>(variant_);
+
+        if (singleton.parentObject != object::undefined &&
+            singleton.parentObject == context)
         {
-          return condition(singleton_.table_, singleton_.column_, singleton_.comparison_, {tableName, singleton_.value_.getColumn()});
+          return {
+            singleton.table,
+            singleton.column,
+            singleton.comparison,
+            field_binding {
+              tableName,
+              std::get<1>(mpark::get<field_binding>(singleton.value))
+            }
+          };
         } else {
           return *this;
         }
@@ -1252,8 +1165,10 @@ namespace verbly {
 
       case type::group:
       {
-        condition result(group_.orlogic_);
-        for (const condition& cond : group_.children_)
+        const group_type& group = mpark::get<group_type>(variant_);
+
+        condition result(group.orlogic);
+        for (const condition& cond : group.children)
         {
           result += cond.resolveCompareFields(context, tableName);
         }

@@ -4,10 +4,9 @@
 #include <stdexcept>
 #include <vector>
 #include <string>
+#include <hkutil/database.h>
 #include "field.h"
 #include "filter.h"
-
-struct sqlite3_stmt;
 
 namespace verbly {
 
@@ -24,7 +23,7 @@ namespace verbly {
 
     // Construct from database
 
-    pronunciation(const database& db, sqlite3_stmt* row);
+    pronunciation(const database& db, hatkirby::row row);
 
     // Accessors
 
@@ -63,7 +62,7 @@ namespace verbly {
       return syllables_;
     }
 
-    std::string getStress() const
+    const std::string& getStress() const
     {
       if (!valid_)
       {
@@ -83,7 +82,7 @@ namespace verbly {
       return hasRhyme_;
     }
 
-    std::string getPrerhyme() const
+    const std::string& getPrerhyme() const
     {
       if (!valid_)
       {
@@ -98,7 +97,7 @@ namespace verbly {
       return prerhyme_;
     }
 
-    std::string getRhyme() const
+    const std::string& getRhyme() const
     {
       if (!valid_)
       {
@@ -167,8 +166,11 @@ namespace verbly {
     static const rhymes_field rhymes;
 
   private:
-    bool valid_ = false;
 
+    static const field prerhyme;
+    static const field rhyme;
+
+    bool valid_ = false;
     int id_;
     std::vector<std::string> phonemes_;
     int syllables_;
@@ -176,12 +178,6 @@ namespace verbly {
     bool hasRhyme_ = false;
     std::string prerhyme_;
     std::string rhyme_;
-
-    const database* db_;
-
-    static const field prerhyme;
-    static const field rhyme;
-
   };
 
 };

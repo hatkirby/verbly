@@ -5,6 +5,8 @@
 #include <string>
 #include <list>
 #include <set>
+#include <variant.hpp>
+#include <hkutil/recptr.h>
 #include "enums.h"
 #include "word.h"
 #include "part.h"
@@ -22,23 +24,6 @@ namespace verbly {
         transform
       };
 
-      // Copy & move constructors
-
-      token(const token& other);
-      token(token&& other);
-
-      // Assignment operator
-
-      token& operator=(token other);
-
-      // Swap
-
-      friend void swap(token& first, token& second);
-
-      // Destructor
-
-      ~token();
-
       // Accessors
 
       type getType() const
@@ -52,7 +37,8 @@ namespace verbly {
 
       bool isEmpty() const
       {
-        return ((type_ == type::utterance) && (utterance_.empty()));
+        return (type_ == type::utterance &&
+          mpark::get<utterance_type>(variant_).empty());
       }
 
       // Word
@@ -68,13 +54,13 @@ namespace verbly {
       token(std::string arg);
       token(const char* arg);
 
-      std::string getLiteral() const;
+      const std::string& getLiteral() const;
 
       // Part
 
       token(part arg);
 
-      part getPart() const;
+      const part& getPart() const;
 
       // Fillin
 
@@ -128,7 +114,7 @@ namespace verbly {
         bool indefiniteArticle,
         casing capitalization) const;
 
-      enum class transform_type {
+      enum class transform_mode {
         separator,
         punctuation,
         indefinite_article,
@@ -137,34 +123,46 @@ namespace verbly {
       };
 
       token(
-        transform_type type,
+        transform_mode type,
         std::string param1,
         std::string param2,
         token inner);
 
       token(
-        transform_type type,
+        transform_mode type,
         casing param,
         token inner);
 
-      union {
-        struct {
-          word word_;
-          inflection category_;
-        } word_;
-        std::string literal_;
-        part part_;
-        std::set<std::string> fillin_;
-        std::list<token> utterance_;
-        struct {
-          transform_type type_;
-          std::string strParam_;
-          std::string strParam2_;
-          casing casingParam_;
-          std::unique_ptr<token> inner_;
-        } transform_;
+      struct word_type {
+        word value;
+        inflection category;
       };
+
+      using literal_type = std::string;
+
+      using fillin_type = std::set<std::string>;
+
+      using utterance_type = std::list<token>;
+
+      struct transform_type {
+        transform_mode type;
+        std::string strParam;
+        std::string strParam2;
+        casing casingParam;
+        hatkirby::recptr<token> inner;
+      };
+
+      using variant_type =
+        mpark::variant<
+          word_type,
+          literal_type,
+          part,
+          fillin_type,
+          utterance_type,
+          transform_type>;
+
       type type_;
+      variant_type variant_;
   };
 
   std::ostream& operator<<(std::ostream& os, token::type type);

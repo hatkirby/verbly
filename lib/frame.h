@@ -3,11 +3,10 @@
 
 #include <stdexcept>
 #include <list>
+#include <hkutil/database.h>
 #include "field.h"
 #include "filter.h"
 #include "part.h"
-
-struct sqlite3_stmt;
 
 namespace verbly {
 
@@ -22,7 +21,7 @@ namespace verbly {
 
     // Construct from database
 
-    frame(const database& db, sqlite3_stmt* row);
+    frame(const database& db, hatkirby::row row);
 
     // Accessors
 
@@ -101,15 +100,12 @@ namespace verbly {
     static field parts(int index);
 
   private:
-    bool valid_ = false;
 
+    bool valid_ = false;
     int id_;
     int groupId_;
     int length_;
     std::vector<part> parts_;
-
-    const database* db_;
-
   };
 
 };
