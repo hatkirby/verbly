@@ -139,6 +139,7 @@ namespace verbly {
       std::map<std::string, std::set<word*>> wordsByBaseForm_;
       std::map<std::string, lemma*> lemmaByBaseForm_;
       std::map<std::string, form*> formByText_;
+      std::map<std::string, pronunciation*> pronunciationByPhonemes_;
 
       // Caches
 

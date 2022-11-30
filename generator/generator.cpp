@@ -573,9 +573,15 @@ namespace verbly {
           }
 
           std::string phonemes = phoneme_data[2];
-          pronunciations_.emplace_back(phonemes);
-          pronunciation& p = pronunciations_.back();
-          formByText_.at(canonical)->addPronunciation(p);
+          if (pronunciationByPhonemes_.count(phonemes)) {
+            pronunciation& p = *pronunciationByPhonemes_[phonemes];
+            formByText_.at(canonical)->addPronunciation(p);
+          } else {
+            pronunciations_.emplace_back(phonemes);
+            pronunciation& p = pronunciations_.back();
+            pronunciationByPhonemes_[phonemes] = &p;
+            formByText_.at(canonical)->addPronunciation(p);
+          }
         }
       }
     }
