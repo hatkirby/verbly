@@ -6,6 +6,9 @@
 #include <fstream>
 #include <hkutil/string.h>
 #include <hkutil/progress.h>
+#include <array>
+#include <mutex>
+#include <thread>
 #include "role.h"
 #include "part.h"
 #include "../lib/enums.h"
@@ -83,7 +86,7 @@ namespace verbly {
       readAdjectivePositioning();
 
       // Counts the number of URLs ImageNet has per notion
-      readImageNetUrls();
+      //readImageNetUrls();
 
       // Creates a word by WordNet sense key lookup table
       readWordNetSenseKeys();
@@ -115,8 +118,16 @@ namespace verbly {
       // Writes the database version
       writeVersion();
 
+      // Calculates and writes form merography
+      writeMerography();
+
+      // Calculates and writes pronunciation merophony
+      writeMerophony();
+
       // Dumps data to the database
       dumpObjects();
+
+
 
       // Populates the antonymy relationship from WordNet
       readWordNetAntonymy();
@@ -577,9 +588,29 @@ namespace verbly {
             pronunciation& p = *pronunciationByPhonemes_[phonemes];
             formByText_.at(canonical)->addPronunciation(p);
           } else {
-            pronunciations_.emplace_back(phonemes);
+            std::string stressless;
+            for (int i=0; i<phonemes.size(); i++) {
+              if (!std::isdigit(phonemes[i])) {
+                stressless.push_back(phonemes[i]);
+              }
+            }
+            auto stresslessList = hatkirby::split<std::vector<std::string>>(stressless, " ");
+            std::string stresslessPhonemes = hatkirby::implode(stresslessList.begin(), stresslessList.end(), " ");
+            std::sort(stresslessList.begin(), stresslessList.end());
+            std::string sortedPhonemes = hatkirby::implode(stresslessList.begin(), stresslessList.end(), " ");
+
+            int anaphoneSetId;
+            if (anaphoneSets_.count(sortedPhonemes)) {
+              anaphoneSetId = anaphoneSets_[sortedPhonemes];
+            } else {
+              anaphoneSetId = anaphoneSets_.size();
+              anaphoneSets_[sortedPhonemes] = anaphoneSetId;
+            }
+
+            pronunciations_.emplace_back(phonemes, anaphoneSetId);
             pronunciation& p = pronunciations_.back();
             pronunciationByPhonemes_[phonemes] = &p;
+            pronunciationByBlankPhonemes_[stresslessPhonemes] = &p;
             formByText_.at(canonical)->addPronunciation(p);
           }
         }
@@ -671,6 +702,12 @@ namespace verbly {
 
         for (form& f : forms_)
         {
+          std::string reverseText = f.getText();
+          std::reverse(reverseText.begin(), reverseText.end());
+          if (formByText_.count(reverseText)) {
+            f.setReverseId(formByText_[reverseText]->getId());
+          }
+
           db_ << f;
 
           ppgs.update();
@@ -682,6 +719,19 @@ namespace verbly {
 
         for (pronunciation& p : pronunciations_)
         {
+          std::string stressless;
+          for (int i=0; i<p.getPhonemes().size(); i++) {
+            if (!std::isdigit(p.getPhonemes()[i])) {
+              stressless.push_back(p.getPhonemes()[i]);
+            }
+          }
+          auto stresslessList = hatkirby::split<std::vector<std::string>>(stressless, " ");
+          std::reverse(stresslessList.begin(), stresslessList.end());
+          std::string reversedPhonemes = hatkirby::implode(stresslessList.begin(), stresslessList.end(), " ");
+          if (pronunciationByBlankPhonemes_.count(reversedPhonemes)) {
+            p.setReverseId(pronunciationByBlankPhonemes_[reversedPhonemes]->getId());
+          }
+
           db_ << p;
 
           ppgs.update();
@@ -697,6 +747,208 @@ namespace verbly {
 
           ppgs.update();
         }
+      }
+
+      /*{
+        hatkirby::progress ppgs("Writing merography...", formByText_.size());
+
+        for (const auto& [merotext, meroform] : formByText_)
+        {
+          for (const auto& [holotext, holoform] : formByText_)
+          {
+            if (isMero(merotext, holotext))
+            {
+              db_.insertIntoTable(
+                "merography",
+                {
+                  { "merograph_id", meroform->getId() },
+                  { "holograph_id", holoform->getId() }
+                });
+            }
+          }
+
+          ppgs.update();
+        }
+      }
+
+      {
+        hatkirby::progress ppgs("Writing merophony...", pronunciationByBlankPhonemes_.size());
+
+        for (const auto& [merotext, merop] : pronunciationByBlankPhonemes_)
+        {
+          auto merophonemes = hatkirby::split<std::list<std::string>>(merotext, " ");
+
+          for (const auto& [holotext, holop] : pronunciationByBlankPhonemes_)
+          {
+            auto holophonemes = hatkirby::split<std::list<std::string>>(holotext, " ");
+
+            if (isMero(merophonemes, holophonemes))
+            {
+              db_.insertIntoTable(
+                "merophony",
+                {
+                  { "merophone_id", merop->getId() },
+                  { "holophone_id", holop->getId() }
+                });
+            }
+          }
+
+          ppgs.update();
+        }
+      }*/
+    }
+
+    void generator::writeMerography()
+    {
+      hatkirby::progress ppgs("Writing merography...", formByText_.size());
+      for (const auto& [text, form] : formByText_)
+      {
+        ppgs.update();
+
+        std::unordered_set<std::string> visited;
+        for (int i=0; i<text.size(); i++)
+        {
+          for (int l=3; l<text.size()-i; l++)
+          {
+            if (i==0 && l == text.size())
+            {
+              continue;
+            }
+
+            std::string substr = text.substr(i, l);
+            if (formByText_.count(substr) && !visited.count(substr))
+            {
+              visited.insert(substr);
+              db_.insertIntoTable(
+                "merography",
+                {
+                  { "merograph_id", formByText_[substr]->getId() },
+                  { "holograph_id", form->getId() }
+                });
+            }
+          }
+        }
+
+
+        /*
+        std::string front = text;
+        while (front.size() > 2)
+        {
+          front.erase(0, 1);
+
+          if (formByText_.count(front))
+          {
+            visited.insert(front);
+            db_.insertIntoTable(
+              "merography",
+              {
+                { "merograph_id", formByText_[front]->getId() },
+                { "holograph_id", form->getId() }
+              });
+          }
+        }
+
+        if (text.size() > 2)
+        {
+          std::string back = text;
+
+          while (back.size() > 2)
+          {
+            back.pop_back();
+
+            if (formByText_.count(back) && !visited.count(back))
+            {
+              db_.insertIntoTable(
+                "merography",
+                {
+                  { "merograph_id", formByText_[back]->getId() },
+                  { "holograph_id", form->getId() }
+                });
+            }
+          }
+        }*/
+      }
+    }
+
+    void generator::writeMerophony()
+    {
+      std::map<std::list<std::string>, pronunciation*> tokenized;
+      for (const auto& [phonemes, pronunciation] : pronunciationByBlankPhonemes_)
+      {
+        tokenized[hatkirby::split<std::list<std::string>>(phonemes, " ")] = pronunciation;
+      }
+
+      hatkirby::progress ppgs("Writing merophony...", tokenized.size());
+      for (const auto& [phonemes, pronunciation] : tokenized)
+      {
+        ppgs.update();
+
+        std::set<std::list<std::string>> visited;
+        for (int i=0; i<phonemes.size(); i++)
+        {
+          for (int l=2; l<phonemes.size()-i; l++)
+          {
+            if (i==0 && l == phonemes.size())
+            {
+              continue;
+            }
+
+            std::list<std::string> sublist;
+            for (auto j=std::next(phonemes.begin(),i); j!=std::next(phonemes.begin(),i+l); j++)
+            {
+              sublist.push_back(*j);
+            }
+
+            if (tokenized.count(sublist) && !visited.count(sublist))
+            {
+              visited.insert(sublist);
+              db_.insertIntoTable(
+                "merophony",
+                {
+                  { "merophone_id", tokenized[sublist]->getId() },
+                  { "holophone_id", pronunciation->getId() }
+                });
+            }
+          }
+        }
+        /*std::list<std::string> front = phonemes;
+        while (front.size() > 1)
+        {
+          front.pop_front();
+
+          if (tokenized.count(front))
+          {
+            visited.insert(front);
+            db_.insertIntoTable(
+              "merophony",
+              {
+                { "merophone_id", tokenized[front]->getId() },
+                { "holophone_id", pronunciation->getId() }
+              });
+            break;
+          }
+        }
+
+        if (phonemes.size() > 1)
+        {
+          std::list<std::string> back = phonemes;
+
+          while (back.size() > 1)
+          {
+            back.pop_back();
+
+            if (tokenized.count(back) && !visited.count(back))
+            {
+              db_.insertIntoTable(
+                "merophony",
+                {
+                  { "merophone_id", tokenized[back]->getId() },
+                  { "holophone_id", pronunciation->getId() }
+                });
+              break;
+            }
+          }
+        }*/
       }
     }
 
@@ -1316,7 +1568,19 @@ namespace verbly {
     {
       if (!formByText_.count(text))
       {
-        forms_.emplace_back(text);
+        std::string sortedText = text;
+        std::sort(sortedText.begin(), sortedText.end());
+
+        int anagramSetId;
+        if (anagramSets_.count(sortedText))
+        {
+          anagramSetId = anagramSets_[sortedText];
+        } else {
+          anagramSetId = anagramSets_.size();
+          anagramSets_[sortedText] = anagramSetId;
+        }
+
+        forms_.emplace_back(text, anagramSetId);
         formByText_[text] = &forms_.back();
       }
 

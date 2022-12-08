@@ -148,6 +148,11 @@ namespace verbly {
 
     static const field forms;
 
+    static const field anaphones;
+
+    static const field merophones;
+    static const field holophones;
+
     // Rhyming relationship
 
     class rhymes_field {

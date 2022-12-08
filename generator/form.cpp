@@ -9,12 +9,13 @@ namespace verbly {
 
     int form::nextId_ = 0;
 
-    form::form(std::string text) :
+    form::form(std::string text, int anagram_set_id) :
       id_(nextId_++),
       text_(text),
       complexity_(std::count(std::begin(text), std::end(text), ' ') + 1),
       proper_(std::any_of(std::begin(text), std::end(text), ::isupper)),
-      length_(text.length())
+      length_(text.length()),
+      anagram_set_id_(anagram_set_id)
     {
     }
 
@@ -34,7 +35,9 @@ namespace verbly {
             { "form", arg.getText() },
             { "complexity", arg.getComplexity() },
             { "proper", arg.isProper() },
-            { "length", arg.getLength() }
+            { "length", arg.getLength() },
+            { "anagram_set_id", arg.getAnagramSetId() },
+            { "reverse_form_id", arg.getReverseId() }
           });
       }
 

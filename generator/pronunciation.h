@@ -13,7 +13,7 @@ namespace verbly {
 
       // Constructor
 
-      explicit pronunciation(std::string phonemes);
+      pronunciation(std::string phonemes, int anaphone_set_id);
 
       // Accessors
 
@@ -62,6 +62,21 @@ namespace verbly {
         return stress_;
       }
 
+      int getAnaphoneSetId() const
+      {
+        return anaphone_set_id_;
+      }
+
+      void setReverseId(int id)
+      {
+        reverse_id_ = id;
+      }
+
+      int getReverseId() const
+      {
+        return reverse_id_;
+      }
+
     private:
 
       static int nextId_;
@@ -72,6 +87,8 @@ namespace verbly {
       std::string prerhyme_;
       int syllables_ = 0;
       std::string stress_;
+      int anaphone_set_id_;
+      int reverse_id_ = -1;
 
     };
 

@@ -160,7 +160,9 @@ CREATE TABLE `forms` (
   `form` VARCHAR(32) NOT NULL,
   `complexity` SMALLINT NOT NULL,
   `proper` SMALLINT NOT NULL,
-  `length` SMALLINT NOT NULL
+  `length` SMALLINT NOT NULL,
+  `anagram_set_id` INTEGER NOT NULL,
+  `reverse_form_id` INTEGER NOT NULL
 );
 
 CREATE UNIQUE INDEX `form_by_string` ON `forms`(`form`);
@@ -174,13 +176,23 @@ CREATE TABLE `lemmas_forms` (
 
 CREATE INDEX `forms_lemmas` ON `lemmas_forms`(`form_id`,`category`,`lemma_id`);
 
+CREATE TABLE `merography` (
+  `merograph_id` INTEGER NOT NULL,
+  `holograph_id` INTEGER NOT NULL,
+  PRIMARY KEY(`merograph_id`,`holograph_id`)
+) WITHOUT ROWID;
+
+CREATE INDEX `reverse_merography` ON `merography`(`holograph_id`,`merograph_id`);
+
 CREATE TABLE `pronunciations` (
   `pronunciation_id` INTEGER PRIMARY KEY,
   `phonemes` VARCHAR(64) NOT NULL,
   `prerhyme` VARCHAR(8),
   `rhyme` VARCHAR(64),
   `syllables` INTEGER NOT NULL,
-  `stress` VARCHAR(64) NOT NULL
+  `stress` VARCHAR(64) NOT NULL,
+  `anaphone_set_id` INTEGER NOT NULL,
+  `reverse_pronunciation_id` INTEGER NOT NULL
 );
 
 CREATE INDEX `rhymes_with` ON `pronunciations`(`rhyme`,`prerhyme`);
@@ -192,6 +204,14 @@ CREATE TABLE `forms_pronunciations` (
 ) WITHOUT ROWID;
 
 CREATE INDEX `pronunciations_forms` ON `forms_pronunciations`(`pronunciation_id`,`form_id`);
+
+CREATE TABLE `merophony` (
+  `merophone_id` INTEGER NOT NULL,
+  `holophone_id` INTEGER NOT NULL,
+  PRIMARY KEY(`merophone_id`,`holophone_id`)
+) WITHOUT ROWID;
+
+CREATE INDEX `reverse_merophony` ON `merophony`(`holophone_id`,`merophone_id`);
 
 CREATE TABLE `frames` (
   `frame_id` INTEGER NOT NULL,

@@ -3,6 +3,8 @@
 
 #include <string>
 #include <map>
+#include <unordered_map>
+#include <unordered_set>
 #include <list>
 #include <set>
 #include <libxml/parser.h>
@@ -63,6 +65,10 @@ namespace verbly {
       void writeVersion();
 
       void dumpObjects();
+
+      void writeMerography();
+
+      void writeMerophony();
 
       void readWordNetAntonymy();
 
@@ -138,8 +144,11 @@ namespace verbly {
       std::map<std::pair<int, int>, word*> wordByWnidAndWnum_;
       std::map<std::string, std::set<word*>> wordsByBaseForm_;
       std::map<std::string, lemma*> lemmaByBaseForm_;
-      std::map<std::string, form*> formByText_;
+      std::unordered_map<std::string, form*> formByText_;
       std::map<std::string, pronunciation*> pronunciationByPhonemes_;
+      std::unordered_map<std::string, pronunciation*> pronunciationByBlankPhonemes_;
+      std::map<std::string, int> anagramSets_;
+      std::map<std::string, int> anaphoneSets_;
 
       // Caches
 

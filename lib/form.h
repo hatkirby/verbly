@@ -136,6 +136,11 @@ namespace verbly {
 
     static const field pronunciations;
 
+    static const field anagrams;
+
+    static const field merographs;
+    static const field holographs;
+
   private:
 
     bool valid_ = false;

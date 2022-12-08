@@ -18,6 +18,11 @@ namespace verbly {
 
   const field form::pronunciations = field::joinThrough(object::form, "form_id", object::pronunciation, "forms_pronunciations", "pronunciation_id");
 
+  const field form::anagrams = field::joinField(object::form, "anagram_set_id", object::form);
+
+  const field form::merographs = field::selfJoin(object::form, "form_id", "merography", "holograph_id", "merograph_id");
+  const field form::holographs = field::selfJoin(object::form, "form_id", "merography", "merograph_id", "holograph_id");
+
   field form::words(inflection category)
   {
     return field::joinThroughWhere(object::form, "form_id", object::word, "lemmas_forms", "lemma_id", "category", static_cast<int>(category));

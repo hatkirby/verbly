@@ -43,9 +43,9 @@ namespace verbly {
       }
 
       statement stmt(Object::objectType, std::move(queryFilter));
-
       queryString_ =
         stmt.getQueryString(Object::select, std::move(sortOrder), limit);
+      
 
       bindings_ = stmt.getBindings();
     }

@@ -11,6 +11,6 @@ include_directories(
   ../vendor/hkutil)
 
 add_executable(generator notion.cpp word.cpp lemma.cpp form.cpp pronunciation.cpp group.cpp frame.cpp part.cpp generator.cpp main.cpp)
-set_property(TARGET generator PROPERTY CXX_STANDARD 11)
+set_property(TARGET generator PROPERTY CXX_STANDARD 17)
 set_property(TARGET generator PROPERTY CXX_STANDARD_REQUIRED ON)
 target_link_libraries(generator ${sqlite3_LIBRARIES} ${LIBXML2_LIBRARIES})

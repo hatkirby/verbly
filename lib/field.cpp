@@ -110,7 +110,10 @@ namespace verbly {
 
   field::operator filter() const
   {
-    if (isJoin())
+    if (type_ == type::hierarchal_join)
+    {
+      return filter(*this, filter::comparison::hierarchally_matches, filter());
+    } else if (isJoin())
     {
       return filter(*this, filter::comparison::matches, filter());
     } else {

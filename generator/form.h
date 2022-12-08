@@ -15,7 +15,7 @@ namespace verbly {
 
       // Constructor
 
-      explicit form(std::string text);
+      form(std::string text, int anagram_set_id);
 
       // Mutators
 
@@ -48,6 +48,21 @@ namespace verbly {
         return length_;
       }
 
+      int getAnagramSetId() const
+      {
+        return anagram_set_id_;
+      }
+
+      void setReverseId(int id)
+      {
+        reverse_id_ = id;
+      }
+
+      int getReverseId() const
+      {
+        return reverse_id_;
+      }
+
       std::set<const pronunciation*> getPronunciations() const
       {
         return pronunciations_;
@@ -62,6 +77,8 @@ namespace verbly {
       const int complexity_;
       const bool proper_;
       const int length_;
+      const int anagram_set_id_;
+      int reverse_id_ = -1;
 
       std::set<const pronunciation*> pronunciations_;
 

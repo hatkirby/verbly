@@ -10,9 +10,10 @@ namespace verbly {
 
     int pronunciation::nextId_ = 0;
 
-    pronunciation::pronunciation(std::string phonemes) :
+    pronunciation::pronunciation(std::string phonemes, int anaphone_set_id) :
       id_(nextId_++),
-      phonemes_(phonemes)
+      phonemes_(phonemes),
+      anaphone_set_id_(anaphone_set_id)
     {
       auto phonemeList =
         hatkirby::split<std::list<std::string>>(phonemes, " ");
@@ -88,6 +89,8 @@ namespace verbly {
       fields.emplace_back("phonemes", arg.getPhonemes());
       fields.emplace_back("syllables", arg.getSyllables());
       fields.emplace_back("stress", arg.getStress());
+      fields.emplace_back("anaphone_set_id", arg.getAnaphoneSetId());
+      fields.emplace_back("reverse_pronunciation_id", arg.getReverseId());
 
       if (arg.hasRhyme())
       {
