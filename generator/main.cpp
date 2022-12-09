@@ -4,22 +4,23 @@
 
 void printUsage()
 {
-  std::cout << "usage: generator verbnet agid wordnet cmudict imagenet output" << std::endl;
+  std::cout << "usage: generator verbnet agid wordnet cmudict imagenet output ino" << std::endl;
   std::cout << "verbnet  :: path to a VerbNet data directory" << std::endl;
   std::cout << "agid     :: path to an AGID infl.txt file" << std::endl;
   std::cout << "wordnet  :: path to a WordNet prolog data directory" << std::endl;
   std::cout << "cmudict  :: path to a CMUDICT pronunciation file" << std::endl;
   std::cout << "imagenet :: path to an ImageNet urls.txt file" << std::endl;
   std::cout << "output   :: datafile output path" << std::endl;
+  std::cout << "ino      :: imagenet directory output path" << std::endl;
 }
 
 int main(int argc, char** argv)
 {
-  if (argc == 7)
+  if (argc == 8)
   {
     try
     {
-      verbly::generator::generator app(argv[1], argv[2], argv[3], argv[4], argv[5], argv[6]);
+      verbly::generator::generator app(argv[1], argv[2], argv[3], argv[4], argv[5], argv[6], argv[7]);
 
       try
       {

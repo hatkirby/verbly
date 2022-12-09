@@ -23,13 +23,15 @@ namespace verbly {
       std::string wordNetPath,
       std::string cmudictPath,
       std::string imageNetPath,
-      std::string outputPath) :
+      std::string outputPath,
+      std::string imageNetOutput) :
         verbNetPath_(verbNetPath),
         agidPath_(agidPath),
         wordNetPath_(wordNetPath),
         cmudictPath_(cmudictPath),
         imageNetPath_(imageNetPath),
-        db_(outputPath, hatkirby::dbmode::create)
+        db_(outputPath, hatkirby::dbmode::create),
+        imageNetOutput_(imageNetOutput)
     {
       // Ensure VerbNet directory exists
       DIR* dir;
@@ -75,6 +77,9 @@ namespace verbly {
       {
         throw std::invalid_argument("ImageNet urls.txt file not found");
       }
+
+      // Create the ImageNet output directory
+      std::filesystem::create_directory(imageNetOutput_);
     }
 
     void generator::run()
@@ -86,7 +91,7 @@ namespace verbly {
       readAdjectivePositioning();
 
       // Counts the number of URLs ImageNet has per notion
-      //readImageNetUrls();
+      readImageNetUrls();
 
       // Creates a word by WordNet sense key lookup table
       readWordNetSenseKeys();
@@ -118,16 +123,14 @@ namespace verbly {
       // Writes the database version
       writeVersion();
 
+      // Dumps data to the database
+      dumpObjects();
+
       // Calculates and writes form merography
       writeMerography();
 
       // Calculates and writes pronunciation merophony
       writeMerophony();
-
-      // Dumps data to the database
-      dumpObjects();
-
-
 
       // Populates the antonymy relationship from WordNet
       readWordNetAntonymy();
@@ -286,6 +289,10 @@ namespace verbly {
         {
           // We know that this notion has a wnid and is a noun.
           notionByWnid_.at(wnid)->incrementNumOfImages();
+
+          std::filesystem::path imagefile = imageNetOutput_ / std::to_string(notionByWnid_[wnid]->getId());
+          std::ofstream imageoutput(imagefile, std::ios::app);
+          imageoutput << line.substr(line.find("\t") + 1) << std::endl;
         }
       }
     }

@@ -9,6 +9,7 @@
 #include <set>
 #include <libxml/parser.h>
 #include <hkutil/database.h>
+#include <filesystem>
 #include "notion.h"
 #include "word.h"
 #include "lemma.h"
@@ -34,7 +35,8 @@ namespace verbly {
         std::string wordNetPath,
         std::string cmudictPath,
         std::string imageNetPath,
-        std::string outputPath);
+        std::string outputPath,
+        std::string imageNetOutput);
 
       // Action
 
@@ -127,6 +129,7 @@ namespace verbly {
       // Output
 
       hatkirby::database db_;
+      std::filesystem::path imageNetOutput_;
 
       // Data
 
