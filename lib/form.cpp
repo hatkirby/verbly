@@ -20,8 +20,8 @@ namespace verbly {
 
   const field form::anagrams = field::joinField(object::form, "anagram_set_id", object::form);
 
-  const field form::merographs = field::selfJoin(object::form, "form_id", "merography", "holograph_id", "merograph_id");
-  const field form::holographs = field::selfJoin(object::form, "form_id", "merography", "merograph_id", "holograph_id");
+  const field form::merographs = field::selfJoin(object::form, "form_id", "merography", "merograph_id", "holograph_id");
+  const field form::holographs = field::selfJoin(object::form, "form_id", "merography", "holograph_id", "merograph_id");
 
   field form::words(inflection category)
   {
