@@ -815,7 +815,7 @@ namespace verbly {
         std::unordered_set<std::string> visited;
         for (int i=0; i<text.size(); i++)
         {
-          for (int l=3; l<text.size()-i; l++)
+          for (int l=3; l<=text.size()-i; l++)
           {
             if (i==0 && l == text.size())
             {
@@ -893,7 +893,7 @@ namespace verbly {
         std::set<std::list<std::string>> visited;
         for (int i=0; i<phonemes.size(); i++)
         {
-          for (int l=2; l<phonemes.size()-i; l++)
+          for (int l=2; l<=phonemes.size()-i; l++)
           {
             if (i==0 && l == phonemes.size())
             {
