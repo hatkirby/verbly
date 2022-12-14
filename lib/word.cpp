@@ -44,7 +44,7 @@ namespace verbly {
     return field::joinThroughWhere(object::word, "lemma_id", object::form, "lemmas_forms", "form_id", "category", static_cast<int>(category));
   }
 
-  word::word(const database& db, hatkirby::row row) : db_(db), valid_(true)
+  word::word(const database& db, hatkirby::row row) : db_(&db), valid_(true)
   {
     id_ = mpark::get<int>(row[0]);
 
@@ -104,7 +104,12 @@ namespace verbly {
 
   void word::initializeForm(inflection infl) const
   {
-    forms_[infl] = db_.forms(form::words(infl) %= *this, verbly::form::id, -1).all();
+    if (!db_)
+    {
+      throw std::domain_error("Database not present");
+    }
+
+    forms_[infl] = db_->forms(form::words(infl) %= *this, verbly::form::id, -1).all();
   }
 
   filter word::synonyms_field::operator%=(filter joinCondition) const

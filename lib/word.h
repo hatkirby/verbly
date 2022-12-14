@@ -214,7 +214,7 @@ namespace verbly {
     std::vector<frame> frames_;
     mutable std::map<inflection, std::vector<form>> forms_;
 
-    const database& db_;
+    const database* db_ = nullptr;
   };
 
 };
