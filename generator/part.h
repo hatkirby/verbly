@@ -3,6 +3,7 @@
 
 #include <string>
 #include <set>
+#include <variant>
 #include "../lib/enums.h"
 
 namespace verbly {
@@ -31,24 +32,6 @@ namespace verbly {
       // Duplication
 
       static part duplicate(const part& other);
-
-      // Copy and move constructors
-
-      part(const part& other);
-
-      part(part&& other);
-
-      // Assignment
-
-      part& operator=(part other);
-
-      // Swap
-
-      friend void swap(part& first, part& second);
-
-      // Destructor
-
-      ~part();
 
       // General accessors
 
@@ -82,6 +65,26 @@ namespace verbly {
 
     private:
 
+      struct noun_phrase_type {
+        std::string role;
+        std::set<std::string> selrestrs;
+        std::set<std::string> synrestrs;
+      };
+
+      struct preposition_type {
+        std::set<std::string> choices;
+        bool literal;
+      };
+
+      using literal_type = std::string;
+
+      using variant_type =
+        std::variant<
+          std::monostate,
+          noun_phrase_type,
+          preposition_type,
+          literal_type>;
+
       static int nextId_;
 
       int id_;
@@ -92,26 +95,47 @@ namespace verbly {
       {
       }
 
-      part(type t) :
+      part(type t, variant_type variant = {}) :
         id_(nextId_++),
-        type_(t)
+        type_(t),
+        variant_(std::move(variant))
       {
+        bool valid_type = false;
+        switch (type_)
+        {
+          case part_type::noun_phrase:
+          {
+            valid_type = std::holds_alternative<noun_phrase_type>(variant_);
+            break;
+          }
+          case part_type::preposition:
+          {
+            valid_type = std::holds_alternative<preposition_type>(variant_);
+            break;
+          }
+          case part_type::literal:
+          {
+            valid_type = std::holds_alternative<literal_type>(variant_);
+            break;
+          }
+          case part_type::invalid:
+          case part_type::verb:
+          case part_type::adjective:
+          case part_type::adverb:
+          {
+            valid_type = std::holds_alternative<std::monostate>(variant_);
+            break;
+          }
+        }
+        if (!valid_type)
+        {
+          throw std::invalid_argument("Invalid variant provided for part");
+        }
       }
 
       // Data
 
-      union {
-        struct {
-          std::string role;
-          std::set<std::string> selrestrs;
-          std::set<std::string> synrestrs;
-        } noun_phrase_;
-        struct {
-          std::set<std::string> choices;
-          bool literal;
-        } preposition_;
-        std::string literal_;
-      };
+      variant_type variant_;
 
       type type_ = type::invalid;
 
