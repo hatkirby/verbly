@@ -23,7 +23,7 @@ namespace verbly {
 
       case type::utterance:
       {
-        const utterance_type& utterance = mpark::get<utterance_type>(variant_);
+        const utterance_type& utterance = std::get<utterance_type>(variant_);
 
         return std::all_of(
           std::begin(utterance),
@@ -35,7 +35,7 @@ namespace verbly {
 
       case type::transform:
       {
-        const transform_type& transform = mpark::get<transform_type>(variant_);
+        const transform_type& transform = std::get<transform_type>(variant_);
 
         return transform.inner->isComplete();
       }
@@ -56,7 +56,7 @@ namespace verbly {
     {
       case type::word:
       {
-        const word_type& w = mpark::get<word_type>(variant_);
+        const word_type& w = std::get<word_type>(variant_);
 
         const form& wordForm = w.value.getInflections(w.category).front();
 
@@ -108,7 +108,7 @@ namespace verbly {
 
       case type::literal:
       {
-        std::string result = mpark::get<literal_type>(variant_);
+        std::string result = std::get<literal_type>(variant_);
 
         if (indefiniteArticle && std::isalpha(result[0]))
         {
@@ -164,7 +164,7 @@ namespace verbly {
 
       case type::utterance:
       {
-        const utterance_type& utterance = mpark::get<utterance_type>(variant_);
+        const utterance_type& utterance = std::get<utterance_type>(variant_);
 
         bool first = true;
         std::list<std::string> compiled;
@@ -192,7 +192,7 @@ namespace verbly {
 
       case type::transform:
       {
-        const transform_type& transform = mpark::get<transform_type>(variant_);
+        const transform_type& transform = std::get<transform_type>(variant_);
 
         switch (transform.type)
         {
@@ -257,7 +257,7 @@ namespace verbly {
       throw std::domain_error("Token is not a word");
     }
 
-    return mpark::get<word_type>(variant_).value;
+    return std::get<word_type>(variant_).value;
   }
 
   token token::inflect(inflection category) const
@@ -268,7 +268,7 @@ namespace verbly {
     }
 
     return {
-      mpark::get<word_type>(variant_).value,
+      std::get<word_type>(variant_).value,
       category
     };
   }
@@ -293,7 +293,7 @@ namespace verbly {
       throw std::domain_error("Token is not a literal");
     }
 
-    return mpark::get<literal_type>(variant_);
+    return std::get<literal_type>(variant_);
   }
 
   token::token(
@@ -310,7 +310,7 @@ namespace verbly {
       throw std::domain_error("Token is not a part");
     }
 
-    return mpark::get<part>(variant_);
+    return std::get<part>(variant_);
   }
 
   token::token(
@@ -327,7 +327,7 @@ namespace verbly {
       throw std::domain_error("Token is not a fillin");
     }
 
-    return mpark::get<fillin_type>(variant_);
+    return std::get<fillin_type>(variant_);
   }
 
   bool token::hasSynrestr(std::string synrestr) const
@@ -337,7 +337,7 @@ namespace verbly {
       throw std::domain_error("Token is not a fillin");
     }
 
-    return mpark::get<fillin_type>(variant_).count(synrestr);
+    return std::get<fillin_type>(variant_).count(synrestr);
   }
 
   void token::addSynrestr(std::string synrestr)
@@ -347,7 +347,7 @@ namespace verbly {
       throw std::domain_error("Token is not a fillin");
     }
 
-    fillin_type& fillin = mpark::get<fillin_type>(variant_);
+    fillin_type& fillin = std::get<fillin_type>(variant_);
     fillin.insert(std::move(synrestr));
   }
 
@@ -378,7 +378,7 @@ namespace verbly {
       throw std::domain_error("Token is not an utterance");
     }
 
-    return std::begin(mpark::get<utterance_type>(variant_));
+    return std::begin(std::get<utterance_type>(variant_));
   }
 
   token::const_iterator token::begin() const
@@ -388,7 +388,7 @@ namespace verbly {
       throw std::domain_error("Token is not an utterance");
     }
 
-    return std::begin(mpark::get<utterance_type>(variant_));
+    return std::begin(std::get<utterance_type>(variant_));
   }
 
   token::iterator token::end()
@@ -398,7 +398,7 @@ namespace verbly {
       throw std::domain_error("Token is not an utterance");
     }
 
-    return std::end(mpark::get<utterance_type>(variant_));
+    return std::end(std::get<utterance_type>(variant_));
   }
 
   token::const_iterator token::end() const
@@ -408,7 +408,7 @@ namespace verbly {
       throw std::domain_error("Token is not an utterance");
     }
 
-    return std::end(mpark::get<utterance_type>(variant_));
+    return std::end(std::get<utterance_type>(variant_));
   }
 
   token& token::operator<<(token arg)
@@ -418,7 +418,7 @@ namespace verbly {
       throw std::domain_error("Token is not an utterance");
     }
 
-    utterance_type& utterance = mpark::get<utterance_type>(variant_);
+    utterance_type& utterance = std::get<utterance_type>(variant_);
     utterance.push_back(std::move(arg));
 
     return *this;
@@ -460,7 +460,7 @@ namespace verbly {
       throw std::domain_error("Invalid access on non-tranform token");
     }
 
-    return *mpark::get<transform_type>(variant_).inner;
+    return *std::get<transform_type>(variant_).inner;
   }
 
   const token& token::getInnerToken() const
@@ -470,7 +470,7 @@ namespace verbly {
       throw std::domain_error("Invalid access on non-tranform token");
     }
 
-    return *mpark::get<transform_type>(variant_).inner;
+    return *std::get<transform_type>(variant_).inner;
   }
 
   token::token(

@@ -31,22 +31,22 @@ namespace verbly {
     hatkirby::row row) :
       valid_(true)
   {
-    id_ = mpark::get<int>(row[0]);
+    id_ = std::get<int>(row[0]);
 
     phonemes_ =
       hatkirby::split<std::vector<std::string>>(
-        mpark::get<std::string>(row[1]),
+        std::get<std::string>(row[1]),
         " ");
 
-    syllables_ = mpark::get<int>(row[2]);
-    stress_ = mpark::get<std::string>(row[3]);
+    syllables_ = std::get<int>(row[2]);
+    stress_ = std::get<std::string>(row[3]);
 
-    if (!mpark::holds_alternative<std::nullptr_t>(row[5]))
+    if (!std::holds_alternative<std::nullptr_t>(row[5]))
     {
       hasRhyme_ = true;
 
-      prerhyme_ = mpark::get<std::string>(row[4]);
-      rhyme_ = mpark::get<std::string>(row[5]);
+      prerhyme_ = std::get<std::string>(row[4]);
+      rhyme_ = std::get<std::string>(row[5]);
     }
   }
 

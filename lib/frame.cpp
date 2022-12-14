@@ -25,9 +25,9 @@ namespace verbly {
 
   frame::frame(const database& db, hatkirby::row row) : valid_(true)
   {
-    id_ = mpark::get<int>(row[0]);
-    groupId_ = mpark::get<int>(row[1]);
-    length_ = mpark::get<int>(row[2]);
+    id_ = std::get<int>(row[0]);
+    groupId_ = std::get<int>(row[1]);
+    length_ = std::get<int>(row[2]);
 
     parts_ = db.parts(*this, verbly::part::index, -1).all();
   }

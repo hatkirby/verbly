@@ -12,8 +12,8 @@ namespace verbly {
     hatkirby::row version =
       ppdb_.queryFirst("SELECT major, minor FROM version");
 
-    major_ = mpark::get<int>(version[0]);
-    minor_ = mpark::get<int>(version[1]);
+    major_ = std::get<int>(version[0]);
+    minor_ = std::get<int>(version[1]);
 
     if (major_ != DATABASE_MAJOR_VERSION)
     {
@@ -62,7 +62,7 @@ namespace verbly {
 
     for (hatkirby::row& r : rows)
     {
-      result.emplace(std::move(mpark::get<std::string>(r[0])));
+      result.emplace(std::move(std::get<std::string>(r[0])));
     }
 
     return result;
@@ -79,7 +79,7 @@ namespace verbly {
 
     for (hatkirby::row& r : rows)
     {
-      result.emplace(std::move(mpark::get<std::string>(r[0])));
+      result.emplace(std::move(std::get<std::string>(r[0])));
     }
 
     return result;

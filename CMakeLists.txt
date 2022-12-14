@@ -4,8 +4,6 @@ project (verbly)
 find_package(PkgConfig)
 pkg_check_modules(sqlite3 sqlite3>=3.8.3 REQUIRED)
 
-set(CMAKE_BUILD_TYPE Debug)
-
 add_library(verbly
   lib/filter.cpp
   lib/field.cpp
@@ -21,9 +19,8 @@ add_library(verbly
 
 target_include_directories(verbly PUBLIC
   lib
-  vendor/hkutil
-  vendor/hkutil/vendor)
+  vendor/hkutil)
 
-set_property(TARGET verbly PROPERTY CXX_STANDARD 11)
+set_property(TARGET verbly PROPERTY CXX_STANDARD 17)
 set_property(TARGET verbly PROPERTY CXX_STANDARD_REQUIRED ON)
 target_link_libraries(verbly ${sqlite3_LIBRARIES})

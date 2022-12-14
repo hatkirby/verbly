@@ -377,7 +377,7 @@ namespace verbly {
       throw std::domain_error("This filter does not have a field");
     }
 
-    return mpark::get<singleton_type>(variant_).filterField;
+    return std::get<singleton_type>(variant_).filterField;
   }
 
   filter::comparison filter::getComparison() const
@@ -387,7 +387,7 @@ namespace verbly {
       throw std::domain_error("This filter does not have a comparison");
     }
 
-    return mpark::get<singleton_type>(variant_).filterType;
+    return std::get<singleton_type>(variant_).filterType;
   }
 
   filter filter::getJoinCondition() const
@@ -397,7 +397,7 @@ namespace verbly {
       throw std::domain_error("This filter does not have a join condition");
     }
 
-    const singleton_type& ss = mpark::get<singleton_type>(variant_);
+    const singleton_type& ss = std::get<singleton_type>(variant_);
 
     switch (ss.filterType)
     {
@@ -406,7 +406,7 @@ namespace verbly {
       case comparison::hierarchally_matches:
       case comparison::does_not_hierarchally_match:
       {
-        return *mpark::get<rec_filter>(ss.data);
+        return *std::get<rec_filter>(ss.data);
       }
 
       case comparison::string_equals:
@@ -437,7 +437,7 @@ namespace verbly {
       throw std::domain_error("This filter does not have a string argument");
     }
 
-    const singleton_type& ss = mpark::get<singleton_type>(variant_);
+    const singleton_type& ss = std::get<singleton_type>(variant_);
 
     switch (ss.filterType)
     {
@@ -446,7 +446,7 @@ namespace verbly {
       case comparison::string_is_like:
       case comparison::string_is_not_like:
       {
-        return mpark::get<std::string>(ss.data);
+        return std::get<std::string>(ss.data);
       }
 
       case comparison::int_equals:
@@ -477,7 +477,7 @@ namespace verbly {
       throw std::domain_error("This filter does not have an integer argument");
     }
 
-    const singleton_type& ss = mpark::get<singleton_type>(variant_);
+    const singleton_type& ss = std::get<singleton_type>(variant_);
 
     switch (ss.filterType)
     {
@@ -488,7 +488,7 @@ namespace verbly {
       case comparison::int_is_at_most:
       case comparison::int_is_less_than:
       {
-        return mpark::get<int>(ss.data);
+        return std::get<int>(ss.data);
       }
 
       case comparison::string_equals:
@@ -514,13 +514,13 @@ namespace verbly {
   bool filter::getBooleanArgument() const
   {
     if ((type_ != type::singleton) ||
-      (mpark::get<singleton_type>(variant_).filterType !=
+      (std::get<singleton_type>(variant_).filterType !=
         comparison::boolean_equals))
     {
       throw std::domain_error("This filter does not have a boolean argument");
     }
 
-    return mpark::get<bool>(mpark::get<singleton_type>(variant_).data);
+    return std::get<bool>(std::get<singleton_type>(variant_).data);
   }
 
   field filter::getCompareField() const
@@ -530,14 +530,14 @@ namespace verbly {
       throw std::domain_error("This filter does not have a compare field");
     }
 
-    const singleton_type& ss = mpark::get<singleton_type>(variant_);
+    const singleton_type& ss = std::get<singleton_type>(variant_);
 
     switch (ss.filterType)
     {
       case comparison::field_equals:
       case comparison::field_does_not_equal:
       {
-        return mpark::get<field>(ss.data);
+        return std::get<field>(ss.data);
 
         break;
       }
@@ -579,7 +579,7 @@ namespace verbly {
       throw std::domain_error("This filter is not a group filter");
     }
 
-    return mpark::get<group_type>(variant_).orlogic;
+    return std::get<group_type>(variant_).orlogic;
   }
 
   filter filter::operator+(filter condition) const
@@ -597,7 +597,7 @@ namespace verbly {
       throw std::domain_error("Children can only be added to group filters");
     }
 
-    mpark::get<group_type>(variant_).children.push_back(std::move(condition));
+    std::get<group_type>(variant_).children.push_back(std::move(condition));
 
     return *this;
   }
@@ -609,7 +609,7 @@ namespace verbly {
       throw std::domain_error("This filter has no children");
     }
 
-    return std::begin(mpark::get<group_type>(variant_).children);
+    return std::begin(std::get<group_type>(variant_).children);
   }
 
   filter::const_iterator filter::end() const
@@ -619,7 +619,7 @@ namespace verbly {
       throw std::domain_error("This filter has no children");
     }
 
-    return std::end(mpark::get<group_type>(variant_).children);
+    return std::end(std::get<group_type>(variant_).children);
   }
 
   filter::filter(
@@ -642,7 +642,7 @@ namespace verbly {
       throw std::domain_error("This filter is not a mask filter");
     }
 
-    return mpark::get<mask_type>(variant_).name;
+    return std::get<mask_type>(variant_).name;
   }
 
   bool filter::isMaskInternal() const
@@ -652,7 +652,7 @@ namespace verbly {
       throw std::domain_error("This filter is not a mask filter");
     }
 
-    return mpark::get<mask_type>(variant_).internal;
+    return std::get<mask_type>(variant_).internal;
   }
 
   const filter& filter::getMaskFilter() const
@@ -662,7 +662,7 @@ namespace verbly {
       throw std::domain_error("This filter is not a mask filter");
     }
 
-    return *mpark::get<mask_type>(variant_).subfilter;
+    return *std::get<mask_type>(variant_).subfilter;
   }
 
   filter filter::operator!() const
@@ -676,7 +676,7 @@ namespace verbly {
 
       case type::singleton:
       {
-        const singleton_type& ss = mpark::get<singleton_type>(variant_);
+        const singleton_type& ss = std::get<singleton_type>(variant_);
 
         switch (ss.filterType)
         {
@@ -685,7 +685,7 @@ namespace verbly {
             return filter(
               ss.filterField,
               comparison::int_does_not_equal,
-              mpark::get<int>(ss.data));
+              std::get<int>(ss.data));
           }
 
           case comparison::int_does_not_equal:
@@ -693,7 +693,7 @@ namespace verbly {
             return filter(
               ss.filterField,
               comparison::int_equals,
-              mpark::get<int>(ss.data));
+              std::get<int>(ss.data));
           }
 
           case comparison::int_is_at_least:
@@ -701,7 +701,7 @@ namespace verbly {
             return filter(
               ss.filterField,
               comparison::int_is_less_than,
-              mpark::get<int>(ss.data));
+              std::get<int>(ss.data));
           }
 
           case comparison::int_is_greater_than:
@@ -709,7 +709,7 @@ namespace verbly {
             return filter(
               ss.filterField,
               comparison::int_is_at_most,
-              mpark::get<int>(ss.data));
+              std::get<int>(ss.data));
           }
 
           case comparison::int_is_at_most:
@@ -717,7 +717,7 @@ namespace verbly {
             return filter(
               ss.filterField,
               comparison::int_is_greater_than,
-              mpark::get<int>(ss.data));
+              std::get<int>(ss.data));
           }
 
           case comparison::int_is_less_than:
@@ -725,7 +725,7 @@ namespace verbly {
             return filter(
               ss.filterField,
               comparison::int_is_at_least,
-              mpark::get<int>(ss.data));
+              std::get<int>(ss.data));
           }
 
           case comparison::boolean_equals:
@@ -733,7 +733,7 @@ namespace verbly {
             return filter(
               ss.filterField,
               comparison::boolean_equals,
-              !mpark::get<int>(ss.data));
+              !std::get<int>(ss.data));
           }
 
           case comparison::string_equals:
@@ -741,7 +741,7 @@ namespace verbly {
             return filter(
               ss.filterField,
               comparison::string_does_not_equal,
-              mpark::get<std::string>(ss.data));
+              std::get<std::string>(ss.data));
           }
 
           case comparison::string_does_not_equal:
@@ -749,7 +749,7 @@ namespace verbly {
             return filter(
               ss.filterField,
               comparison::string_equals,
-              mpark::get<std::string>(ss.data));
+              std::get<std::string>(ss.data));
           }
 
           case comparison::string_is_like:
@@ -757,7 +757,7 @@ namespace verbly {
             return filter(
               ss.filterField,
               comparison::string_is_not_like,
-              mpark::get<std::string>(ss.data));
+              std::get<std::string>(ss.data));
           }
 
           case comparison::string_is_not_like:
@@ -765,7 +765,7 @@ namespace verbly {
             return filter(
               ss.filterField,
               comparison::string_is_like,
-              mpark::get<std::string>(ss.data));
+              std::get<std::string>(ss.data));
           }
 
           case comparison::is_null:
@@ -787,7 +787,7 @@ namespace verbly {
             return filter(
               ss.filterField,
               comparison::does_not_match,
-              *mpark::get<rec_filter>(ss.data));
+              *std::get<rec_filter>(ss.data));
           }
 
           case comparison::does_not_match:
@@ -795,7 +795,7 @@ namespace verbly {
             return filter(
               ss.filterField,
               comparison::matches,
-              *mpark::get<rec_filter>(ss.data));
+              *std::get<rec_filter>(ss.data));
           }
 
           case comparison::hierarchally_matches:
@@ -803,7 +803,7 @@ namespace verbly {
             return filter(
               ss.filterField,
               comparison::does_not_hierarchally_match,
-              *mpark::get<rec_filter>(ss.data));
+              *std::get<rec_filter>(ss.data));
           }
 
           case comparison::does_not_hierarchally_match:
@@ -811,7 +811,7 @@ namespace verbly {
             return filter(
               ss.filterField,
               comparison::hierarchally_matches,
-              *mpark::get<rec_filter>(ss.data));
+              *std::get<rec_filter>(ss.data));
           }
 
           case comparison::field_equals:
@@ -819,7 +819,7 @@ namespace verbly {
             return filter(
               ss.filterField,
               comparison::field_does_not_equal,
-              mpark::get<field>(ss.data));
+              std::get<field>(ss.data));
           }
 
           case comparison::field_does_not_equal:
@@ -827,14 +827,14 @@ namespace verbly {
             return filter(
               ss.filterField,
               comparison::field_equals,
-              mpark::get<field>(ss.data));
+              std::get<field>(ss.data));
           }
         }
       }
 
       case type::group:
       {
-        const group_type& gg = mpark::get<group_type>(variant_);
+        const group_type& gg = std::get<group_type>(variant_);
 
         filter result(!gg.orlogic);
 
@@ -848,7 +848,7 @@ namespace verbly {
 
       case type::mask:
       {
-        const mask_type& mm = mpark::get<mask_type>(variant_);
+        const mask_type& mm = std::get<mask_type>(variant_);
 
         return {mm.name, mm.internal, !*mm.subfilter};
       }
@@ -879,7 +879,7 @@ namespace verbly {
       {
         filter result(false);
 
-        group_type& gg = mpark::get<group_type>(result.variant_);
+        group_type& gg = std::get<group_type>(result.variant_);
 
         gg.children.push_back(*this);
         gg.children.push_back(std::move(condition));
@@ -889,13 +889,13 @@ namespace verbly {
 
       case type::group:
       {
-        const group_type& og = mpark::get<group_type>(variant_);
+        const group_type& og = std::get<group_type>(variant_);
 
         if (og.orlogic)
         {
           filter result(false);
 
-          group_type& gg = mpark::get<group_type>(result.variant_);
+          group_type& gg = std::get<group_type>(result.variant_);
 
           gg.children.push_back(*this);
           gg.children.push_back(std::move(condition));
@@ -904,7 +904,7 @@ namespace verbly {
         } else {
           filter result(*this);
 
-          group_type& gg = mpark::get<group_type>(result.variant_);
+          group_type& gg = std::get<group_type>(result.variant_);
 
           gg.children.push_back(std::move(condition));
 
@@ -928,7 +928,7 @@ namespace verbly {
       {
         filter result(true);
 
-        group_type& gg = mpark::get<group_type>(result.variant_);
+        group_type& gg = std::get<group_type>(result.variant_);
 
         gg.children.push_back(*this);
         gg.children.push_back(std::move(condition));
@@ -938,13 +938,13 @@ namespace verbly {
 
       case type::group:
       {
-        const group_type& og = mpark::get<group_type>(variant_);
+        const group_type& og = std::get<group_type>(variant_);
 
         if (!og.orlogic)
         {
           filter result(true);
 
-          group_type& gg = mpark::get<group_type>(result.variant_);
+          group_type& gg = std::get<group_type>(result.variant_);
 
           gg.children.push_back(*this);
           gg.children.push_back(std::move(condition));
@@ -953,7 +953,7 @@ namespace verbly {
         } else {
           filter result(*this);
 
-          group_type& gg = mpark::get<group_type>(result.variant_);
+          group_type& gg = std::get<group_type>(result.variant_);
 
           gg.children.push_back(std::move(condition));
 
@@ -980,7 +980,7 @@ namespace verbly {
 
         case type::singleton:
         {
-          const singleton_type& ss = mpark::get<singleton_type>(variant_);
+          const singleton_type& ss = std::get<singleton_type>(variant_);
 
           // First, switch on the normalized context, and then switch on the
           // current context. We recursively recontextualize by using the
@@ -1147,7 +1147,7 @@ namespace verbly {
 
         case type::group:
         {
-          const group_type& gg = mpark::get<group_type>(variant_);
+          const group_type& gg = std::get<group_type>(variant_);
 
           filter result(gg.orlogic);
           std::map<field, filter> positiveJoins;
@@ -1166,7 +1166,7 @@ namespace verbly {
               case type::singleton:
               {
                 singleton_type& normSing =
-                  mpark::get<singleton_type>(normalized.variant_);
+                  std::get<singleton_type>(normalized.variant_);
 
                 switch (normalized.getComparison())
                 {
@@ -1178,7 +1178,7 @@ namespace verbly {
                     }
 
                     positiveJoins.at(normalized.getField()) +=
-                      std::move(*mpark::get<rec_filter>(normSing.data));
+                      std::move(*std::get<rec_filter>(normSing.data));
 
                     break;
                   }
@@ -1192,7 +1192,7 @@ namespace verbly {
                     }
 
                     negativeJoins.at(normalized.getField()) +=
-                      std::move(*mpark::get<rec_filter>(normSing.data));
+                      std::move(*std::get<rec_filter>(normSing.data));
 
                     break;
                   }
@@ -1202,7 +1202,7 @@ namespace verbly {
                     if (gg.orlogic)
                     {
                       positiveJoins[normalized.getField()] |=
-                        std::move(*mpark::get<rec_filter>(normSing.data));
+                        std::move(*std::get<rec_filter>(normSing.data));
                     } else {
                       result += std::move(normalized);
                     }
@@ -1215,7 +1215,7 @@ namespace verbly {
                     if (!gg.orlogic)
                     {
                       negativeJoins[normalized.getField()] |=
-                        std::move(*mpark::get<rec_filter>(normSing.data));
+                        std::move(*std::get<rec_filter>(normSing.data));
                     } else {
                       result += std::move(normalized);
                     }
@@ -1259,7 +1259,7 @@ namespace verbly {
               case type::mask:
               {
                 mask_type& normMask =
-                  mpark::get<mask_type>(normalized.variant_);
+                  std::get<mask_type>(normalized.variant_);
 
                 auto maskId =
                   std::tie(
@@ -1310,7 +1310,7 @@ namespace verbly {
 
         case type::mask:
         {
-          const mask_type& mm = mpark::get<mask_type>(variant_);
+          const mask_type& mm = std::get<mask_type>(variant_);
 
           return {
             mm.name,
@@ -1333,7 +1333,7 @@ namespace verbly {
 
       case type::group:
       {
-        const group_type& gg = mpark::get<group_type>(variant_);
+        const group_type& gg = std::get<group_type>(variant_);
 
         filter result(gg.orlogic);
         for (const filter& child : gg.children)
@@ -1345,7 +1345,7 @@ namespace verbly {
           }
         }
 
-        group_type& resGroup = mpark::get<group_type>(result.variant_);
+        group_type& resGroup = std::get<group_type>(result.variant_);
 
         if (resGroup.children.empty())
         {
@@ -1362,7 +1362,7 @@ namespace verbly {
 
       case type::mask:
       {
-        const mask_type& mm = mpark::get<mask_type>(variant_);
+        const mask_type& mm = std::get<mask_type>(variant_);
 
         filter subfilter = mm.subfilter->compact();
 

@@ -4,7 +4,7 @@
 #include <list>
 #include <string>
 #include <memory>
-#include "../vendor/hkutil/vendor/variant.hpp"
+#include <variant>
 #include "../vendor/hkutil/hkutil/recptr.h"
 #include "field.h"
 #include "enums.h"
@@ -133,8 +133,8 @@ namespace verbly {
       field filterField;
       comparison filterType;
 
-      mpark::variant<
-        mpark::monostate,
+      std::variant<
+        std::monostate,
         rec_filter,
         std::string,
         int,
@@ -154,8 +154,8 @@ namespace verbly {
     };
 
     using variant_type =
-      mpark::variant<
-        mpark::monostate,
+      std::variant<
+        std::monostate,
         singleton_type,
         group_type,
         mask_type>;

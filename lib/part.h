@@ -6,7 +6,7 @@
 #include <set>
 #include <list>
 #include <hkutil/database.h>
-#include <variant.hpp>
+#include <variant>
 #include "field.h"
 #include "filter.h"
 #include "enums.h"
@@ -129,8 +129,8 @@ namespace verbly {
     };
 
     using variant_type =
-      mpark::variant<
-        mpark::monostate,
+      std::variant<
+        std::monostate,
         np_type,
         prep_type,
         std::string>;

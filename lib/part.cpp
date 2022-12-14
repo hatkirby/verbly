@@ -76,16 +76,16 @@ namespace verbly {
 
   part::part(const database& db, hatkirby::row row)
   {
-    int id = mpark::get<int>(row[0]);
+    int id = std::get<int>(row[0]);
 
-    type_ = static_cast<part_type>(mpark::get<int>(row[3]));
+    type_ = static_cast<part_type>(std::get<int>(row[3]));
 
     switch (type_)
     {
       case part_type::noun_phrase:
       {
         variant_ = np_type {
-          mpark::get<std::string>(row[4]),
+          std::get<std::string>(row[4]),
           db.selrestrs(id),
           db.synrestrs(id)
         };
@@ -96,7 +96,7 @@ namespace verbly {
       case part_type::preposition:
       {
         hatkirby::blob_type raw =
-          mpark::get<hatkirby::blob_type>(row[5]);
+          std::get<hatkirby::blob_type>(row[5]);
 
         std::string serializedChoices(
           std::begin(raw),
@@ -106,7 +106,7 @@ namespace verbly {
           hatkirby::split<std::vector<std::string>>(
             std::move(serializedChoices),
             ","),
-          (mpark::get<int>(row[6]) == 1)
+          (std::get<int>(row[6]) == 1)
         };
 
         break;
@@ -114,7 +114,7 @@ namespace verbly {
 
       case part_type::literal:
       {
-        variant_ = mpark::get<std::string>(row[7]);
+        variant_ = std::get<std::string>(row[7]);
 
         break;
       }
@@ -136,7 +136,7 @@ namespace verbly {
       throw std::domain_error("part is not a noun phrase");
     }
 
-    return mpark::get<np_type>(variant_).role;
+    return std::get<np_type>(variant_).role;
   }
 
   const std::set<std::string>& part::getNounSelrestrs() const
@@ -146,7 +146,7 @@ namespace verbly {
       throw std::domain_error("part is not a noun phrase");
     }
 
-    return mpark::get<np_type>(variant_).selrestrs;
+    return std::get<np_type>(variant_).selrestrs;
   }
 
   const std::set<std::string>& part::getNounSynrestrs() const
@@ -156,7 +156,7 @@ namespace verbly {
       throw std::domain_error("part is not a noun phrase");
     }
 
-    return mpark::get<np_type>(variant_).synrestrs;
+    return std::get<np_type>(variant_).synrestrs;
   }
 
   bool part::nounHasSynrestr(std::string synrestr) const
@@ -166,7 +166,7 @@ namespace verbly {
       throw std::domain_error("part is not a noun phrase");
     }
 
-    return mpark::get<np_type>(variant_).synrestrs.count(synrestr);
+    return std::get<np_type>(variant_).synrestrs.count(synrestr);
   }
 
   const std::vector<std::string>& part::getPrepositionChoices() const
@@ -176,7 +176,7 @@ namespace verbly {
       throw std::domain_error("part is not a preposition");
     }
 
-    return mpark::get<prep_type>(variant_).choices;
+    return std::get<prep_type>(variant_).choices;
   }
 
   bool part::isPrepositionLiteral() const
@@ -186,7 +186,7 @@ namespace verbly {
       throw std::domain_error("part is not a preposition");
     }
 
-    return mpark::get<prep_type>(variant_).literal;
+    return std::get<prep_type>(variant_).literal;
   }
 
   const std::string& part::getLiteralValue() const
@@ -196,7 +196,7 @@ namespace verbly {
       throw std::domain_error("part is not a literal");
     }
 
-    return mpark::get<std::string>(variant_);
+    return std::get<std::string>(variant_);
   }
 
   filter part::synrestr_field::operator%=(std::string synrestr) const

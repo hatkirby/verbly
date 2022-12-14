@@ -5,7 +5,7 @@
 #include <string>
 #include <list>
 #include <set>
-#include <variant.hpp>
+#include <variant>
 #include <hkutil/recptr.h>
 #include "enums.h"
 #include "word.h"
@@ -38,7 +38,7 @@ namespace verbly {
       bool isEmpty() const
       {
         return (type_ == type::utterance &&
-          mpark::get<utterance_type>(variant_).empty());
+          std::get<utterance_type>(variant_).empty());
       }
 
       // Word
@@ -153,7 +153,7 @@ namespace verbly {
       };
 
       using variant_type =
-        mpark::variant<
+        std::variant<
           word_type,
           literal_type,
           part,

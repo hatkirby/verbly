@@ -46,22 +46,22 @@ namespace verbly {
 
   word::word(const database& db, hatkirby::row row) : db_(&db), valid_(true)
   {
-    id_ = mpark::get<int>(row[0]);
+    id_ = std::get<int>(row[0]);
 
-    notion_ = db.notions(notion::id == mpark::get<int>(row[1])).first();
+    notion_ = db.notions(notion::id == std::get<int>(row[1])).first();
 
-    if (!mpark::holds_alternative<std::nullptr_t>(row[3]))
+    if (!std::holds_alternative<std::nullptr_t>(row[3]))
     {
       hasTagCount_ = true;
-      tagCount_ = mpark::get<int>(row[3]);
+      tagCount_ = std::get<int>(row[3]);
     }
 
-    if (!mpark::holds_alternative<std::nullptr_t>(row[4]))
+    if (!std::holds_alternative<std::nullptr_t>(row[4]))
     {
-      adjectivePosition_ = static_cast<positioning>(mpark::get<int>(row[4]));
+      adjectivePosition_ = static_cast<positioning>(std::get<int>(row[4]));
     }
 
-    if (!mpark::holds_alternative<std::nullptr_t>(row[5]))
+    if (!std::holds_alternative<std::nullptr_t>(row[5]))
     {
       frames_ = db.frames(*this).all();
     }
