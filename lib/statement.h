@@ -5,7 +5,7 @@
 #include <list>
 #include <map>
 #include <hkutil/database.h>
-#include <variant.hpp>
+#include <variant>
 #include "enums.h"
 #include "field.h"
 #include "filter.h"
@@ -19,8 +19,8 @@ namespace verbly {
     std::tuple<std::string, std::string>;
 
   using binding =
-    mpark::variant<
-      mpark::monostate,
+    std::variant<
+      std::monostate,
       std::string,
       int,
       field_binding>;
@@ -185,8 +185,8 @@ namespace verbly {
       };
 
       using variant_type =
-        mpark::variant<
-          mpark::monostate,
+        std::variant<
+          std::monostate,
           singleton_type,
           group_type>;
 

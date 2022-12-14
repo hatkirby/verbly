@@ -25,11 +25,11 @@ namespace verbly {
 
   form::form(const database& db, hatkirby::row row) : valid_(true)
   {
-    id_ = mpark::get<int>(row[0]);
-    text_ = mpark::get<std::string>(row[1]);
-    complexity_ = mpark::get<int>(row[2]);
-    proper_ = (mpark::get<int>(row[3]) == 1);
-    length_ = mpark::get<int>(row[4]);
+    id_ = std::get<int>(row[0]);
+    text_ = std::get<std::string>(row[1]);
+    complexity_ = std::get<int>(row[2]);
+    proper_ = (std::get<int>(row[3]) == 1);
+    length_ = std::get<int>(row[4]);
 
     pronunciations_ = db.pronunciations(*this, pronunciation::id, -1).all();
   }

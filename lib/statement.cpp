@@ -800,7 +800,7 @@ namespace verbly {
 
       case type::singleton:
       {
-        const singleton_type& singleton = mpark::get<singleton_type>(variant_);
+        const singleton_type& singleton = std::get<singleton_type>(variant_);
 
         sql << singleton.table << "." << singleton.column;
 
@@ -816,20 +816,20 @@ namespace verbly {
               sql << " != ";
             }
 
-            if (mpark::holds_alternative<field_binding>(singleton.value))
+            if (std::holds_alternative<field_binding>(singleton.value))
             {
-              sql << std::get<0>(mpark::get<field_binding>(singleton.value))
+              sql << std::get<0>(std::get<field_binding>(singleton.value))
                 << "."
-                << std::get<1>(mpark::get<field_binding>(singleton.value));
+                << std::get<1>(std::get<field_binding>(singleton.value));
             } else if (debug)
             {
-              if (mpark::holds_alternative<std::string>(singleton.value))
+              if (std::holds_alternative<std::string>(singleton.value))
               {
-                sql << "\"" << mpark::get<std::string>(singleton.value) << "\"";
+                sql << "\"" << std::get<std::string>(singleton.value) << "\"";
               }
-              else if (mpark::holds_alternative<int>(singleton.value))
+              else if (std::holds_alternative<int>(singleton.value))
               {
-                sql << mpark::get<int>(singleton.value);
+                sql << std::get<int>(singleton.value);
               }
             } else {
               sql << "?";
@@ -844,7 +844,7 @@ namespace verbly {
 
             if (debug)
             {
-              sql << mpark::get<int>(singleton.value);
+              sql << std::get<int>(singleton.value);
             } else {
               sql << "?";
             }
@@ -858,7 +858,7 @@ namespace verbly {
 
             if (debug)
             {
-              sql << mpark::get<int>(singleton.value);
+              sql << std::get<int>(singleton.value);
             } else {
               sql << "?";
             }
@@ -872,7 +872,7 @@ namespace verbly {
 
             if (debug)
             {
-              sql << mpark::get<int>(singleton.value);
+              sql << std::get<int>(singleton.value);
             } else {
               sql << "?";
             }
@@ -886,7 +886,7 @@ namespace verbly {
 
             if (debug)
             {
-              sql << mpark::get<int>(singleton.value);
+              sql << std::get<int>(singleton.value);
             } else {
               sql << "?";
             }
@@ -900,7 +900,7 @@ namespace verbly {
 
             if (debug)
             {
-              sql << "\"" << mpark::get<std::string>(singleton.value) << "\"";
+              sql << "\"" << std::get<std::string>(singleton.value) << "\"";
             } else {
               sql << "?";
             }
@@ -914,7 +914,7 @@ namespace verbly {
 
             if (debug)
             {
-              sql << "\"" << mpark::get<std::string>(singleton.value) << "\"";
+              sql << "\"" << std::get<std::string>(singleton.value) << "\"";
             } else {
               sql << "?";
             }
@@ -942,7 +942,7 @@ namespace verbly {
 
       case type::group:
       {
-        const group_type& group = mpark::get<group_type>(variant_);
+        const group_type& group = std::get<group_type>(variant_);
 
         std::list<std::string> clauses;
         for (const condition& cond : group.children)
@@ -990,14 +990,14 @@ namespace verbly {
 
       case type::singleton:
       {
-        const singleton_type& singleton = mpark::get<singleton_type>(variant_);
+        const singleton_type& singleton = std::get<singleton_type>(variant_);
 
-        if (mpark::holds_alternative<std::string>(singleton.value))
+        if (std::holds_alternative<std::string>(singleton.value))
         {
-          return {{ mpark::get<std::string>(singleton.value) }};
-        } else if (mpark::holds_alternative<int>(singleton.value))
+          return {{ std::get<std::string>(singleton.value) }};
+        } else if (std::holds_alternative<int>(singleton.value))
         {
-          return {{ mpark::get<int>(singleton.value) }};
+          return {{ std::get<int>(singleton.value) }};
         } else {
           return {};
         }
@@ -1005,7 +1005,7 @@ namespace verbly {
 
       case type::group:
       {
-        const group_type& group = mpark::get<group_type>(variant_);
+        const group_type& group = std::get<group_type>(variant_);
 
         std::list<hatkirby::binding> bindings;
         for (const condition& cond : group.children)
@@ -1035,7 +1035,7 @@ namespace verbly {
       throw std::domain_error("Cannot add condition to non-group condition");
     }
 
-    group_type& group = mpark::get<group_type>(variant_);
+    group_type& group = std::get<group_type>(variant_);
     group.children.emplace_back(std::move(n));
 
     return *this;
@@ -1082,7 +1082,7 @@ namespace verbly {
       throw std::domain_error("Cannot get children of non-group condition");
     }
 
-    const group_type& group = mpark::get<group_type>(variant_);
+    const group_type& group = std::get<group_type>(variant_);
 
     return group.children;
   }
@@ -1099,7 +1099,7 @@ namespace verbly {
 
       case type::group:
       {
-        const group_type& group = mpark::get<group_type>(variant_);
+        const group_type& group = std::get<group_type>(variant_);
 
         condition result(group.orlogic);
 
@@ -1110,7 +1110,7 @@ namespace verbly {
           if (newChild.type_ == type::group)
           {
             group_type& childGroup =
-              mpark::get<group_type>(newChild.variant_);
+              std::get<group_type>(newChild.variant_);
 
             if (childGroup.orlogic == group.orlogic)
             {
@@ -1144,7 +1144,7 @@ namespace verbly {
 
       case type::singleton:
       {
-        const singleton_type& singleton = mpark::get<singleton_type>(variant_);
+        const singleton_type& singleton = std::get<singleton_type>(variant_);
 
         if (singleton.parentObject != object::undefined &&
             singleton.parentObject == context)
@@ -1155,7 +1155,7 @@ namespace verbly {
             singleton.comparison,
             field_binding {
               tableName,
-              std::get<1>(mpark::get<field_binding>(singleton.value))
+              std::get<1>(std::get<field_binding>(singleton.value))
             }
           };
         } else {
@@ -1165,7 +1165,7 @@ namespace verbly {
 
       case type::group:
       {
-        const group_type& group = mpark::get<group_type>(variant_);
+        const group_type& group = std::get<group_type>(variant_);
 
         condition result(group.orlogic);
         for (const condition& cond : group.children)

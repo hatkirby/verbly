@@ -60,19 +60,19 @@ namespace verbly {
 
   notion::notion(const database& db, hatkirby::row row) : valid_(true)
   {
-    id_ = mpark::get<int>(row[0]);
-    partOfSpeech_ = static_cast<part_of_speech>(mpark::get<int>(row[1]));
+    id_ = std::get<int>(row[0]);
+    partOfSpeech_ = static_cast<part_of_speech>(std::get<int>(row[1]));
 
-    if (!mpark::holds_alternative<std::nullptr_t>(row[2]))
+    if (!std::holds_alternative<std::nullptr_t>(row[2]))
     {
       hasWnid_ = true;
-      wnid_ = mpark::get<int>(row[2]);
+      wnid_ = std::get<int>(row[2]);
     }
 
-    if (!mpark::holds_alternative<std::nullptr_t>(row[3]))
+    if (!std::holds_alternative<std::nullptr_t>(row[3]))
     {
       hasNumOfImages_ = true;
-      numOfImages_ = mpark::get<int>(row[3]);
+      numOfImages_ = std::get<int>(row[3]);
     }
   }
 
