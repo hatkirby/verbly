@@ -367,7 +367,7 @@ namespace verbly {
   token::token(
     std::initializer_list<token> parts) :
       type_(type::utterance),
-      variant_(utterance_type { std::move(parts) })
+      variant_(utterance_type { std::begin(parts), std::end(parts) })
   {
   }
 
