@@ -174,7 +174,7 @@ namespace verbly {
       struct singleton_type {
         std::string table;
         std::string column;
-        comparison comparison;
+        comparison cmp;
         binding value;
         object parentObject;
       };

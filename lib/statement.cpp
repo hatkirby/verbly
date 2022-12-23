@@ -804,12 +804,12 @@ namespace verbly {
 
         sql << singleton.table << "." << singleton.column;
 
-        switch (singleton.comparison)
+        switch (singleton.cmp)
         {
           case comparison::equals:
           case comparison::does_not_equal:
           {
-            if (singleton.comparison == comparison::equals)
+            if (singleton.cmp == comparison::equals)
             {
               sql << " = ";
             } else {
@@ -1152,7 +1152,7 @@ namespace verbly {
           return {
             singleton.table,
             singleton.column,
-            singleton.comparison,
+            singleton.cmp,
             field_binding {
               tableName,
               std::get<1>(std::get<field_binding>(singleton.value))
