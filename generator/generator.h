@@ -35,6 +35,7 @@ namespace verbly {
         std::string wordNetPath,
         std::string cmudictPath,
         std::string imageNetPath,
+        std::string wordfreqPath,
         std::string outputPath,
         std::string imageNetOutput);
 
@@ -61,6 +62,8 @@ namespace verbly {
       void readPrepositions();
 
       void readCmudictPronunciations();
+
+      void readWordFrequency();
 
       void writeSchema();
 
@@ -125,6 +128,7 @@ namespace verbly {
       std::string wordNetPath_;
       std::string cmudictPath_;
       std::string imageNetPath_;
+      std::string wordfreqPath_;
 
       // Output
 

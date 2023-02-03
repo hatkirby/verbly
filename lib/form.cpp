@@ -8,13 +8,14 @@ namespace verbly {
 
   const object form::objectType = object::form;
 
-  const std::list<std::string> form::select = {"form_id", "form", "complexity", "proper", "length"};
+  const std::list<std::string> form::select = {"form_id", "form", "complexity", "proper", "length", "frequency"};
 
   const field form::id = field::integerField(object::form, "form_id");
   const field form::text = field::stringField(object::form, "form");
   const field form::complexity = field::integerField(object::form, "complexity");
   const field form::proper = field::booleanField(object::form, "proper");
   const field form::length = field::integerField(object::form, "length");
+  const field form::frequency = field::integerField(object::form, "frequency");
 
   const field form::pronunciations = field::joinThrough(object::form, "form_id", object::pronunciation, "forms_pronunciations", "pronunciation_id");
 
@@ -35,6 +36,12 @@ namespace verbly {
     complexity_ = std::get<int>(row[2]);
     proper_ = (std::get<int>(row[3]) == 1);
     length_ = std::get<int>(row[4]);
+
+    if (!mpark::holds_alternative<std::nullptr_t>(row[5]))
+    {
+      hasFreq_ = true;
+      frequency_ = mpark::get<int>(row[5]);
+    }
 
     pronunciations_ = db.pronunciations(*this, pronunciation::id, -1).all();
   }

@@ -162,7 +162,8 @@ CREATE TABLE `forms` (
   `proper` SMALLINT NOT NULL,
   `length` SMALLINT NOT NULL,
   `anagram_set_id` INTEGER NOT NULL,
-  `reverse_form_id` INTEGER NOT NULL
+  `reverse_form_id` INTEGER NOT NULL,
+  `frequency` INTEGER
 );
 
 CREATE UNIQUE INDEX `form_by_string` ON `forms`(`form`);

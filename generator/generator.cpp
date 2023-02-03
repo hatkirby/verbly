@@ -1,4 +1,5 @@
 #include "generator.h"
+#include <cstdlib>
 #include <stdexcept>
 #include <iostream>
 #include <regex>
@@ -23,6 +24,7 @@ namespace verbly {
       std::string wordNetPath,
       std::string cmudictPath,
       std::string imageNetPath,
+      std::string wordfreqPath,
       std::string outputPath,
       std::string imageNetOutput) :
         verbNetPath_(verbNetPath),
@@ -30,6 +32,7 @@ namespace verbly {
         wordNetPath_(wordNetPath),
         cmudictPath_(cmudictPath),
         imageNetPath_(imageNetPath),
+        wordfreqPath_(wordfreqPath),
         db_(outputPath, hatkirby::dbmode::create),
         imageNetOutput_(imageNetOutput)
     {
@@ -116,6 +119,10 @@ namespace verbly {
       // pronunciations created, we do this after all forms have been created,
       // and then only generate pronunciations for already-exisiting forms.
       readCmudictPronunciations();
+
+      // Reads word (really form) frequency information from a corpus, formatted
+      // as a CSV file with the form in one column and the frequency in another.
+      readWordFrequency();
 
       // Writes the database schema
       writeSchema();
@@ -620,6 +627,39 @@ namespace verbly {
             pronunciationByBlankPhonemes_[stresslessPhonemes] = &p;
             formByText_.at(canonical)->addPronunciation(p);
           }
+        }
+      }
+    }
+
+    void generator::readWordFrequency()
+    {
+      std::list<std::string> lines(readFile(wordfreqPath_));
+
+      hatkirby::progress ppgs(
+        "Reading word frequencies...",
+        lines.size());
+
+      for (std::string line : lines)
+      {
+        ppgs.update();
+
+        std::regex freqline("([a-z]+),([0-9]+)");
+        std::smatch freqline_data;
+        if (std::regex_search(line, freqline_data, freqline))
+        {
+          std::string text = freqline_data[1];
+
+          if (!formByText_.count(text))
+          {
+            continue;
+          }
+
+          std::string freqnumstr = freqline_data[2];
+          long long freqnumnum = std::atoll(freqnumstr.c_str());
+          formByText_[text]->setFrequency(
+            freqnumnum > std::numeric_limits<int>::max()
+              ? std::numeric_limits<int>::max()
+              : freqnumnum);
         }
       }
     }

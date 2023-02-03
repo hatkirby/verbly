@@ -82,6 +82,31 @@ namespace verbly {
       return length_;
     }
 
+    bool hasFrequency() const
+    {
+      if (!valid_)
+      {
+        throw std::domain_error("Bad access to uninitialized form");
+      }
+
+      return hasFreq_;
+    }
+
+    bool getFrequency() const
+    {
+      if (!valid_)
+      {
+        throw std::domain_error("Bad access to uninitialized form");
+      }
+
+      if (!hasFreq_)
+      {
+        throw std::domain_error("Form does not have a frequency");
+      }
+
+      return frequency_;
+    }
+
     const std::vector<pronunciation>& getPronunciations() const
     {
       if (!valid_)
@@ -109,6 +134,7 @@ namespace verbly {
     static const field complexity;
     static const field proper;
     static const field length;
+    static const field frequency;
 
     operator filter() const
     {
@@ -149,6 +175,8 @@ namespace verbly {
     int complexity_;
     bool proper_;
     int length_;
+    bool hasFreq_ = false;
+    int frequency_;
     std::vector<pronunciation> pronunciations_;
   };
 

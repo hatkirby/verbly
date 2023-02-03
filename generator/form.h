@@ -63,6 +63,16 @@ namespace verbly {
         return reverse_id_;
       }
 
+      void setFrequency(int freq)
+      {
+        frequency_ = freq;
+      }
+
+      int getFrequency() const
+      {
+        return frequency_;
+      }
+
       std::set<const pronunciation*> getPronunciations() const
       {
         return pronunciations_;
@@ -79,6 +89,7 @@ namespace verbly {
       const int length_;
       const int anagram_set_id_;
       int reverse_id_ = -1;
+      int frequency_ = 0;
 
       std::set<const pronunciation*> pronunciations_;
 

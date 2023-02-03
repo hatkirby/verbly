@@ -28,17 +28,22 @@ namespace verbly {
     {
       // Serialize the form first.
       {
-        db.insertIntoTable(
-          "forms",
-          {
-            { "form_id", arg.getId() },
-            { "form", arg.getText() },
-            { "complexity", arg.getComplexity() },
-            { "proper", arg.isProper() },
-            { "length", arg.getLength() },
-            { "anagram_set_id", arg.getAnagramSetId() },
-            { "reverse_form_id", arg.getReverseId() }
-          });
+        std::list<hatkirby::column> fields = {
+          { "form_id", arg.getId() },
+          { "form", arg.getText() },
+          { "complexity", arg.getComplexity() },
+          { "proper", arg.isProper() },
+          { "length", arg.getLength() },
+          { "anagram_set_id", arg.getAnagramSetId() },
+          { "reverse_form_id", arg.getReverseId() }
+        };
+
+        if (arg.getFrequency() > 0)
+        {
+          fields.emplace_back("frequency", arg.getFrequency());
+        }
+
+        db.insertIntoTable("forms", std::move(fields));
       }
 
       // Then, serialize the form/pronunciation relationship.
