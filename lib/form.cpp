@@ -37,10 +37,10 @@ namespace verbly {
     proper_ = (std::get<int>(row[3]) == 1);
     length_ = std::get<int>(row[4]);
 
-    if (!mpark::holds_alternative<std::nullptr_t>(row[5]))
+    if (!std::holds_alternative<std::nullptr_t>(row[5]))
     {
       hasFreq_ = true;
-      frequency_ = mpark::get<int>(row[5]);
+      frequency_ = std::get<int>(row[5]);
     }
 
     pronunciations_ = db.pronunciations(*this, pronunciation::id, -1).all();
