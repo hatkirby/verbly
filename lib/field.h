@@ -85,7 +85,7 @@ namespace verbly {
       object joinWith,
       bool nullable = false)
     {
-      return field(obj, type::join, name, nullable, 0, joinWith);
+      return field(obj, type::join, name, nullable, 0, joinWith, name);
     }
 
     static field joinField(
@@ -94,7 +94,7 @@ namespace verbly {
       const char* table,
       bool nullable = false)
     {
-      return field(obj, type::join, name, nullable, table);
+      return field(obj, type::join, name, nullable, table, obj, name);
     }
 
     static field joinWhere(
@@ -105,7 +105,7 @@ namespace verbly {
       int conditionValue,
       bool nullable = false)
     {
-      return field(obj, type::join_where, name, nullable, 0, joinWith, 0, 0, 0, conditionColumn, conditionValue);
+      return field(obj, type::join_where, name, nullable, 0, joinWith, name, 0, 0, conditionColumn, conditionValue);
     }
 
     static field joinThrough(
@@ -151,6 +151,14 @@ namespace verbly {
       const char* foreignJoinColumn)
     {
       return field(obj, type::join_through, name, true, joinTable, obj, name, joinColumn, foreignJoinColumn);
+    }
+
+    static field selfJoin(
+      object obj,
+      const char* name,
+      const char* foreignColumn)
+    {
+      return field(obj, type::join, name, true, 0, obj, foreignColumn);
     }
 
     static field hierarchalSelfJoin(
@@ -220,9 +228,9 @@ namespace verbly {
     const char* getForeignColumn() const
     {
       // We ignore hierarchal joins because they are always self joins.
-      return ((type_ == type::join_through) || (type_ == type::join_through_where))
+      return ((type_ == type::join) || (type_ == type::join_through) || (type_ == type::join_through_where))
         ? foreignColumn_
-        : throw std::domain_error("Only many-to-many join fields have a foreign column");
+        : throw std::domain_error("Only join fields have a foreign column");
     }
 
     const char* getJoinColumn() const

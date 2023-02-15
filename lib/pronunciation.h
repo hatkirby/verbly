@@ -149,6 +149,7 @@ namespace verbly {
     static const field forms;
 
     static const field anaphones;
+    static const field antophone;
 
     static const field merophones;
     static const field holophones;

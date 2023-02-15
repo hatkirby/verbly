@@ -420,7 +420,7 @@ namespace verbly {
                 topTable_,
                 clause.getField().getColumn(),
                 withInstName,
-                clause.getField().getColumn());
+                clause.getField().getForeignColumn());
 
               // All CTEs have to be in the main statement, so integrate any
               // CTEs that our subquery uses. Also, retrieve the table mapping,
@@ -450,7 +450,7 @@ namespace verbly {
                 topTable_,
                 clause.getField().getColumn(),
                 std::move(joinTable),
-                clause.getField().getColumn());
+                clause.getField().getForeignColumn());
 
               // Integrate the subquery's table mappings, joins, and CTEs into
               // this statement, and return the subquery condition as our

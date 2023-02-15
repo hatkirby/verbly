@@ -163,6 +163,7 @@ namespace verbly {
     static const field pronunciations;
 
     static const field anagrams;
+    static const field antogram;
 
     static const field merographs;
     static const field holographs;

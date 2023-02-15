@@ -19,6 +19,7 @@ namespace verbly {
   const field pronunciation::rhyme = field::stringField(object::pronunciation, "rhyme", true);
 
   const field pronunciation::anaphones = field::joinField(object::pronunciation, "anaphone_set_id", object::pronunciation);
+  const field pronunciation::antophone = field::selfJoin(object::pronunciation, "reverse_pronunciation_id", "pronunciation_id");
 
   const field pronunciation::merophones = field::selfJoin(object::pronunciation, "pronunciation_id", "merophony", "merophone_id", "holophone_id");
   const field pronunciation::holophones = field::selfJoin(object::pronunciation, "pronunciation_id", "merophony", "holophone_id", "merophone_id");
