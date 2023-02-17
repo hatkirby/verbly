@@ -85,6 +85,11 @@ namespace verbly {
     return result;
   }
 
+  void database::setTimeout(int ms)
+  {
+    ppdb_.setTimeout(ms);
+  }
+
   std::string database_version_mismatch::generateMessage(int right, int wrong)
   {
     std::ostringstream msgbuilder;

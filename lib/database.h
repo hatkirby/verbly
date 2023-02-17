@@ -73,6 +73,8 @@ namespace verbly {
 
     std::set<std::string> synrestrs(int partId) const;
 
+    void setTimeout(int ms);
+
   private:
 
     mutable hatkirby::database ppdb_;
